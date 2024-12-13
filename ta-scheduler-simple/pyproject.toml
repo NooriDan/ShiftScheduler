@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+[project]
+name = "ta_scheduler_simple"
+version = "1.0.0"
+requires-python = ">=3.10"
+dependencies = [
+    'timefold == 1.17.0b0',
+    'pytest == 8.2.2'
+]
+
+
+[project.scripts]
+ta-run = "ta_scheduler_simple:main"
+run = "ta_scheduler_simple:myscript"
+test = "tests:test_feasible"
