@@ -9,29 +9,33 @@ from .json_serialization import *
 
 
 class Employee(JsonDomainBase):
-    name: Annotated[str, PlanningId]
-    skills: Annotated[set[str], Field(default_factory=set)]
-    unavailable_dates: Annotated[set[date], Field(default_factory=set)]
-    undesired_dates: Annotated[set[date], Field(default_factory=set)]
-    desired_dates: Annotated[set[date], Field(default_factory=set)]
+    name:               Annotated[str, PlanningId]
+    skills:             Annotated[set[str], Field(default_factory=set)]
+    unavailable_dates:  Annotated[set[date], Field(default_factory=set)]
+    undesired_dates:    Annotated[set[date], Field(default_factory=set)]
+    desired_dates:      Annotated[set[date], Field(default_factory=set)]
+    # Added Fields
+    contract_hours:     Annotated[int, Field(default=130)]
+    hours_worked:       Annotated[int, Field(default=0)]
+    level:              Annotated[str, Field(default="NOT_SPECIFIED")]
 
 
 @planning_entity
 class Shift(JsonDomainBase):
-    id: Annotated[str, PlanningId]
-    start: datetime
-    end: datetime
-    location: str
+    id:             Annotated[str, PlanningId]
+    start:          datetime
+    end:            datetime
+    location:       str
     required_skill: str
-    employee: Annotated[Employee | None,
-                        PlanningVariable,
-                        Field(default=None)]
+    employee:       Annotated[Employee | None,
+                            PlanningVariable,
+                            Field(default=None)]
 
 
 @planning_solution
 class EmployeeSchedule(JsonDomainBase):
-    employees: Annotated[list[Employee], ProblemFactCollectionProperty, ValueRangeProvider]
-    shifts: Annotated[list[Shift], PlanningEntityCollectionProperty]
-    score: Annotated[HardSoftDecimalScore | None,
-                     PlanningScore, ScoreSerializer, ScoreValidator, Field(default=None)]
-    solver_status: Annotated[SolverStatus | None, Field(default=None)]
+    employees:      Annotated[list[Employee], ProblemFactCollectionProperty, ValueRangeProvider]
+    shifts:         Annotated[list[Shift], PlanningEntityCollectionProperty]
+    score:          Annotated[HardSoftDecimalScore | None,
+                                        PlanningScore, ScoreSerializer, ScoreValidator, Field(default=None)]
+    solver_status:  Annotated[SolverStatus | None, Field(default=None)]

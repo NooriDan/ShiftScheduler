@@ -11,6 +11,7 @@ from .domain import *
 class DemoData(Enum):
     SMALL = 'SMALL'
     LARGE = 'LARGE'
+    CUSTOM = 'CUSTOM'
 
 
 @dataclass(frozen=True, kw_only=True)
@@ -41,6 +42,29 @@ class DemoDataParameters:
 
 
 demo_data_to_parameters: dict[DemoData, DemoDataParameters] = {
+        DemoData.CUSTOM: DemoDataParameters(
+        locations=("ITB-110", "ITB-120", "FLOAT"),
+        required_skills=("Undergrad", "Grad"),
+        optional_skills=("ELEC", "COMP"),
+        days_in_schedule=14,
+        employee_count=15,
+        optional_skill_distribution=(
+            CountDistribution(count=1, weight=3),
+            CountDistribution(count=2, weight=1)
+        ),
+        shift_count_distribution=(
+            CountDistribution(count=1, weight=0.9),
+            CountDistribution(count=2, weight=0.1)
+        ),
+        availability_count_distribution=(
+            CountDistribution(count=1, weight=4),
+            CountDistribution(count=2, weight=3),
+            CountDistribution(count=3, weight=2),
+            CountDistribution(count=4, weight=1)
+        ),
+        random_seed=37
+    ),
+
     DemoData.SMALL: DemoDataParameters(
         locations=("Ambulatory care", "Critical care", "Pediatric care"),
         required_skills=("Doctor", "Nurse"),
@@ -96,6 +120,28 @@ demo_data_to_parameters: dict[DemoData, DemoDataParameters] = {
 }
 
 
+
+# MODIFIED THE FOLLOWING:
+# FIRST_NAMES = ("Danial", "Moein", "Shahrukh")
+# LAST_NAMES = ("Noori Zadeh", "Roghani", "Athar")
+# SHIFT_LENGTH = timedelta(hours=3)
+# # MORNING_SHIFT_START_TIME = time(hour=14, minute=30)
+# # DAY_SHIFT_START_TIME = time(hour=17, minute=30)
+# AFTERNOON_SHIFT_START_TIME = time(hour=14, minute=30)
+# NIGHT_SHIFT_START_TIME = time(hour=18, minute=30)
+
+# # SHIFT_START_TIMES_COMBOS = (
+# #     (MORNING_SHIFT_START_TIME, AFTERNOON_SHIFT_START_TIME),
+# #     (MORNING_SHIFT_START_TIME, AFTERNOON_SHIFT_START_TIME, NIGHT_SHIFT_START_TIME),
+# #     (MORNING_SHIFT_START_TIME, DAY_SHIFT_START_TIME, AFTERNOON_SHIFT_START_TIME, NIGHT_SHIFT_START_TIME),
+# # )
+
+# SHIFT_START_TIMES_COMBOS = (
+#     (AFTERNOON_SHIFT_START_TIME, NIGHT_SHIFT_START_TIME)
+# )
+
+
+# ORIGINAL
 FIRST_NAMES = ("Amy", "Beth", "Carl", "Dan", "Elsa", "Flo", "Gus", "Hugo", "Ivy", "Jay")
 LAST_NAMES = ("Cole", "Fox", "Green", "Jones", "King", "Li", "Poe", "Rye", "Smith", "Watt")
 SHIFT_LENGTH = timedelta(hours=8)
@@ -127,6 +173,7 @@ def earliest_monday_on_or_after(target_date: date):
 
 
 def generate_demo_data(demo_data_or_parameters: DemoData | DemoDataParameters) -> EmployeeSchedule:
+    print("== In demo_data.py == generate_demo_data")
     global location_to_shift_start_time_list_map, demo_data_to_parameters
     if isinstance(demo_data_or_parameters, DemoData):
         parameters = demo_data_to_parameters[demo_data_or_parameters]
