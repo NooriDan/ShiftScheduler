@@ -55,6 +55,7 @@ def student_group_conflict(constraint_factory: ConstraintFactory) -> Constraint:
 
 def teacher_room_stability(constraint_factory: ConstraintFactory) -> Constraint:
     # A teacher prefers to teach in a single room.
+    HardSoftScore.ONE_HARD
     return (constraint_factory
             .for_each_unique_pair(Lesson,
                                   Joiners.equal(lambda lesson: lesson.teacher))
