@@ -100,7 +100,7 @@ class Scheduler:
         self.status = self.solver.Solve(self.model)
 
         if self.status == cp_model.OPTIMAL or self.status == cp_model.FEASIBLE:
-            print("\nFeasible Solution:")
+            print("\nFound Feasible Solutions")
             for ta in self.schedule.tas:
                 ta_shifts_str = [f"{shift.series}_{shift.id}" for shift in self.schedule.shifts if self.solver.Value(self.assigment_matrix[(ta.id, shift.id)]) == 1]
                 print(f"TA {ta.id} requires {ta.req_shift_per_week} given {len(ta_shifts_str)}: {ta_shifts_str}")

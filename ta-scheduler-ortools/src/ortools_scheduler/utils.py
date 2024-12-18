@@ -224,12 +224,13 @@ class Schedule_Utils:
         shifts_sorted_by_start_time = sorted(schedule_solution.schedule.shifts, key=lambda s: s.start_time)
 
         # Step 2: Prepare the header for the CSV file using the start time of each shift
-        header = ['TA Name/ID']  # First column will be TA names and IDs
+        header = ['TA Name/row']  # First column will be TA names and IDs
         for shift in shifts_sorted_by_start_time:
             # Format date and time as a string (assumes shift has a start_time field)
             date_combined  = datetime.combine(shift.date, shift.start_time)
-            start_time_str = date_combined.strftime('%Y-%m-%d %H:%M')
-            header.append(start_time_str)
+            start_time_str = date_combined.strftime('%B %d %H:%M')
+            to_append = f"{shift.series} ({start_time_str})"
+            header.append(to_append)
 
         # Step 3: Determine the max number of rows (based on the most TAs assigned to a shift)
         max_rows = max(len(shift.assigned_tas) for shift in schedule_solution.schedule.shifts)  # Find max number of TAs per shift
@@ -243,10 +244,10 @@ class Schedule_Utils:
 
             # Step 6: Write the rows for assigned TAs
             for row_index in range(max_rows):
-                row = ['']  # The first column is for TA names and IDs
+                row = [row_index+1]  # The first column is for TA names and IDs
                 for shift in shifts_sorted_by_start_time:
                     # Collect assigned TAs for this shift
-                    assigned_tas = [f"{ta.id} - {ta.name}" for ta in shift.assigned_tas]
+                    assigned_tas = [f"{ta.name} - {ta.availability_as_dict.get(shift.series)} time" for ta in shift.assigned_tas]
 
                     # Prepare the cell content with TA name and ID, if available
                     if row_index < len(assigned_tas):
