@@ -12,7 +12,7 @@ It is recommended to use a Python virtual environment manager like Conda or PyEn
 The scheduler algorithm, implemented using the Google OR-Tools constraint satisfaction library, can be executed with the following command:
 
    ```bash
-   roster-tas
+   roster-tas```
 
 Make sure to navigate to the data directory before running the command:
 
