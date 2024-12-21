@@ -19,8 +19,6 @@ Make sure to navigate to the data directory before running the command:
 
    ```bash
    cd data 
-```
-
 
 data/
 │
@@ -32,5 +30,7 @@ data/
 │
 ├── shift_list.csv
 └── ta_list.csv
+
+```
 
 
