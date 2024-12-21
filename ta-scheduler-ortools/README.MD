@@ -13,12 +13,12 @@ The scheduler algorithm, implemented using the Google OR-Tools constraint satisf
 
    ```bash
    roster-tas
+```
 
 Make sure to navigate to the data directory before running the command:
 
    ```bash
-   cd data
-
+   cd data 
 
 data/
 │
@@ -28,8 +28,9 @@ data/
 │   └── ...
 │   └── TA_availability_n.xlsx
 │
-├── availability_Template.xlsx
 ├── shift_list.csv
 └── ta_list.csv
+
+```
 
 
