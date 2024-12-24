@@ -3,23 +3,26 @@ from fastapi.staticfiles import StaticFiles
 from uuid import uuid4
 # Custom imports
 from .domain import Timetable
-# from .demo_data import DemoData, generate_demo_data
+from .demo_data import DemoData, generate_demo_data
 from .solver import solver_manager
 
 app = FastAPI(docs_url='/q/swagger-ui')
 data_sets: dict[str, Timetable] = {}
 
 
-# @app.get("/demo-data")
-# async def demo_data_list() -> list[DemoData]:
-#     return [e for e in DemoData]
+# Demo data API
+
+@app.get("/demo-data")
+async def demo_data_list() -> list[DemoData]:
+    return [e for e in DemoData]
 
 
-# @app.get("/demo-data/{dataset_id}",  response_model_exclude_none=True)
-# async def get_demo_data(dataset_id: str) -> Timetable:
-#     demo_data = getattr(DemoData, dataset_id)
-#     return generate_demo_data(demo_data)
+@app.get("/demo-data/{dataset_id}",  response_model_exclude_none=True)
+async def get_demo_data(dataset_id: str) -> Timetable:
+    demo_data = getattr(DemoData, dataset_id)
+    return generate_demo_data(demo_data)
 
+# END OF DEMO DATA
 
 @app.get("/schedules/{problem_id}",  response_model_exclude_none=True)
 async def get_timetable(problem_id: str) -> Timetable:

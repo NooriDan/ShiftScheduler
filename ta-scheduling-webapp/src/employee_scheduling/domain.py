@@ -12,6 +12,7 @@ from pydantic import Field
 @dataclass
 class Shift(JsonDomainBase):
     id: Annotated[str, PlanningId]
+    series: str
     day_of_week: str
     start_time: time
     end_time: time
@@ -23,21 +24,24 @@ class TA(JsonDomainBase):
     id: Annotated[str, PlanningId]
     name: str
     required_shifts: int
-    availability: Annotated[list[Shift], Field(default_factory=list)]
     is_grad_student: bool
     favourite_partners: Annotated[list['TA'], Field(default=None)]
+    # availability: Annotated[list[Shift], Field(default_factory=list)]
+    desired: Annotated[list[Shift], Field(default_factory=list)]
+    undesired: Annotated[list[Shift], Field(default_factory=list)]
+    unavailable: Annotated[list[Shift], Field(default_factory=list)]
 
-@dataclass
-class ConstraintParameters(JsonDomainBase):
-    allow_favourite_partners: Annotated[bool, ProblemFactCollectionProperty]
-    mandate_grad_undergrad: Annotated[bool, ProblemFactCollectionProperty]
+
+# @dataclass
+# class ConstraintParameters(JsonDomainBase):
+#     allow_favourite_partners: Annotated[bool, ProblemFactCollectionProperty]
+#     mandate_grad_undergrad: Annotated[bool, ProblemFactCollectionProperty]
 
 @planning_entity
 @dataclass
 class ShiftAssignment(JsonDomainBase):
     id: Annotated[str, PlanningId]
-    series: str
-    # shift: Shift
+    shift: Shift
     assigned_ta: Annotated[TA | None,
                         PlanningVariable,
                         Field(default=None)]
@@ -45,9 +49,9 @@ class ShiftAssignment(JsonDomainBase):
 @planning_solution
 class Timetable(JsonDomainBase):
     # problem facts
-    # shifts: Annotated[list[Shift], ProblemFactCollectionProperty]
+    # shifts: Annotated[list[Shift], ProblemFactCollectionProperty, Val]
     tas: Annotated[list[TA], ProblemFactCollectionProperty,  ValueRangeProvider]
-    constraint_parameters: Annotated[ConstraintParameters, ProblemFactProperty]
+    # constraint_parameters: Annotated[ConstraintParameters, ProblemFactProperty]
     # planning entities
     shift_assignments: Annotated[list[ShiftAssignment], PlanningEntityCollectionProperty]
     # score and solver status

@@ -13,6 +13,32 @@ class DemoData(Enum):
     LARGE = 'LARGE'
     CUSTOM = 'CUSTOM'
 
+@dataclass(frozen=True, kw_only=True)
+class CountDistribution:
+    count: int
+    weight: float
+
+
+def counts(distributions: tuple[CountDistribution, ...]) -> tuple[int, ...]:
+    return tuple(distribution.count for distribution in distributions)
+
+
+def weights(distributions: tuple[CountDistribution, ...]) -> tuple[float, ...]:
+    return tuple(distribution.weight for distribution in distributions)
+
+@dataclass(kw_only=True)
+class DemoDataParameters:
+    locations: tuple[str, ...]
+    required_skills: tuple[str, ...]
+    optional_skills: tuple[str, ...]
+    days_in_schedule: int
+    employee_count: int
+    optional_skill_distribution: tuple[CountDistribution, ...]
+    shift_count_distribution: tuple[CountDistribution, ...]
+    availability_count_distribution: tuple[CountDistribution, ...]
+    random_seed: int = field(default=37)
+
+
 # MODIFIED THE FOLLOWING:
 FIRST_NAMES = ("Danial", "Moein", "Shahrukh")
 LAST_NAMES = ("Noori Zadeh", "Roghani", "Athar")
@@ -33,7 +59,7 @@ SHIFT_START_TIMES_COMBOS = (
 )
 
 
-def generate_demo_data():
+def generate_demo_data(demo_data_or_parameters: DemoData | DemoDataParameters) -> Timetable:
 
 
     return None

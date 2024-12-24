@@ -8,7 +8,9 @@ def define_constraints(constraint_factory: ConstraintFactory) -> list[Constraint
         required_tas(constraint_factory),
         ta_must_have_required_shifts(constraint_factory),
         ta_should_not_have_more_than_required_shifts(constraint_factory),
-        ta_availability(constraint_factory),
+        ta_unavailable_shift(constraint_factory),
+        ta_undesired_shift(constraint_factory),
+        ta_desired_shift(constraint_factory)
         # at_least_one_grad_undergrad_ta(constraint_factory),
         # favourite_partners(constraint_factory),
     ]
@@ -45,14 +47,32 @@ def ta_should_not_have_more_than_required_shifts(constraint_factory: ConstraintF
             .penalize(HardSoftScore.ONE_SOFT)
             .as_constraint("TA should not to more than the required shifts"))
     
-# TA's availability must match the shift they are assigned to
-def ta_availability(constraint_factory: ConstraintFactory) -> Constraint:
+# TA doesnt work on unavailable days
+def ta_unavailable_shift (constraint_factory: ConstraintFactory) -> Constraint:
     return (constraint_factory
             .for_each(ShiftAssignment)
             # filter out shifts that the TA is not available for
-            .filter(lambda shift_assignment: shift_assignment.assigned_ta.availability.contains(shift_assignment.shift))
+            .filter(lambda shift_assignment: shift_assignment.assigned_ta.unavailable.contains(shift_assignment.shift))
             .penalize(HardSoftScore.ONE_HARD)
-            .as_constraint("TA availability"))
+            .as_constraint("TA unavailable"))
+
+# TA preferably doesn't work on undesired days
+def ta_undesired_shift (constraint_factory: ConstraintFactory) -> Constraint:
+    return (constraint_factory
+            .for_each(ShiftAssignment)
+            # filter out shifts that the TA is not available for
+            .filter(lambda shift_assignment: shift_assignment.assigned_ta.undesired.contains(shift_assignment.shift))
+            .penalize(HardSoftScore.ONE_SOFT)
+            .as_constraint("TA undesired"))
+
+# TA preferably works on undesired days
+def ta_desired_shift (constraint_factory: ConstraintFactory) -> Constraint:
+    return (constraint_factory
+            .for_each(ShiftAssignment)
+            # filter out shifts that the TA is not available for
+            .filter(lambda shift_assignment: shift_assignment.assigned_ta.desired.contains(shift_assignment.shift))
+            .reward(HardSoftScore.ONE_SOFT)
+            .as_constraint("TA desired"))
 
 # # TA's favourite partners should be assigned to the same shift
 # def favourite_partners(constraint_factory: ConstraintFactory) -> Constraint:
