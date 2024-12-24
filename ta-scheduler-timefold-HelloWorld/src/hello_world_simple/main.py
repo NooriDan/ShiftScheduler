@@ -6,8 +6,8 @@ from datetime import time
 import logging
 import argparse
 
-from ta_scheduler_simple.domain import *
-from ta_scheduler_simple.constraints import define_constraints
+from .domain import *
+from .constraints import define_constraints
 
 
 logging.basicConfig(level=logging.INFO, )
