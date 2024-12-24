@@ -3,13 +3,13 @@ from datetime import date, datetime, time, timedelta
 from random import Random
 from dataclasses import dataclass, field
 # Custom Imports
-from src.employee_scheduling.domain import Shift, Employee, EmployeeSchedule
+from src.employee_scheduling.domain import Shift, TA, ShiftAssignment, Timetable
 
 
 def readEmployeeData(filename: str):
     pass
 
-def generate_data() -> EmployeeSchedule:
+def generate_data() -> Timetable:
     
     start_date = date.today()
     random = Random(2024)
@@ -17,7 +17,7 @@ def generate_data() -> EmployeeSchedule:
 
     random.shuffle()
 
-    employees = []
+    tas: list[TA] = []
 
     shifts: list[Shift] = []
 
@@ -34,8 +34,9 @@ def generate_data() -> EmployeeSchedule:
         shift.id = str(shift_count)
         shift_count += 1
 
-    return EmployeeSchedule(
-        employees=employees,
-        shifts=shifts
+    return Timetable(
+        tas=tas,
+        shifts=shifts,
+        shift_assignments=[]
     )
 

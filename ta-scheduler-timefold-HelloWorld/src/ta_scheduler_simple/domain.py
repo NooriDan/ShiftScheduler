@@ -1,52 +1,44 @@
-from timefold.solver.domain import (planning_entity, planning_solution, PlanningId, PlanningVariable,
-                                    PlanningEntityCollectionProperty,
-                                    ProblemFactCollectionProperty, ValueRangeProvider,
-                                    PlanningScore)
-from timefold.solver.score import HardSoftScore
-from dataclasses import dataclass, field
+
+from dataclasses import dataclass
 from datetime import time
 from typing import Annotated
+from timefold.solver.domain import *
+from timefold.solver.score import HardSoftScore
+from timefold.solver import SolverStatus
+from pydantic import Field
 
 
 @dataclass
-class Timeslot:
+class Shift:
+    id: Annotated[str, PlanningId]
     day_of_week: str
     start_time: time
     end_time: time
-
-    def __str__(self):
-        return f'{self.day_of_week} {self.start_time.strftime("%H:%M")}'
-
+    required_tas: int
 
 @dataclass
-class Room:
+class TA:
+    id: Annotated[str, PlanningId]
     name: str
-
-    def __str__(self):
-        return f'{self.name}'
-
+    required_shifts: int
+    availability: Annotated[list[Shift], Field(default_factory=list)]
+    is_grad_student: bool
+    favourite_partners: Annotated[list['TA'], Field(default=None)]
 
 @planning_entity
 @dataclass
-class Lesson:
-    id: Annotated[str, PlanningId]
-    subject: str
-    teacher: str
-    student_group: str
-    timeslot: Annotated[Timeslot | None, PlanningVariable] = field(default=None)
-    room: Annotated[Room | None, PlanningVariable] = field(default=None)
-
-
+class ShiftAssignment:
+    shift: Shift
+    assigned_ta: TA
+    
 @planning_solution
-@dataclass
 class Timetable:
-    id: str
-    timeslots: Annotated[list[Timeslot],
-                         ProblemFactCollectionProperty,
-                         ValueRangeProvider]
-    rooms: Annotated[list[Room],
-                     ProblemFactCollectionProperty,
-                     ValueRangeProvider]
-    lessons: Annotated[list[Lesson],
-                       PlanningEntityCollectionProperty]
-    score: Annotated[HardSoftScore, PlanningScore] = field(default=None)
+    # problem facts
+    shifts: Annotated[list[Shift], ProblemFactCollectionProperty]
+    tas: Annotated[list[TA], ProblemFactCollectionProperty]
+    # planning entities
+    shift_assignments: Annotated[list[ShiftAssignment], PlanningEntityCollectionProperty]
+    # score and solver status
+    score: Annotated[HardSoftScore | None, PlanningScore, Field(default=None)]
+    solver_status: Annotated[SolverStatus | None, Field(default=None)]
+    
