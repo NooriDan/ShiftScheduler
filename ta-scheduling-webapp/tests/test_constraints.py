@@ -1,4 +1,4 @@
-from timefold.solver.test import ConstraintVerifier
+from timefold.solver.test import ConstraintVerifier # Used for writing testcases for the constraints
 
 from employee_scheduling.domain import *
 from employee_scheduling.constraints import *

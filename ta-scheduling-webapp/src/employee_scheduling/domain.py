@@ -17,6 +17,7 @@ class Shift(JsonDomainBase):
     end_time: time
     required_tas: int
 
+
 @dataclass
 class TA(JsonDomainBase):
     id: Annotated[str, PlanningId]
@@ -26,22 +27,26 @@ class TA(JsonDomainBase):
     is_grad_student: bool
     favourite_partners: Annotated[list['TA'], Field(default=None)]
 
-@planning_entity
-@dataclass
-class ShiftAssignment(JsonDomainBase):
-    shift: Shift
-    assigned_ta: TA
-    
 @dataclass
 class ConstraintParameters(JsonDomainBase):
     allow_favourite_partners: Annotated[bool, ProblemFactCollectionProperty]
     mandate_grad_undergrad: Annotated[bool, ProblemFactCollectionProperty]
 
+@planning_entity
+@dataclass
+class ShiftAssignment(JsonDomainBase):
+    id: Annotated[str, PlanningId]
+    series: str
+    # shift: Shift
+    assigned_ta: Annotated[TA | None,
+                        PlanningVariable,
+                        Field(default=None)]
+
 @planning_solution
 class Timetable(JsonDomainBase):
     # problem facts
-    shifts: Annotated[list[Shift], ProblemFactCollectionProperty]
-    tas: Annotated[list[TA], ProblemFactCollectionProperty]
+    # shifts: Annotated[list[Shift], ProblemFactCollectionProperty]
+    tas: Annotated[list[TA], ProblemFactCollectionProperty,  ValueRangeProvider]
     constraint_parameters: Annotated[ConstraintParameters, ProblemFactProperty]
     # planning entities
     shift_assignments: Annotated[list[ShiftAssignment], PlanningEntityCollectionProperty]

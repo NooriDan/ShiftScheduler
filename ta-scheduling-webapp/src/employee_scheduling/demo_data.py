@@ -33,3 +33,7 @@ SHIFT_START_TIMES_COMBOS = (
 )
 
 
+def generate_demo_data():
+
+
+    return None

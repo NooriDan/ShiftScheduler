@@ -1,6 +1,6 @@
 import uvicorn
 
-from .rest_api import app # Used by Uvicorn for serving the FastAPI app
+from employee_scheduling.rest_api import app # Used by Uvicorn for serving the FastAPI app
 
 
 def main():
@@ -14,4 +14,5 @@ def main():
 
 
 if __name__ == "__main__":
+    print("inside main")
     main()
