@@ -33,7 +33,7 @@ class Solver:
     def solve_and_listen(self, job_id: str, timetable: Timetable, listener: Callable[[Timetable], None]):
         self.solver_manager.solve_and_listen(job_id, timetable, listener)
     
-    def terminate(self):
+    def terminate_early(self):
         self.solver_manager.terminate_early()
         
     def get_solver_status(self, job_id: str) -> str:
