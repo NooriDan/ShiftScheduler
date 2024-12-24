@@ -4,11 +4,14 @@ from timefold.solver.config import (SolverConfig, ScoreDirectorFactoryConfig,
 from timefold.solver.score  import ConstraintFactory, Constraint
 
 from .domain        import Timetable, ShiftAssignment
-from .constraints   import (basic_ta_scheduling_constraints, grad_undergrad_constraints, favourite_partners_constraints, all_constraints)
+from .constraints   import define_constraints
 from typing import Callable
 
 
 class Solver:
+    solver_manager: SolverManager
+    solution_manager: SolutionManager
+    
     def __init__(self, define_constraints: Callable[[ConstraintFactory], list[Constraint]]):
         self.solver_config   = SolverConfig(
             solution_class    = Timetable,
@@ -25,15 +28,15 @@ class Solver:
         self.solution_manager = SolutionManager.create(self.solver_manager)
 
     def solve(self, timetable: Timetable) -> Timetable:
-        return self.solution_manager.solve(timetable)
+        return self.solver_manager.solve(timetable)
+    
+    def solve_and_listen(self, job_id: str, timetable: Timetable, listener: Callable[[Timetable], None]):
+        self.solver_manager.solve_and_listen(job_id, timetable, listener)
     
     def terminate(self):
         self.solver_manager.terminate_early()
-    
-    def is_terminated(self) -> bool:
-        return self.solver_manager.is_termination_imminent()
+        
+    def get_solver_status(self, job_id: str) -> str:
+        return self.solver_manager.get_solver_status(job_id)
 
-basic_ta_scheduling_solver = Solver(basic_ta_scheduling_constraints)
-grad_undergrad_solver = Solver(grad_undergrad_constraints)
-favourite_partners_solver = Solver(favourite_partners_constraints)
-all_constraints_solver = Solver(all_constraints)
+solver_manager = Solver(define_constraints)

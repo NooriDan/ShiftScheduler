@@ -32,15 +32,23 @@ class ShiftAssignment(JsonDomainBase):
     shift: Shift
     assigned_ta: TA
     
+@dataclass
+class ConstraintParameters(JsonDomainBase):
+    allow_favourite_partners: Annotated[bool, ProblemFactCollectionProperty]
+    mandate_grad_undergrad: Annotated[bool, ProblemFactCollectionProperty]
+
 @planning_solution
 class Timetable(JsonDomainBase):
     # problem facts
     shifts: Annotated[list[Shift], ProblemFactCollectionProperty]
     tas: Annotated[list[TA], ProblemFactCollectionProperty]
+    constraint_parameters: Annotated[ConstraintParameters, ProblemFactProperty]
     # planning entities
     shift_assignments: Annotated[list[ShiftAssignment], PlanningEntityCollectionProperty]
     # score and solver status
     score:          Annotated[HardSoftScore | None,
                                         PlanningScore, ScoreSerializer, ScoreValidator, Field(default=None)]
     solver_status: Annotated[SolverStatus | None, Field(default=None)]
+    
+    
     
