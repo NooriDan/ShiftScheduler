@@ -1,6 +1,6 @@
 from timefold.solver.score import (constraint_provider, HardSoftScore,
                                    ConstraintFactory, Constraint, ConstraintCollectors, Joiners)
-from .domain import Shift, TA, ConstraintParameters
+from .domain import Shift, TA, ShiftAssignment
     
 @constraint_provider
 def define_constraints(constraint_factory: ConstraintFactory) -> list[Constraint]:
@@ -18,70 +18,57 @@ def define_constraints(constraint_factory: ConstraintFactory) -> list[Constraint
 
 # Each shift gets exactly their required number of TAs
 def required_tas(constraint_factory: ConstraintFactory) -> Constraint:
-    def filter_shift(shift: Shift) -> bool:
-        return len(shift.assigned_tas) != shift.required_tas
     
     return (constraint_factory
-            .for_each(Shift)
+            .for_each(ShiftAssignment)
             # filter out shifts that don't have the required amount of TAs
-            .filter(filter_shift)
+            .group_by(lambda shift_assignment: shift_assignment.shift, ConstraintCollectors.count())
+            .filter(lambda shift, count: count < shift.required_tas)
             .penalize(HardSoftScore.ONE_HARD)
             .as_constraint("Required TAs"))
     
 # Each TA teaches at least their minimum number of shifts
 def ta_must_have_required_shifts(constraint_factory: ConstraintFactory) -> Constraint:
-    def check_ta_shifts(ta: TA, count: int) -> bool:
-        return count < ta.required_shifts
-    
     return (constraint_factory
-            .for_each(TA)
-            # group by TA and count the number of shifts that they are assigned to
-            .join(constraint_factory.for_each(Shift), Joiners.filtering(lambda ta, shift: ta in shift.assigned_tas))
-            .group_by(lambda ta, shift: ta, ConstraintCollectors.count())
-            # filter out TAs that are not assigned to the required amount of shifts
-            .filter(check_ta_shifts)
+            .for_each(ShiftAssignment)
+            .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.count())
+            .filter(lambda ta, count: count < ta.required_shifts)
             .penalize(HardSoftScore.ONE_HARD)
             .as_constraint("TA must have required shifts"))
     
 # System penalizes if a TA is doing more than their required number of shifts
 def ta_should_not_have_more_than_required_shifts(constraint_factory: ConstraintFactory) -> Constraint:
     return (constraint_factory
-            .for_each(TA)
-            # group by TA and count the number of shifts that they are assigned to
-            .join(constraint_factory.for_each(Shift), Joiners.filtering(lambda ta, shift: ta in shift.assigned_tas))
-            .group_by(lambda ta, shift: ta, ConstraintCollectors.count())
-            # filter out TAs that are doing more than the required amount of shifts
+            .for_each(ShiftAssignment)
+            .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.count())
             .filter(lambda ta, count: count > ta.required_shifts)
             .penalize(HardSoftScore.ONE_SOFT)
             .as_constraint("TA should not to more than the required shifts"))
     
 # TA doesnt work on unavailable days
-def ta_unavailable_shift (constraint_factory: ConstraintFactory) -> Constraint:
+def ta_unavailable_shift(constraint_factory: ConstraintFactory) -> Constraint:
     return (constraint_factory
-            .for_each(TA)
-            # filter out shifts that the TA is not available for
-            .join(constraint_factory.for_each(Shift), Joiners.filtering(lambda ta, shift: ta in shift.assigned_tas))
-            .filter(lambda ta, shift: shift in ta.unavailable)
+            .for_each(ShiftAssignment)
+            .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.to_list(lambda assignment: assignment.shift))
+            .filter(lambda ta, shifts: any(shift in ta.unavailable for shift in shifts))
             .penalize(HardSoftScore.ONE_HARD)
             .as_constraint("TA unavailable"))
 
 # TA preferably doesn't work on undesired days
 def ta_undesired_shift (constraint_factory: ConstraintFactory) -> Constraint:
     return (constraint_factory
-            .for_each(TA)
-            # filter out shifts that the TA is not available for
-            .join(constraint_factory.for_each(Shift), Joiners.filtering(lambda ta, shift: ta in shift.assigned_tas))
-            .filter(lambda ta, shift: shift in ta.undesired)
+            .for_each(ShiftAssignment)
+            .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.to_list(lambda assignment: assignment.shift))
+            .filter(lambda ta, shifts: any(shift in ta.undesired for shift in shifts))
             .penalize(HardSoftScore.ONE_SOFT)
             .as_constraint("TA undesired"))
 
 # TA preferably works on undesired days
 def ta_desired_shift (constraint_factory: ConstraintFactory) -> Constraint:
     return (constraint_factory
-            .for_each(TA)
-            # filter out shifts that the TA is not available for
-            .join(constraint_factory.for_each(Shift), Joiners.filtering(lambda ta, shift: ta in shift.assigned_tas))
-            .filter(lambda ta, shift: shift in ta.desired)
+            .for_each(ShiftAssignment)
+            .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.to_list(lambda assignment: assignment.shift))
+            .filter(lambda ta, shifts: any(shift in ta.desired for shift in shifts))
             .reward(HardSoftScore.ONE_SOFT)
             .as_constraint("TA desired"))
 

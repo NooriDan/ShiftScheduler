@@ -89,7 +89,7 @@ def test_required_tas():
           undesired   =[SHIFT1, SHIFT2], 
           desired     =[])
      # As
-     SHIFT1.assigned_tas = [ta1]
+     #SHIFT1.assigned_tas = [ta1]
      (constraint_verifier
       .verify_that(constraints.required_tas).given(ta1, shift1)
       .penalizes(0))
