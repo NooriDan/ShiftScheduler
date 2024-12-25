@@ -23,7 +23,6 @@ class TA(JsonDomainBase):
     required_shifts: int
     is_grad_student: bool
     favourite_partners: Annotated[list['TA'], Field(default=None)]
-    # availability: Annotated[list[Shift], Field(default_factory=list)]
     desired: Annotated[list[Shift], Field(default_factory=list)]
     undesired: Annotated[list[Shift], Field(default_factory=list)]
     unavailable: Annotated[list[Shift], Field(default_factory=list)]

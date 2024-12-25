@@ -15,3 +15,4 @@ dependencies = [
 
 [project.scripts]
 run-app = "hello_world:main"
+test-demo-generator = "hello_world:generate_demo_data"

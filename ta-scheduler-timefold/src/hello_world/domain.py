@@ -10,7 +10,7 @@ from pydantic import Field
 
 
 @dataclass
-class ShiftGroup:
+class Shift:
     id:     Annotated[str, PlanningId]
     group_name: str
     day_of_week: str
@@ -27,12 +27,12 @@ class TA:
     name: str
     required_shifts: int
     # Availability Information
-    unavailable_shifts: Annotated[set['ShiftGroup'], Field(default_factory=set)]
-    undesired_shifts:   Annotated[set['ShiftGroup'], Field(default_factory=set)]
-    desired_shifts:     Annotated[set['ShiftGroup'], Field(default_factory=set)]
+    desired_shifts: Annotated[list[Shift], Field(default_factory=list)]
+    undesired_shifts: Annotated[list[Shift], Field(default_factory=list)]
+    unavailable_shifts: Annotated[list[Shift], Field(default_factory=list)]
     # Extra properties
-    favourite_partners: Annotated[set['TA'], Field(default=None)]
-    is_grad_student: bool
+    # favourite_partners: Annotated[list['TA'], Field(default=None)]
+    # is_grad_student: bool
 
     def __str__(self):
         return f'{self.name}'
@@ -42,7 +42,7 @@ class TA:
 @dataclass
 class ShiftAssignment:
     id: Annotated[str, PlanningId]
-    shift_group: Annotated[ShiftGroup | None, PlanningVariable] = field(default=None)
+    shift_group: Shift
     assigned_ta: Annotated[TA | None, PlanningVariable] = field(default=None)
 
 
@@ -50,7 +50,7 @@ class ShiftAssignment:
 @dataclass
 class Timetable:
     id: str
-    shift_groups: Annotated[list[ShiftGroup],
+    shift_groups: Annotated[list[Shift],
                          ProblemFactCollectionProperty,
                          ValueRangeProvider]
     tas: Annotated[list[TA],
