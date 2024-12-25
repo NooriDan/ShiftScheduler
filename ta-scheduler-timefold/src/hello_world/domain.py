@@ -34,6 +34,28 @@ class TA:
 
     def __str__(self):
         return f'{self.name}'
+    
+    def get_status_for_shift(self, shift: Shift) -> str:
+        if shift in self.desired:
+            return 'Desired'
+        if shift in self.undesired:
+            return 'Undesired'
+        if shift in self.unavailable:
+            return 'Unavailable'
+        return 'Neutral'
+    
+    def get_status_for_shift(self, shift_series_name: str) -> str:
+        if shift_series_name in [shift.series for shift in self.desired]:
+            return 'Desired'
+        if shift_series_name in [shift.series for shift in self.undesired]:
+            return 'Undesired'
+        if shift_series_name in [shift.series for shift in self.unavailable]:
+            return 'Unavailable'
+        return 'Neutral'
+    
+    def is_available_for_shift(self, shift: Shift) -> bool:
+        return shift not in self.unavailable
+
 
 
 @planning_entity

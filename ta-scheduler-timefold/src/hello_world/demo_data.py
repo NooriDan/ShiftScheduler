@@ -2,6 +2,11 @@ from datetime import time
 from typing import List
 from hello_world.domain import Shift, TA, ShiftAssignment, Timetable
 
+DAY_START_TIME = time(14, 30)
+DAY_END_TIME   = time(17, 30)
+
+AFTERNOON_START_TIME =  time(18, 30)
+AFTERNOON_END_TIME   =  time(21, 30)
 
 def id_generator():
     current = 0
@@ -9,14 +14,8 @@ def id_generator():
         yield str(current)
         current += 1
 
-def generate_demo_data(name: str = "CUSTOM") -> Timetable:
-
-    DAY_START_TIME = time(14, 30)
-    DAY_END_TIME   = time(17, 30)
-
-    AFTERNOON_START_TIME =  time(18, 30)
-    AFTERNOON_END_TIME   =  time(21, 30)
-
+def demo_data_A(name: str) -> Timetable:
+    
     ids = id_generator()
     shifts: List[Shift] = [
         Shift(next(ids),"L07", "Mon", DAY_START_TIME, DAY_END_TIME, 2),
@@ -95,3 +94,15 @@ def generate_demo_data(name: str = "CUSTOM") -> Timetable:
                     shift_assignments= shift_assignments
             )
 
+def demo_data_B(name: str) -> Timetable:
+   pass
+
+
+def generate_demo_data(name: str = "CUSTOM", select: str = "A") -> Timetable:
+   if select == "A":
+      return demo_data_A(name)
+   if select == "B":
+      return demo_data_B(name)
+   
+   else:
+      raise ValueError(f"Unknown demo data name: {select}")

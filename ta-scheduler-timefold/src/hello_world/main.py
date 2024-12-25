@@ -64,7 +64,9 @@ def print_timetable(time_table: Timetable) -> None:
     sep_format = "+" + ((("-" * column_width) + "+") * (len(tas) + 1))
 
     LOGGER.info(sep_format)
-    LOGGER.info(row_format.format('', *[ta.name for ta in tas]))
+    LOGGER.info(row_format.format('', *[f"{ta.name} (ID: {ta.id})" for ta in tas]))
+    LOGGER.info(row_format.format('', *[f"(requires: {ta.required_shifts})" for ta in tas]))
+
     LOGGER.info(sep_format)
 
     ids = id_generator()
@@ -74,12 +76,20 @@ def print_timetable(time_table: Timetable) -> None:
                 yield assignment_map.get((ta.name, shift_group.series, shift_group.start_time),
                                      ShiftAssignment(next(ids), shift=None, assigned_ta=None))
 
+        # Logging the shift group
         row_shifts = [*get_row_shifts()]
         LOGGER.info(row_format.format(
             str(shift_group), 
             *[assignment.assigned_ta.name if assignment.assigned_ta is not None else " " 
               for assignment in row_shifts]
         ))
+
+        LOGGER.info(row_format.format(
+            str(shift_group), 
+            *[assignment.assigned_ta.get_status_for_shift(shift_group) if assignment.assigned_ta is not None else " " 
+              for assignment in row_shifts]
+        ))
+
         # LOGGER.info(row_format.format('', *[lesson.teacher for lesson in row_shifts]))
         # LOGGER.info(row_format.format('', *[lesson.student_group for lesson in row_shifts]))
         LOGGER.info(sep_format)
