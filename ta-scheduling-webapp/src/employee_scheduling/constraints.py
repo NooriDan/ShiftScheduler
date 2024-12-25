@@ -57,6 +57,7 @@ def penalize_over_assignment(constraint_factory: ConstraintFactory) -> Constrain
     
 # TA doesnt work on unavailable days
 def ta_unavailable_shift(constraint_factory: ConstraintFactory) -> Constraint:
+    """ Each TA should not be assigned to a shift that they are unavailable for """
     return (constraint_factory
             .for_each(ShiftAssignment)
             .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.to_list(lambda assignment: assignment.shift))
@@ -66,6 +67,7 @@ def ta_unavailable_shift(constraint_factory: ConstraintFactory) -> Constraint:
 
 # TA preferably doesn't work on undesired days
 def ta_undesired_shift (constraint_factory: ConstraintFactory) -> Constraint:
+    """ Penalize if a TA is assigned to a shift that they don't want to work on """
     return (constraint_factory
             .for_each(ShiftAssignment)
             .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.to_list(lambda assignment: assignment.shift))
@@ -75,6 +77,7 @@ def ta_undesired_shift (constraint_factory: ConstraintFactory) -> Constraint:
 
 # TA preferably works on undesired days
 def ta_desired_shift (constraint_factory: ConstraintFactory) -> Constraint:
+    """ Reward if a TA is assigned to a shift that they want to work on """
     return (constraint_factory
             .for_each(ShiftAssignment)
             .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.to_list(lambda assignment: assignment.shift))

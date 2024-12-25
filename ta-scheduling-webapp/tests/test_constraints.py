@@ -1,7 +1,9 @@
 from timefold.solver.test import ConstraintVerifier # Used for writing testcases for the constraints
+from timefold.solver.score import HardSoftScore
 
 from employee_scheduling.domain import Shift, ShiftAssignment, TA, Timetable
 import employee_scheduling.constraints as constraints 
+
 
 from datetime import date, datetime, time, timedelta
 from dataclasses import dataclass
@@ -278,8 +280,51 @@ def test_ta_meets_shift_requirment():
       .penalizes(0))
 
 def test_penalize_over_assignment():
-     pytest.skip("Incomplete: Skipping this test!")
+     ta1 = TestData.TA1 # TA1 has required_shifts = 2
+     ta2 = TestData.TA2 # TA2 has required_shifts = 2
+     ta3 = TestData.TA3 # TA3 has required_shifts = 1
 
+     shift1 = TestData.SHIFT1 # SHIFT1 has required_tas = 2
+     shift2 = TestData.SHIFT2 # SHIFT2 has required_tas = 3
+     shift3 = TestData.SHIFT3 # SHIFT3 has required_tas = 2
+
+     timetable = Timetable(shifts=[shift1, shift2, shift3], tas=[ta1, ta2, ta3], shift_assignments=[])
+
+     # TA1 has 2 shift assignments
+     timetable.shift_assignments.append(ShiftAssignment(id="1", shift=shift1, assigned_ta=ta1))
+     (constraint_verifier
+      .verify_that(constraints.penalize_over_assignment)
+      .given_solution(timetable)
+      .penalizes(0))
+     
+     timetable.shift_assignments.append(ShiftAssignment(id="2", shift=shift2, assigned_ta=ta1))
+     (constraint_verifier
+      .verify_that(constraints.penalize_over_assignment)
+      .given_solution(timetable)
+      .penalizes(0))
+     
+     # TA2 has 2 shift assignments (no penalty)
+     timetable.shift_assignments.append(ShiftAssignment(id="3", shift=shift1, assigned_ta=ta2))
+     (constraint_verifier
+      .verify_that(constraints.penalize_over_assignment)
+      .given_solution(timetable)
+      .penalizes(0))
+     
+     
+     # TA1 has 3 shift assignment
+     timetable.shift_assignments.append(ShiftAssignment(id="4", shift=shift3, assigned_ta=ta1))
+     (constraint_verifier
+      .verify_that(constraints.penalize_over_assignment)
+      .given_solution(timetable)
+      .penalizes_by(1))
+     
+     # TA1 has 4 shift assignment
+     timetable.shift_assignments.append(ShiftAssignment(id="5", shift=shift3, assigned_ta=ta1))
+     (constraint_verifier
+      .verify_that(constraints.penalize_over_assignment)
+      .given_solution(timetable)
+      .penalizes_by(2))
+     
 def test_ta_unavailable_shift():
      pytest.skip("Incomplete: Skipping this test!")
 
@@ -293,3 +338,10 @@ def test_ta_desired_shift():
 if __name__ == "__main__":
      print("Running tests for constraints.py")
      test_shift_meets_ta_requirement()
+     test_ta_duplicate_shift_assignment()
+     test_ta_meets_shift_requirment()
+     test_penalize_over_assignment()
+     test_ta_unavailable_shift()
+     test_ta_undesired_shift()
+     test_ta_desired_shift()
+     print("All tests ran!")
