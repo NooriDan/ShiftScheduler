@@ -126,3 +126,4 @@ def test_ta_meets_shift_requirment():
 def test_respect_ta_unavailability():
      pass
 
+test_required_tas()
