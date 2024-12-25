@@ -9,7 +9,6 @@ from timefold.solver import SolverStatus
 from pydantic import Field
 
 
-@dataclass
 class Shift(JsonDomainBase):
     id: Annotated[str, PlanningId]
     series: str
@@ -18,8 +17,6 @@ class Shift(JsonDomainBase):
     end_time: time
     required_tas: int
 
-
-@dataclass
 class TA(JsonDomainBase):
     id: Annotated[str, PlanningId]
     name: str
@@ -37,8 +34,7 @@ class TA(JsonDomainBase):
 #     allow_favourite_partners: Annotated[bool, ProblemFactCollectionProperty]
 #     mandate_grad_undergrad: Annotated[bool, ProblemFactCollectionProperty]
 
-# @planning_entity
-@dataclass
+@planning_entity
 class ShiftAssignment(JsonDomainBase):
     id: Annotated[str, PlanningId]
     shift: Shift
