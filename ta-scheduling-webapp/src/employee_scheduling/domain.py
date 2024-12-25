@@ -22,11 +22,11 @@ class TA(JsonDomainBase):
     name: str
     required_shifts: int
     is_grad_student: bool
-    favourite_partners: Annotated[set['TA'], Field(default=None)]
+    favourite_partners: Annotated[list['TA'], Field(default=None)]
     # availability: Annotated[list[Shift], Field(default_factory=list)]
-    desired: Annotated[set[Shift], Field(default_factory=list)]
-    undesired: Annotated[set[Shift], Field(default_factory=list)]
-    unavailable: Annotated[set[Shift], Field(default_factory=list)]
+    desired: Annotated[list[Shift], Field(default_factory=list)]
+    undesired: Annotated[list[Shift], Field(default_factory=list)]
+    unavailable: Annotated[list[Shift], Field(default_factory=list)]
 
 
 # @dataclass
@@ -45,11 +45,11 @@ class ShiftAssignment(JsonDomainBase):
 @planning_solution
 class Timetable(JsonDomainBase):
     # problem facts
-    shifts: Annotated[set[Shift], ProblemFactCollectionProperty]
-    tas: Annotated[set[TA], ProblemFactCollectionProperty,  ValueRangeProvider]
+    shifts: Annotated[list[Shift], ProblemFactCollectionProperty]
+    tas: Annotated[list[TA], ProblemFactCollectionProperty,  ValueRangeProvider]
     # constraint_parameters: Annotated[ConstraintParameters, ProblemFactProperty]
     # planning entities
-    shift_assignments: Annotated[set[ShiftAssignment], PlanningEntityCollectionProperty]
+    shift_assignments: Annotated[list[ShiftAssignment], PlanningEntityCollectionProperty]
     # score and solver status
     score:          Annotated[HardSoftScore | None,
                                         PlanningScore, ScoreSerializer, ScoreValidator, Field(default=None)]
