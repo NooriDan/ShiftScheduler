@@ -98,7 +98,8 @@ def run_app():
             termination_config=TerminationConfig(
                 # The solver runs only for 5 seconds on this small dataset.
                 # It's recommended to run for at least 5 minutes ("5m") otherwise.
-                spent_limit=Duration(seconds=5)
+                spent_limit = Duration(seconds=30),
+                unimproved_spent_limit= Duration(seconds=10)
             )
             )
         )
