@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 
 [project]
-name = "ta_scheduler_simple"
+name = "hello_world"
 version = "1.0.0"
 requires-python = ">=3.10"
 dependencies = [
@@ -14,6 +14,4 @@ dependencies = [
 
 
 [project.scripts]
-ta-run = "ta_scheduler_simple:main"
-run = "ta_scheduler_simple:myscript"
-test = "tests:test_feasible"
+run-app = "hello_world:main"

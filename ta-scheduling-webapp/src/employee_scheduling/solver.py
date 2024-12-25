@@ -8,7 +8,7 @@ from .constraints   import define_constraints
 from typing import Callable
 
 
-class Solver:
+class MySolver:
     solver_manager: SolverManager
     solution_manager: SolutionManager
     
@@ -39,4 +39,4 @@ class Solver:
     def get_solver_status(self, job_id: str) -> str:
         return self.solver_manager.get_solver_status(job_id)
 
-solver_manager = Solver(define_constraints)
+solver_manager = MySolver(define_constraints)

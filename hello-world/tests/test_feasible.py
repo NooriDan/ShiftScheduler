@@ -26,7 +26,3 @@ def test_feasible():
     solver = solver_factory.build_solver()
     solution = solver.solve(generate_demo_data(DemoData.SMALL))
     assert solution.score.is_feasible
-
-
-if __name__ == "__main__":
-    test_feasible()
