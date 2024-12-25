@@ -7,8 +7,8 @@ def define_constraints(constraint_factory: ConstraintFactory) -> list[Constraint
     return [
         shift_must_have_required_tas_exactly(constraint_factory),
         ta_duplicate_shift_assignment(constraint_factory),
-        ta_must_have_required_shifts(constraint_factory),
-        ta_should_not_have_more_than_required_shifts(constraint_factory),
+        ta_meets_shift_requirement(constraint_factory),
+        penalize_over_assignment(constraint_factory),
         ta_unavailable_shift(constraint_factory),
         ta_undesired_shift(constraint_factory),
         ta_desired_shift(constraint_factory)
@@ -36,7 +36,7 @@ def ta_duplicate_shift_assignment(constraint_factory: ConstraintFactory) -> Cons
             .penalize(HardSoftScore.ONE_HARD)
             .as_constraint("TA duplicate shift assignment"))
 
-def ta_must_have_required_shifts(constraint_factory: ConstraintFactory) -> Constraint:
+def ta_meets_shift_requirement(constraint_factory: ConstraintFactory) -> Constraint:
     """ Each TA should be assigned to at least their required number of shifts """
     return (constraint_factory
             .for_each(ShiftAssignment)
@@ -46,7 +46,7 @@ def ta_must_have_required_shifts(constraint_factory: ConstraintFactory) -> Const
             .as_constraint("TA must have required shifts"))
     
 # System penalizes if a TA is doing more than their required number of shifts
-def ta_should_not_have_more_than_required_shifts(constraint_factory: ConstraintFactory) -> Constraint:
+def penalize_over_assignment(constraint_factory: ConstraintFactory) -> Constraint:
     """ Each TA should assigned to more than their required number of shifts should be penalized (Soft) """
     return (constraint_factory
             .for_each(ShiftAssignment)

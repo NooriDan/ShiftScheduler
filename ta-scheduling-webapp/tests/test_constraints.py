@@ -31,16 +31,16 @@ class TestData:
 
      # Mock Shifts
      SHIFT1 = Shift(id="1", series="L01", 
-                    day_of_week="Wed", required_tas=1, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
+                    day_of_week="Mon", required_tas=2, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
 
      SHIFT2 = Shift(id="2", series="L02", 
-                    day_of_week="Wed", required_tas=2, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
+                    day_of_week="Tue", required_tas=3, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
 
      SHIFT3 = Shift(id="3", series="L03", 
-                    day_of_week="Wed", required_tas=1, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
+                    day_of_week="Wed", required_tas=2, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
 
      SHIFT4 = Shift(id="4", series="L04", 
-                    day_of_week="Wed", required_tas=2, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
+                    day_of_week="Thu", required_tas=3, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
 
      # Mock TAs
      TA1 = TA(id="1", name="TA1", required_shifts=2, 
@@ -170,7 +170,6 @@ def test_shift_meets_ta_requirement():
       .verify_that(constraints.shift_must_have_required_tas_exactly)
       .given_solution(timetable)
       .penalizes(0))
-     
 
 def test_ta_duplicate_shift_assignment():
 
@@ -229,9 +228,47 @@ def test_ta_duplicate_shift_assignment():
       .penalizes(2))
 
 def test_ta_meets_shift_requirment():
-     pytest.skip("Incomplete: Skipping this test!")
+     ta1 = TestData.TA1 # TA1 has required_shifts = 2
+     ta2 = TestData.TA2 # TA2 has required_shifts = 2
+     ta3 = TestData.TA3 # TA3 has required_shifts = 1
 
-def test_ta_should_not_have_more_than_required_shifts():
+     shift1 = TestData.SHIFT1 # SHIFT1 has required_tas = 2
+     shift2 = TestData.SHIFT2 # SHIFT2 has required_tas = 3
+     shift3 = TestData.SHIFT3 # SHIFT3 has required_tas = 2
+
+     timetable = Timetable(shifts=[shift1, shift2, shift3], tas=[ta1, ta2, ta3], shift_assignments=[])
+
+     timetable.shift_assignments.append(ShiftAssignment(id="1", shift=shift1, assigned_ta=ta1))
+     (constraint_verifier
+      .verify_that(constraints.ta_meets_shift_requirement)
+      .given_solution(timetable)
+      .penalizes(1))
+     
+     timetable.shift_assignments.append(ShiftAssignment(id="2", shift=shift1, assigned_ta=ta2))
+     (constraint_verifier
+      .verify_that(constraints.ta_meets_shift_requirement)
+      .given_solution(timetable)
+      .penalizes(2))
+     
+     timetable.shift_assignments.append(ShiftAssignment(id="3", shift=shift2, assigned_ta=ta1))
+     (constraint_verifier
+      .verify_that(constraints.ta_meets_shift_requirement)
+      .given_solution(timetable)
+      .penalizes(1))
+     
+     timetable.shift_assignments.append(ShiftAssignment(id="4", shift=shift2, assigned_ta=ta2))
+     (constraint_verifier
+      .verify_that(constraints.ta_meets_shift_requirement)
+      .given_solution(timetable)
+      .penalizes(0))
+     
+     timetable.shift_assignments.append(ShiftAssignment(id="5", shift=shift2, assigned_ta=ta3))
+     (constraint_verifier
+      .verify_that(constraints.ta_meets_shift_requirement)
+      .given_solution(timetable)
+      .penalizes(0))
+
+def test_penalize_over_assignment():
      pytest.skip("Incomplete: Skipping this test!")
 
 def test_ta_unavailable_shift():
