@@ -2,11 +2,11 @@ from timefold.solver.config import (SolverConfig, ScoreDirectorFactoryConfig,
                                     TerminationConfig, Duration)
 from timefold.solver import SolverFactory
 from enum import Enum
-from datetime import time
+from datetime import time, datetime, date
 import logging
 import argparse
 
-from .domain import *
+from .domain import Timetable, ShiftAssignment, ShiftGroup, TA
 from .constraints import define_constraints
 
 
@@ -25,7 +25,7 @@ def main():
     solver_factory = SolverFactory.create(
         SolverConfig(
             solution_class=Timetable,
-            entity_class_list=[Shift],
+            entity_class_list=[ShiftAssignment],
             score_director_factory_config=ScoreDirectorFactoryConfig(
                 constraint_provider_function=define_constraints
             ),
@@ -47,136 +47,156 @@ def main():
     # Visualize the solution
     print_timetable(solution)
 
+def id_generator():
+    current = 0
+    while True:
+        yield str(current)
+        current += 1
 
 def generate_demo_data(demo_data: 'DemoData') -> Timetable:
-    days = (('MONDAY', 'TUESDAY') if demo_data == DemoData.SMALL
-            else ('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY'))
-    timeslots = [
-        ShiftGroup(day, start, start.replace(hour=start.hour + 1))
-        for day in days
-        for start in (time(8, 30), time(9, 30), time(10, 30), time(13, 30), time(14, 30))
-    ]
 
-    room_ids = (('A', 'B', 'C') if demo_data == DemoData.SMALL
-                else ('A', 'B', 'C', 'D', 'E', 'F'))
-    rooms = [TA(f'Room {name}') for name in room_ids]
+    DAY_START_TIME = time(14, 30)
+    DAY_END_TIME   = time(17, 30)
 
-    lessons = []
-
-    def id_generator():
-        current = 0
-        while True:
-            yield str(current)
-            current += 1
+    AFTERNOON_START_TIME =  time(18, 30)
+    AFTERNOON_END_TIME   =  time(21, 30)
 
     ids = id_generator()
-    lessons.append(Shift(next(ids), "Math", "A. Turing", "9th grade"))
-    lessons.append(Shift(next(ids), "Math", "A. Turing", "9th grade"))
-    lessons.append(Shift(next(ids), "Physics", "M. Curie", "9th grade"))
-    lessons.append(Shift(next(ids), "Chemistry", "M. Curie", "9th grade"))
-    lessons.append(Shift(next(ids), "Biology", "C. Darwin", "9th grade"))
-    lessons.append(Shift(next(ids), "History", "I. Jones", "9th grade"))
-    lessons.append(Shift(next(ids), "English", "I. Jones", "9th grade"))
-    lessons.append(Shift(next(ids), "English", "I. Jones", "9th grade"))
-    lessons.append(Shift(next(ids), "Spanish", "P. Cruz", "9th grade"))
-    lessons.append(Shift(next(ids), "Spanish", "P. Cruz", "9th grade"))
-    if demo_data == DemoData.LARGE:
-        lessons.append(Shift(next(ids), "Math", "A. Turing", "9th grade"))
-        lessons.append(Shift(next(ids), "Math", "A. Turing", "9th grade"))
-        lessons.append(Shift(next(ids), "Math", "A. Turing", "9th grade"))
-        lessons.append(Shift(next(ids), "ICT", "A. Turing", "9th grade"))
-        lessons.append(Shift(next(ids), "Physics", "M. Curie", "9th grade"))
-        lessons.append(Shift(next(ids), "Geography", "C. Darwin", "9th grade"))
-        lessons.append(Shift(next(ids), "Geology", "C. Darwin", "9th grade"))
-        lessons.append(Shift(next(ids), "History", "I. Jones", "9th grade"))
-        lessons.append(Shift(next(ids), "English", "I. Jones", "9th grade"))
-        lessons.append(Shift(next(ids), "Drama", "I. Jones", "9th grade"))
-        lessons.append(Shift(next(ids), "Art", "S. Dali", "9th grade"))
-        lessons.append(Shift(next(ids), "Art", "S. Dali", "9th grade"))
-        lessons.append(Shift(next(ids), "Physical education", "C. Lewis", "9th grade"))
-        lessons.append(Shift(next(ids), "Physical education", "C. Lewis", "9th grade"))
-        lessons.append(Shift(next(ids), "Physical education", "C. Lewis", "9th grade"))
-
-    lessons.append(Shift(next(ids), "Math", "A. Turing", "10th grade"))
-    lessons.append(Shift(next(ids), "Math", "A. Turing", "10th grade"))
-    lessons.append(Shift(next(ids), "Math", "A. Turing", "10th grade"))
-    lessons.append(Shift(next(ids), "Physics", "M. Curie", "10th grade"))
-    lessons.append(Shift(next(ids), "Chemistry", "M. Curie", "10th grade"))
-    lessons.append(Shift(next(ids), "French", "M. Curie", "10th grade"))
-    lessons.append(Shift(next(ids), "Geography", "C. Darwin", "10th grade"))
-    lessons.append(Shift(next(ids), "History", "I. Jones", "10th grade"))
-    lessons.append(Shift(next(ids), "English", "P. Cruz", "10th grade"))
-    lessons.append(Shift(next(ids), "Spanish", "P. Cruz", "10th grade"))
-    if demo_data == DemoData.LARGE:
-        lessons.append(Shift(next(ids), "Math", "A. Turing", "10th grade"))
-        lessons.append(Shift(next(ids), "Math", "A. Turing", "10th grade"))
-        lessons.append(Shift(next(ids), "ICT", "A. Turing", "10th grade"))
-        lessons.append(Shift(next(ids), "Physics", "M. Curie", "10th grade"))
-        lessons.append(Shift(next(ids), "Biology", "C. Darwin", "10th grade"))
-        lessons.append(Shift(next(ids), "Geology", "C. Darwin", "10th grade"))
-        lessons.append(Shift(next(ids), "History", "I. Jones", "10th grade"))
-        lessons.append(Shift(next(ids), "English", "P. Cruz", "10th grade"))
-        lessons.append(Shift(next(ids), "English", "P. Cruz", "10th grade"))
-        lessons.append(Shift(next(ids), "Drama", "I. Jones", "10th grade"))
-        lessons.append(Shift(next(ids), "Art", "S. Dali", "10th grade"))
-        lessons.append(Shift(next(ids), "Art", "S. Dali", "10th grade"))
-        lessons.append(Shift(next(ids), "Physical education", "C. Lewis", "10th grade"))
-        lessons.append(Shift(next(ids), "Physical education", "C. Lewis", "10th grade"))
-        lessons.append(Shift(next(ids), "Physical education", "C. Lewis", "10th grade"))
+    shift_groups = [
+        ShiftGroup(next(ids),"L07", "Mon", DAY_START_TIME, DAY_END_TIME, 2),
+        ShiftGroup(next(ids),"L08", "Mon", AFTERNOON_START_TIME, AFTERNOON_END_TIME, 3),
+        ShiftGroup(next(ids),"L09", "Tue", DAY_START_TIME, DAY_END_TIME, 2),
+        ShiftGroup(next(ids),"L10", "Tue", AFTERNOON_START_TIME, AFTERNOON_END_TIME, 3),
+        ]
     
-        lessons.append(Shift(next(ids), "Math", "A. Turing", "11th grade"))
-        lessons.append(Shift(next(ids), "Math", "A. Turing", "11th grade"))
-        lessons.append(Shift(next(ids), "Math", "A. Turing", "11th grade"))
-        lessons.append(Shift(next(ids), "Math", "A. Turing", "11th grade"))
-        lessons.append(Shift(next(ids), "Math", "A. Turing", "11th grade"))
-        lessons.append(Shift(next(ids), "ICT", "A. Turing", "11th grade"))
-        lessons.append(Shift(next(ids), "Physics", "M. Curie", "11th grade"))
-        lessons.append(Shift(next(ids), "Chemistry", "M. Curie", "11th grade"))
-        lessons.append(Shift(next(ids), "French", "M. Curie", "11th grade"))
-        lessons.append(Shift(next(ids), "Physics", "M. Curie", "11th grade"))
-        lessons.append(Shift(next(ids), "Geography", "C. Darwin", "11th grade"))
-        lessons.append(Shift(next(ids), "Biology", "C. Darwin", "11th grade"))
-        lessons.append(Shift(next(ids), "Geology", "C. Darwin", "11th grade"))
-        lessons.append(Shift(next(ids), "History", "I. Jones", "11th grade"))
-        lessons.append(Shift(next(ids), "History", "I. Jones", "11th grade"))
-        lessons.append(Shift(next(ids), "English", "P. Cruz", "11th grade"))
-        lessons.append(Shift(next(ids), "English", "P. Cruz", "11th grade"))
-        lessons.append(Shift(next(ids), "English", "P. Cruz", "11th grade"))
-        lessons.append(Shift(next(ids), "Spanish", "P. Cruz", "11th grade"))
-        lessons.append(Shift(next(ids), "Drama", "P. Cruz", "11th grade"))
-        lessons.append(Shift(next(ids), "Art", "S. Dali", "11th grade"))
-        lessons.append(Shift(next(ids), "Art", "S. Dali", "11th grade"))
-        lessons.append(Shift(next(ids), "Physical education", "C. Lewis", "11th grade"))
-        lessons.append(Shift(next(ids), "Physical education", "C. Lewis", "11th grade"))
-        lessons.append(Shift(next(ids), "Physical education", "C. Lewis", "11th grade"))
-    
-        lessons.append(Shift(next(ids), "Math", "A. Turing", "12th grade"))
-        lessons.append(Shift(next(ids), "Math", "A. Turing", "12th grade"))
-        lessons.append(Shift(next(ids), "Math", "A. Turing", "12th grade"))
-        lessons.append(Shift(next(ids), "Math", "A. Turing", "12th grade"))
-        lessons.append(Shift(next(ids), "Math", "A. Turing", "12th grade"))
-        lessons.append(Shift(next(ids), "ICT", "A. Turing", "12th grade"))
-        lessons.append(Shift(next(ids), "Physics", "M. Curie", "12th grade"))
-        lessons.append(Shift(next(ids), "Chemistry", "M. Curie", "12th grade"))
-        lessons.append(Shift(next(ids), "French", "M. Curie", "12th grade"))
-        lessons.append(Shift(next(ids), "Physics", "M. Curie", "12th grade"))
-        lessons.append(Shift(next(ids), "Geography", "C. Darwin", "12th grade"))
-        lessons.append(Shift(next(ids), "Biology", "C. Darwin", "12th grade"))
-        lessons.append(Shift(next(ids), "Geology", "C. Darwin", "12th grade"))
-        lessons.append(Shift(next(ids), "History", "I. Jones", "12th grade"))
-        lessons.append(Shift(next(ids), "History", "I. Jones", "12th grade"))
-        lessons.append(Shift(next(ids), "English", "P. Cruz", "12th grade"))
-        lessons.append(Shift(next(ids), "English", "P. Cruz", "12th grade"))
-        lessons.append(Shift(next(ids), "English", "P. Cruz", "12th grade"))
-        lessons.append(Shift(next(ids), "Spanish", "P. Cruz", "12th grade"))
-        lessons.append(Shift(next(ids), "Drama", "P. Cruz", "12th grade"))
-        lessons.append(Shift(next(ids), "Art", "S. Dali", "12th grade"))
-        lessons.append(Shift(next(ids), "Art", "S. Dali", "12th grade"))
-        lessons.append(Shift(next(ids), "Physical education", "C. Lewis", "12th grade"))
-        lessons.append(Shift(next(ids), "Physical education", "C. Lewis", "12th grade"))
-        lessons.append(Shift(next(ids), "Physical education", "C. Lewis", "12th grade"))
+    ids = id_generator()
+    course_tas = [
+        TA(id = next(ids), 
+           name = "M. Roghani", 
+           required_shifts= 2, 
+           unavailable_shifts= set(shift_groups[2]), 
+           desired_shifts =  set(),
+           undesired_shifts = set()
+        ),
+        TA(id = next(ids), 
+           name = "D. Noori", 
+           required_shifts= 3, 
+           unavailable_shifts= set(shift_groups[0]), 
+           desired_shifts =  set(),
+           undesired_shifts = set()
+        ),
+    ]
 
-    return Timetable(demo_data.name, timeslots, rooms, lessons)
+
+
+    
+    lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "9th grade"))
+    lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "9th grade"))
+    lessons.append(ShiftAssignment(next(ids), "Physics", "M. Curie", "9th grade"))
+    lessons.append(ShiftAssignment(next(ids), "Chemistry", "M. Curie", "9th grade"))
+    lessons.append(ShiftAssignment(next(ids), "Biology", "C. Darwin", "9th grade"))
+    lessons.append(ShiftAssignment(next(ids), "History", "I. Jones", "9th grade"))
+    lessons.append(ShiftAssignment(next(ids), "English", "I. Jones", "9th grade"))
+    lessons.append(ShiftAssignment(next(ids), "English", "I. Jones", "9th grade"))
+    lessons.append(ShiftAssignment(next(ids), "Spanish", "P. Cruz", "9th grade"))
+    lessons.append(ShiftAssignment(next(ids), "Spanish", "P. Cruz", "9th grade"))
+    if demo_data == DemoData.LARGE:
+        lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "9th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "9th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "9th grade"))
+        lessons.append(ShiftAssignment(next(ids), "ICT", "A. Turing", "9th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Physics", "M. Curie", "9th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Geography", "C. Darwin", "9th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Geology", "C. Darwin", "9th grade"))
+        lessons.append(ShiftAssignment(next(ids), "History", "I. Jones", "9th grade"))
+        lessons.append(ShiftAssignment(next(ids), "English", "I. Jones", "9th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Drama", "I. Jones", "9th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Art", "S. Dali", "9th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Art", "S. Dali", "9th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Physical education", "C. Lewis", "9th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Physical education", "C. Lewis", "9th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Physical education", "C. Lewis", "9th grade"))
+
+    lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "10th grade"))
+    lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "10th grade"))
+    lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "10th grade"))
+    lessons.append(ShiftAssignment(next(ids), "Physics", "M. Curie", "10th grade"))
+    lessons.append(ShiftAssignment(next(ids), "Chemistry", "M. Curie", "10th grade"))
+    lessons.append(ShiftAssignment(next(ids), "French", "M. Curie", "10th grade"))
+    lessons.append(ShiftAssignment(next(ids), "Geography", "C. Darwin", "10th grade"))
+    lessons.append(ShiftAssignment(next(ids), "History", "I. Jones", "10th grade"))
+    lessons.append(ShiftAssignment(next(ids), "English", "P. Cruz", "10th grade"))
+    lessons.append(ShiftAssignment(next(ids), "Spanish", "P. Cruz", "10th grade"))
+    if demo_data == DemoData.LARGE:
+        lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "10th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "10th grade"))
+        lessons.append(ShiftAssignment(next(ids), "ICT", "A. Turing", "10th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Physics", "M. Curie", "10th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Biology", "C. Darwin", "10th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Geology", "C. Darwin", "10th grade"))
+        lessons.append(ShiftAssignment(next(ids), "History", "I. Jones", "10th grade"))
+        lessons.append(ShiftAssignment(next(ids), "English", "P. Cruz", "10th grade"))
+        lessons.append(ShiftAssignment(next(ids), "English", "P. Cruz", "10th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Drama", "I. Jones", "10th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Art", "S. Dali", "10th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Art", "S. Dali", "10th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Physical education", "C. Lewis", "10th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Physical education", "C. Lewis", "10th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Physical education", "C. Lewis", "10th grade"))
+    
+        lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "ICT", "A. Turing", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Physics", "M. Curie", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Chemistry", "M. Curie", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "French", "M. Curie", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Physics", "M. Curie", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Geography", "C. Darwin", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Biology", "C. Darwin", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Geology", "C. Darwin", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "History", "I. Jones", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "History", "I. Jones", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "English", "P. Cruz", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "English", "P. Cruz", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "English", "P. Cruz", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Spanish", "P. Cruz", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Drama", "P. Cruz", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Art", "S. Dali", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Art", "S. Dali", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Physical education", "C. Lewis", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Physical education", "C. Lewis", "11th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Physical education", "C. Lewis", "11th grade"))
+    
+        lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Math", "A. Turing", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "ICT", "A. Turing", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Physics", "M. Curie", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Chemistry", "M. Curie", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "French", "M. Curie", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Physics", "M. Curie", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Geography", "C. Darwin", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Biology", "C. Darwin", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Geology", "C. Darwin", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "History", "I. Jones", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "History", "I. Jones", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "English", "P. Cruz", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "English", "P. Cruz", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "English", "P. Cruz", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Spanish", "P. Cruz", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Drama", "P. Cruz", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Art", "S. Dali", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Art", "S. Dali", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Physical education", "C. Lewis", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Physical education", "C. Lewis", "12th grade"))
+        lessons.append(ShiftAssignment(next(ids), "Physical education", "C. Lewis", "12th grade"))
+
+    return Timetable(demo_data.name, shift_groups, rooms, lessons)
 
 
 def print_timetable(time_table: Timetable) -> None:
@@ -185,7 +205,7 @@ def print_timetable(time_table: Timetable) -> None:
     column_width = 18
     rooms = time_table.tas
     timeslots = time_table.shift_groups
-    lessons = time_table.shifts
+    lessons = time_table.shift_assignments
     lesson_map = {
         (lesson.room.name, lesson.timeslot.day_of_week, lesson.timeslot.start_time): lesson
         for lesson in lessons
@@ -202,7 +222,7 @@ def print_timetable(time_table: Timetable) -> None:
         def get_row_lessons():
             for room in rooms:
                 yield lesson_map.get((room.name, timeslot.day_of_week, timeslot.start_time),
-                                     Shift('', '', '', ''))
+                                     ShiftAssignment('', '', '', ''))
 
         row_lessons = [*get_row_lessons()]
         LOGGER.info(row_format.format(str(timeslot), *[lesson.subject for lesson in row_lessons]))

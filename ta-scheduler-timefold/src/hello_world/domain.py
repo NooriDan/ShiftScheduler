@@ -26,13 +26,13 @@ class TA:
     id:     Annotated[str, PlanningId]
     name: str
     required_shifts: int
-    # Extra properties
-    favourite_partners: Annotated[list['TA'], Field(default=None)]
-    is_grad_student: bool
     # Availability Information
-    unavailable_dates: Annotated[set[date], Field(default_factory=set)]
-    undesired_dates: Annotated[set[date], Field(default_factory=set)]
-    desired_dates: Annotated[set[date], Field(default_factory=set)]
+    unavailable_shifts: Annotated[set['ShiftGroup'], Field(default_factory=set)]
+    undesired_shifts:   Annotated[set['ShiftGroup'], Field(default_factory=set)]
+    desired_shifts:     Annotated[set['ShiftGroup'], Field(default_factory=set)]
+    # Extra properties
+    favourite_partners: Annotated[set['TA'], Field(default=None)]
+    is_grad_student: bool
 
     def __str__(self):
         return f'{self.name}'
@@ -40,13 +40,10 @@ class TA:
 
 @planning_entity
 @dataclass
-class Shift:
+class ShiftAssignment:
     id: Annotated[str, PlanningId]
-    subject: str
-    teacher: str
-    student_group: str
-    timeslot: Annotated[ShiftGroup | None, PlanningVariable] = field(default=None)
-    room: Annotated[TA | None, PlanningVariable] = field(default=None)
+    shift_group: Annotated[ShiftGroup | None, PlanningVariable] = field(default=None)
+    assigned_ta: Annotated[TA | None, PlanningVariable] = field(default=None)
 
 
 @planning_solution
@@ -59,7 +56,7 @@ class Timetable:
     tas: Annotated[list[TA],
                      ProblemFactCollectionProperty,
                      ValueRangeProvider]
-    shifts: Annotated[list[Shift],
+    shift_assignments: Annotated[list[ShiftAssignment],
                        PlanningEntityCollectionProperty]
     score: Annotated[HardSoftScore, PlanningScore] = field(default=None)
 

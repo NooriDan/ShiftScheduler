@@ -2,7 +2,7 @@ from timefold.solver.score import (constraint_provider, HardSoftScore, Joiners,
                                    ConstraintFactory, Constraint)
 from datetime import time
 
-from .domain import Shift
+from .domain import ShiftAssignment
 
 @constraint_provider
 def define_constraints(constraint_factory: ConstraintFactory):
@@ -23,7 +23,7 @@ def room_conflict(constraint_factory: ConstraintFactory) -> Constraint:
     # A room can accommodate at most one lesson at the same time.
     return (constraint_factory
             # Select each pair of 2 different lessons ...
-            .for_each_unique_pair(Shift,
+            .for_each_unique_pair(ShiftAssignment,
                                   # ... in the same timeslot ...
                                   Joiners.equal(lambda lesson: lesson.timeslot),
                                   # ... in the same room ...
@@ -36,7 +36,7 @@ def room_conflict(constraint_factory: ConstraintFactory) -> Constraint:
 def teacher_conflict(constraint_factory: ConstraintFactory) -> Constraint:
     # A teacher can teach at most one lesson at the same time.
     return (constraint_factory
-            .for_each_unique_pair(Shift,
+            .for_each_unique_pair(ShiftAssignment,
                                   Joiners.equal(lambda lesson: lesson.timeslot),
                                   Joiners.equal(lambda lesson: lesson.teacher))
             .penalize(HardSoftScore.ONE_HARD)
@@ -46,7 +46,7 @@ def teacher_conflict(constraint_factory: ConstraintFactory) -> Constraint:
 def student_group_conflict(constraint_factory: ConstraintFactory) -> Constraint:
     # A student can attend at most one lesson at the same time.
     return (constraint_factory
-            .for_each_unique_pair(Shift,
+            .for_each_unique_pair(ShiftAssignment,
                                   Joiners.equal(lambda lesson: lesson.timeslot),
                                   Joiners.equal(lambda lesson: lesson.student_group))
             .penalize(HardSoftScore.ONE_HARD)
@@ -56,7 +56,7 @@ def student_group_conflict(constraint_factory: ConstraintFactory) -> Constraint:
 def teacher_room_stability(constraint_factory: ConstraintFactory) -> Constraint:
     # A teacher prefers to teach in a single room.
     return (constraint_factory
-            .for_each_unique_pair(Shift,
+            .for_each_unique_pair(ShiftAssignment,
                                   Joiners.equal(lambda lesson: lesson.teacher))
             .filter(lambda lesson1, lesson2: lesson1.room != lesson2.room)
             .penalize(HardSoftScore.ONE_SOFT)
@@ -67,15 +67,15 @@ def to_minutes(moment: time) -> int:
     return moment.hour * 60 + moment.minute
 
 
-def is_between(lesson1: Shift, lesson2: Shift) -> bool:
+def is_between(lesson1: ShiftAssignment, lesson2: ShiftAssignment) -> bool:
     difference = to_minutes(lesson1.timeslot.end_time) - to_minutes(lesson2.timeslot.start_time)
     return 0 <= difference <= 30
 
 
 def teacher_time_efficiency(constraint_factory: ConstraintFactory) -> Constraint:
     # A teacher prefers to teach sequential lessons and dislikes gaps between lessons.
-    return (constraint_factory.for_each(Shift)
-            .join(Shift,
+    return (constraint_factory.for_each(ShiftAssignment)
+            .join(ShiftAssignment,
                   Joiners.equal(lambda lesson: lesson.teacher),
                   Joiners.equal(lambda lesson: lesson.timeslot.day_of_week))
             .filter(is_between)
@@ -85,8 +85,8 @@ def teacher_time_efficiency(constraint_factory: ConstraintFactory) -> Constraint
 
 def student_group_subject_variety(constraint_factory: ConstraintFactory) -> Constraint:
     # A student group dislikes sequential lessons on the same subject.
-    return (((constraint_factory.for_each(Shift)
-            .join(Shift,
+    return (((constraint_factory.for_each(ShiftAssignment)
+            .join(ShiftAssignment,
                   Joiners.equal(lambda lesson: lesson.subject),
                   Joiners.equal(lambda lesson: lesson.student_group),
                   Joiners.equal(lambda lesson: lesson.timeslot.day_of_week))

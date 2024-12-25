@@ -2,7 +2,7 @@ from timefold.solver import SolverFactory
 from timefold.solver.config import (SolverConfig, ScoreDirectorFactoryConfig,
                                     TerminationConfig, Duration, TerminationCompositionStyle)
 
-from hello_world.domain import *
+from hello_world.domain import Lesson, Timetable
 from hello_world.constraints import define_constraints
 from hello_world.main import generate_demo_data, DemoData
 
