@@ -11,28 +11,26 @@ from pydantic import Field
 
 @dataclass
 class Shift:
-    id:     Annotated[str, PlanningId]
-    group_name: str
+    id: Annotated[str, PlanningId]
+    series: str
     day_of_week: str
     start_time: time
     end_time: time
     required_tas: int
 
     def __str__(self):
-        return f'{self.group_name} {self.day_of_week} {self.start_time.strftime("%H:%M")}'
+        return f'{self.series} {self.day_of_week} {self.start_time.strftime("%H:%M")}'
     
 @dataclass
 class TA:
-    id:     Annotated[str, PlanningId]
+    id: Annotated[str, PlanningId]
     name: str
     required_shifts: int
-    # Availability Information
-    desired_shifts: Annotated[list[Shift], Field(default_factory=list)]
-    undesired_shifts: Annotated[list[Shift], Field(default_factory=list)]
-    unavailable_shifts: Annotated[list[Shift], Field(default_factory=list)]
-    # Extra properties
-    # favourite_partners: Annotated[list['TA'], Field(default=None)]
     # is_grad_student: bool
+    # favourite_partners: Annotated[list['TA'], Field(default=None)]
+    desired: Annotated[list[Shift], Field(default_factory=list)]
+    undesired: Annotated[list[Shift], Field(default_factory=list)]
+    unavailable: Annotated[list[Shift], Field(default_factory=list)]
 
     def __str__(self):
         return f'{self.name}'
@@ -42,22 +40,27 @@ class TA:
 @dataclass
 class ShiftAssignment:
     id: Annotated[str, PlanningId]
-    shift_group: Shift
-    assigned_ta: Annotated[TA | None, PlanningVariable] = field(default=None)
+    shift: Shift
+    assigned_ta: Annotated[TA | None,
+                        PlanningVariable,
+                        Field(default=None)]
 
 
 @planning_solution
 @dataclass
 class Timetable:
-    id: str
+    id: Annotated[str, PlanningId]
+    # problem facts
     shift_groups: Annotated[list[Shift],
                          ProblemFactCollectionProperty,
                          ValueRangeProvider]
     tas: Annotated[list[TA],
                      ProblemFactCollectionProperty,
                      ValueRangeProvider]
+    # planning entities
     shift_assignments: Annotated[list[ShiftAssignment],
                        PlanningEntityCollectionProperty]
+    # score and solver status
     score: Annotated[HardSoftScore, PlanningScore] = field(default=None)
 
 

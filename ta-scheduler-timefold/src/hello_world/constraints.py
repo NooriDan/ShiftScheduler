@@ -1,95 +1,88 @@
-from timefold.solver.score import (constraint_provider, HardSoftScore, Joiners,
-                                   ConstraintFactory, Constraint)
+from timefold.solver.score import (constraint_provider, HardSoftScore,
+                                   ConstraintFactory, Constraint, ConstraintCollectors, Joiners)
 from datetime import time
 
-from .domain import ShiftAssignment
+# Custom Imports
+from .domain import Shift, TA, ShiftAssignment
 
+
+    
 @constraint_provider
-def define_constraints(constraint_factory: ConstraintFactory):
+def define_constraints(constraint_factory: ConstraintFactory) -> list[Constraint]:
     return [
         # Hard constraints
-        room_conflict(constraint_factory),
-        teacher_conflict(constraint_factory),
-        student_group_conflict(constraint_factory),
+        shift_mmeet_ta_required_exactly(constraint_factory),
+        ta_duplicate_shift_assignment(constraint_factory),
+        ta_meets_shift_requirement(constraint_factory),
+        ta_unavailable_shift(constraint_factory),
+        ta_undesired_shift(constraint_factory),
+        ta_desired_shift(constraint_factory),
 
         # Soft constraints
-        teacher_room_stability(constraint_factory),
-        teacher_time_efficiency(constraint_factory),
-        student_group_subject_variety(constraint_factory),
+        penalize_over_assignment(constraint_factory),   
     ]
 
 
-def room_conflict(constraint_factory: ConstraintFactory) -> Constraint:
-    # A room can accommodate at most one lesson at the same time.
+def shift_mmeet_ta_required_exactly(constraint_factory: ConstraintFactory) -> Constraint:
+    """ Each shift should have exactly the required number of TAs """
     return (constraint_factory
-            # Select each pair of 2 different lessons ...
-            .for_each_unique_pair(ShiftAssignment,
-                                  # ... in the same timeslot ...
-                                  Joiners.equal(lambda lesson: lesson.timeslot),
-                                  # ... in the same room ...
-                                  Joiners.equal(lambda lesson: lesson.room))
-            # ... and penalize each pair with a hard weight.
+            .for_each(ShiftAssignment)
+            # filter out shifts that don't have the required amount of TAs
+            .group_by(lambda shift_assignment: shift_assignment.shift, ConstraintCollectors.count())
+            .filter(lambda shift, count: count != shift.required_tas)
             .penalize(HardSoftScore.ONE_HARD)
-            .as_constraint("Room conflict"))
+            .as_constraint("Required TAs per shift violated"))
 
-
-def teacher_conflict(constraint_factory: ConstraintFactory) -> Constraint:
-    # A teacher can teach at most one lesson at the same time.
+def ta_duplicate_shift_assignment(constraint_factory: ConstraintFactory) -> Constraint:
+    """ Each TA should be assigned to a shift only once """
     return (constraint_factory
-            .for_each_unique_pair(ShiftAssignment,
-                                  Joiners.equal(lambda lesson: lesson.timeslot),
-                                  Joiners.equal(lambda lesson: lesson.teacher))
+            .for_each(ShiftAssignment)
+            .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.to_list(lambda assignment: assignment.shift.id))
+            .filter(lambda ta, shift_ids: len(shift_ids) > len(set(shift_ids)))
             .penalize(HardSoftScore.ONE_HARD)
-            .as_constraint("Teacher conflict"))
+            .as_constraint("TA duplicate shift assignment"))
 
-
-def student_group_conflict(constraint_factory: ConstraintFactory) -> Constraint:
-    # A student can attend at most one lesson at the same time.
+def ta_meets_shift_requirement(constraint_factory: ConstraintFactory) -> Constraint:
+    """ Each TA should be assigned to at least their required number of shifts """
     return (constraint_factory
-            .for_each_unique_pair(ShiftAssignment,
-                                  Joiners.equal(lambda lesson: lesson.timeslot),
-                                  Joiners.equal(lambda lesson: lesson.student_group))
+            .for_each(ShiftAssignment)
+            .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.count())
+            .filter(lambda ta, count: count < ta.required_shifts)
             .penalize(HardSoftScore.ONE_HARD)
-            .as_constraint("Student group conflict"))
-
-
-def teacher_room_stability(constraint_factory: ConstraintFactory) -> Constraint:
-    # A teacher prefers to teach in a single room.
+            .as_constraint("TA must have required shifts"))
+    
+def penalize_over_assignment(constraint_factory: ConstraintFactory) -> Constraint:
+    """ Each TA should assigned to more than their required number of shifts should be penalized (Soft) """
     return (constraint_factory
-            .for_each_unique_pair(ShiftAssignment,
-                                  Joiners.equal(lambda lesson: lesson.teacher))
-            .filter(lambda lesson1, lesson2: lesson1.room != lesson2.room)
+            .for_each(ShiftAssignment)
+            .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.count())
+            .filter(lambda ta, count: count > ta.required_shifts)
+            .penalize(HardSoftScore.ONE_SOFT, lambda ta, count: count - ta.required_shifts)
+            .as_constraint("TA should not to more than the required shifts"))
+    
+def ta_unavailable_shift(constraint_factory: ConstraintFactory) -> Constraint:
+    """ Each TA should not be assigned to a shift that they are unavailable for """
+    return (constraint_factory
+            .for_each(ShiftAssignment)
+            .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.to_list(lambda assignment: assignment.shift))
+            .filter(lambda ta, shifts: any(shift in ta.unavailable for shift in shifts))
+            .penalize(HardSoftScore.ONE_HARD)
+            .as_constraint("TA unavailable"))
+
+def ta_undesired_shift (constraint_factory: ConstraintFactory) -> Constraint:
+    """ Penalize if a TA is assigned to a shift that they don't want to work on """
+    return (constraint_factory
+            .for_each(ShiftAssignment)
+            .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.to_list(lambda assignment: assignment.shift))
+            .filter(lambda ta, shifts: any(shift in ta.undesired for shift in shifts))
             .penalize(HardSoftScore.ONE_SOFT)
-            .as_constraint("Teacher room stability"))
+            .as_constraint("TA undesired"))
 
-
-def to_minutes(moment: time) -> int:
-    return moment.hour * 60 + moment.minute
-
-
-def is_between(lesson1: ShiftAssignment, lesson2: ShiftAssignment) -> bool:
-    difference = to_minutes(lesson1.timeslot.end_time) - to_minutes(lesson2.timeslot.start_time)
-    return 0 <= difference <= 30
-
-
-def teacher_time_efficiency(constraint_factory: ConstraintFactory) -> Constraint:
-    # A teacher prefers to teach sequential lessons and dislikes gaps between lessons.
-    return (constraint_factory.for_each(ShiftAssignment)
-            .join(ShiftAssignment,
-                  Joiners.equal(lambda lesson: lesson.teacher),
-                  Joiners.equal(lambda lesson: lesson.timeslot.day_of_week))
-            .filter(is_between)
+def ta_desired_shift (constraint_factory: ConstraintFactory) -> Constraint:
+    """ Reward if a TA is assigned to a shift that they want to work on """
+    return (constraint_factory
+            .for_each(ShiftAssignment)
+            .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.to_list(lambda assignment: assignment.shift))
+            .filter(lambda ta, shifts: any(shift in ta.desired for shift in shifts))
             .reward(HardSoftScore.ONE_SOFT)
-            .as_constraint("Teacher time efficiency"))
-
-
-def student_group_subject_variety(constraint_factory: ConstraintFactory) -> Constraint:
-    # A student group dislikes sequential lessons on the same subject.
-    return (((constraint_factory.for_each(ShiftAssignment)
-            .join(ShiftAssignment,
-                  Joiners.equal(lambda lesson: lesson.subject),
-                  Joiners.equal(lambda lesson: lesson.student_group),
-                  Joiners.equal(lambda lesson: lesson.timeslot.day_of_week))
-            .filter(is_between))
-            .penalize(HardSoftScore.ONE_SOFT))
-            .as_constraint("Student group subject variety"))
+            .as_constraint("TA desired"))

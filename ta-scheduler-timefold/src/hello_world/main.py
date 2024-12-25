@@ -16,12 +16,12 @@ LOGGER = logging.getLogger('app')
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Solve a school timetable.')
-    parser.add_argument('--demo_data', dest='demo_data', action='store',
-                        choices=['SMALL', 'LARGE', 'CUSTOM'],
-                        default='SMALL',
-                        help='Demo dataset to use')
-    args = parser.parse_args()
+    # parser = argparse.ArgumentParser(description='Solve a school timetable.')
+    # parser.add_argument('--demo_data', dest='demo_data', action='store',
+    #                     choices=['SMALL', 'LARGE', 'CUSTOM'],
+    #                     default='SMALL',
+    #                     help='Demo dataset to use')
+    # args = parser.parse_args()
 
     solver_factory = SolverFactory.create(
         SolverConfig(
@@ -38,8 +38,8 @@ def main():
         ))
 
     # Load the problem
-    demo_data = getattr(DemoData, args.demo_data)
-    problem = generate_demo_data(demo_data)
+    # demo_data = getattr(DemoData, args.demo_data)
+    problem = generate_demo_data()
 
     # Solve the problem
     solver = solver_factory.build_solver()
@@ -75,37 +75,37 @@ def generate_demo_data(name: str = "CUSTOM") -> Timetable:
         TA(id = next(ids), 
            name = "M. Roghani", 
            required_shifts= 2, 
-           unavailable_shifts= [shifts[1]], 
-           desired_shifts    = [shifts[0]],
-           undesired_shifts  = [shifts[2]]
+           unavailable= [shifts[1]], 
+           desired    = [shifts[0]],
+           undesired  = [shifts[2]]
         ),
         TA(id = next(ids), 
            name = "D. Noori", 
            required_shifts= 3, 
-           unavailable_shifts= [shifts[1]], 
-           desired_shifts    = [shifts[0]],
-           undesired_shifts  = [shifts[2]]
+           unavailable= [shifts[1]], 
+           desired    = [shifts[0]],
+           undesired  = [shifts[2]]
         ),
         TA(id = next(ids), 
            name = "A. Gholami", 
            required_shifts= 2, 
-           unavailable_shifts= [shifts[1]], 
-           desired_shifts    = [shifts[0]],
-           undesired_shifts  = [shifts[2]]
+           unavailable= [shifts[1]], 
+           desired    = [shifts[0]],
+           undesired  = [shifts[2]]
         ),
         TA(id = next(ids), 
            name = "M. Jafari", 
            required_shifts= 3, 
-           unavailable_shifts= [shifts[1]], 
-           desired_shifts    = [shifts[0]],
-           undesired_shifts  = [shifts[2]]
+           unavailable= [shifts[1]], 
+           desired    = [shifts[0]],
+           undesired  = [shifts[2]]
         ),
         TA(id = next(ids), 
            name = "A. Athar", 
            required_shifts= 2, 
-           unavailable_shifts= [shifts[1]], 
-           desired_shifts    = [shifts[0]],
-           undesired_shifts  = [shifts[2]]
+           unavailable= [shifts[1]], 
+           desired    = [shifts[0]],
+           undesired  = [shifts[2]]
         ),
     ]
 
@@ -113,25 +113,25 @@ def generate_demo_data(name: str = "CUSTOM") -> Timetable:
     shift_assignments: List[ShiftAssignment] = []
     # Shifts for Monday (L07) need 2 TAs
     shift_index = 0
-    shift_assignments.append(ShiftAssignment(id= next(ids), shift_group= shifts[shift_index], assigned_ta= None))
-    shift_assignments.append(ShiftAssignment(id= next(ids), shift_group= shifts[shift_index], assigned_ta= None))
+    shift_assignments.append(ShiftAssignment(id= next(ids), shift= shifts[shift_index], assigned_ta= None))
+    shift_assignments.append(ShiftAssignment(id= next(ids), shift= shifts[shift_index], assigned_ta= None))
 
     # Shifts for Monday (L08) need 3 TAs
     shift_index = 1
-    shift_assignments.append(ShiftAssignment(id= next(ids), shift_group= shifts[shift_index], assigned_ta= None))
-    shift_assignments.append(ShiftAssignment(id= next(ids), shift_group= shifts[shift_index], assigned_ta= None))
-    shift_assignments.append(ShiftAssignment(id= next(ids), shift_group= shifts[shift_index], assigned_ta= None))
+    shift_assignments.append(ShiftAssignment(id= next(ids), shift= shifts[shift_index], assigned_ta= None))
+    shift_assignments.append(ShiftAssignment(id= next(ids), shift= shifts[shift_index], assigned_ta= None))
+    shift_assignments.append(ShiftAssignment(id= next(ids), shift= shifts[shift_index], assigned_ta= None))
 
     # Shifts for Tuesday (L09) need 2 TAs
     shift_index = 2
-    shift_assignments.append(ShiftAssignment(id= next(ids), shift_group= shifts[shift_index], assigned_ta= None))
-    shift_assignments.append(ShiftAssignment(id= next(ids), shift_group= shifts[shift_index], assigned_ta= None))
+    shift_assignments.append(ShiftAssignment(id= next(ids), shift= shifts[shift_index], assigned_ta= None))
+    shift_assignments.append(ShiftAssignment(id= next(ids), shift= shifts[shift_index], assigned_ta= None))
 
     # Shifts for Tuesday (L10) need 3 TAs
     shift_index = 3
-    shift_assignments.append(ShiftAssignment(id= next(ids), shift_group= shifts[shift_index], assigned_ta= None))
-    shift_assignments.append(ShiftAssignment(id= next(ids), shift_group= shifts[shift_index], assigned_ta= None))
-    shift_assignments.append(ShiftAssignment(id= next(ids), shift_group= shifts[shift_index], assigned_ta= None))
+    shift_assignments.append(ShiftAssignment(id= next(ids), shift= shifts[shift_index], assigned_ta= None))
+    shift_assignments.append(ShiftAssignment(id= next(ids), shift= shifts[shift_index], assigned_ta= None))
+    shift_assignments.append(ShiftAssignment(id= next(ids), shift= shifts[shift_index], assigned_ta= None))
 
     return Timetable(
                     id= name, 
@@ -142,44 +142,53 @@ def generate_demo_data(name: str = "CUSTOM") -> Timetable:
 
 
 def print_timetable(time_table: Timetable) -> None:
-    LOGGER.info("")
+    LOGGER.info("=== Starting to print the assignment matrix ===")
 
     column_width = 18
-    rooms = time_table.tas
-    timeslots = time_table.shift_groups
-    lessons = time_table.shift_assignments
-    lesson_map = {
-        (lesson.room.name, lesson.timeslot.day_of_week, lesson.timeslot.start_time): lesson
-        for lesson in lessons
-        if lesson.room is not None and lesson.timeslot is not None
+    tas = time_table.tas
+    shift_groups = time_table.shift_groups
+    shift_assignments = time_table.shift_assignments
+    
+    assignment_map = {
+        (assignment.assigned_ta.name, assignment.shift.series, assignment.shift.start_time): assignment
+        for assignment in shift_assignments
+        if assignment.shift is not None and assignment.assigned_ta is not None
     }
-    row_format = ("|{:<" + str(column_width) + "}") * (len(rooms) + 1) + "|"
-    sep_format = "+" + ((("-" * column_width) + "+") * (len(rooms) + 1))
+
+    row_format = ("|{:<" + str(column_width) + "}") * (len(tas) + 1) + "|"
+    sep_format = "+" + ((("-" * column_width) + "+") * (len(tas) + 1))
 
     LOGGER.info(sep_format)
-    LOGGER.info(row_format.format('', *[room.name for room in rooms]))
+    LOGGER.info(row_format.format('', *[ta.name for ta in tas]))
     LOGGER.info(sep_format)
 
-    for timeslot in timeslots:
-        def get_row_lessons():
-            for room in rooms:
-                yield lesson_map.get((room.name, timeslot.day_of_week, timeslot.start_time),
-                                     ShiftAssignment('', '', '', ''))
+    ids = id_generator()
+    for shift_group in shift_groups:
+        def get_row_shifts():
+            for ta in tas:
+                yield assignment_map.get((ta.name, shift_group.series, shift_group.start_time),
+                                     ShiftAssignment(next(ids), shift=None, assigned_ta=None))
 
-        row_lessons = [*get_row_lessons()]
-        LOGGER.info(row_format.format(str(timeslot), *[lesson.subject for lesson in row_lessons]))
-        LOGGER.info(row_format.format('', *[lesson.teacher for lesson in row_lessons]))
-        LOGGER.info(row_format.format('', *[lesson.student_group for lesson in row_lessons]))
+        row_shifts = [*get_row_shifts()]
+        LOGGER.info(row_format.format(
+            str(shift_group), 
+            *[assignment.assigned_ta.name if assignment.assigned_ta is not None else " " 
+              for assignment in row_shifts]
+        ))
+        # LOGGER.info(row_format.format('', *[lesson.teacher for lesson in row_shifts]))
+        # LOGGER.info(row_format.format('', *[lesson.student_group for lesson in row_shifts]))
         LOGGER.info(sep_format)
 
-    unassigned_lessons = [lesson for lesson in lessons if lesson.room is None or lesson.timeslot is None]
-    if len(unassigned_lessons) > 0:
+    unassigned_shifts = [assignment for assignment in shift_assignments if assignment.shift is None or assignment.assigned_ta is None]
+    if len(unassigned_shifts) > 0:
         LOGGER.info("")
-        LOGGER.info("Unassigned lessons")
-        for lesson in unassigned_lessons:
-            LOGGER.info(f'    {lesson.subject} - {lesson.teacher} - {lesson.student_group}')
+        LOGGER.info("Unassigned shifts")
+        for shift in unassigned_shifts:
+            LOGGER.info(f'    {shift.shift} - {shift.assigned_ta}')
+
+    LOGGER.info("=== Finished printing the assignment matrix ===")
 
 
 if __name__ == '__main__':
-    # main()
-    generate_demo_data()
+    main()
+    # generate_demo_data()
