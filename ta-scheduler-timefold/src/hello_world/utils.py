@@ -168,8 +168,8 @@ class DataConstructor:
                     continue
 
                 print(f"TA {ta.id} {ta.name} has availability data.")
-                for availability_status, shift_group in availability_as_dict.items():
-                    shift = next((shift for shift in self.timetable.shift_groups if shift.series == shift_group), None)
+                for shift_group, availability_status in availability_as_dict.items():
+                    shift = next((shift for shift in self.timetable.shift_groups if shift.series == shift_group), None) # Find the shift group
                     if shift is None:
                         print(f"Shift group {shift_group} not found.")
                         continue
@@ -181,9 +181,7 @@ class DataConstructor:
                     elif availability_status == "Undesired":
                         ta.undesired.append(shift)
                     else:
-                        print(f"Unknown availability status: {availability_status}")
-
-                    
+                        print(f"Unknown availability status: {availability_status}")      
             return True
         return False
 
