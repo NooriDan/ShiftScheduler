@@ -238,6 +238,7 @@ def test_ta_meets_shift_requirment():
 
      timetable = Timetable(shifts=[shift1, shift2, shift3], tas=[ta1, ta2, ta3], shift_assignments=[])
 
+     
      timetable.shift_assignments.append(ShiftAssignment(id="1", shift=shift1, assigned_ta=ta1))
      (constraint_verifier
       .verify_that(constraints.ta_meets_shift_requirement)
@@ -262,7 +263,15 @@ def test_ta_meets_shift_requirment():
       .given_solution(timetable)
       .penalizes(0))
      
+     # TA3 has required_shifts = 1 (TA3 has only 1 shift assignment)
      timetable.shift_assignments.append(ShiftAssignment(id="5", shift=shift2, assigned_ta=ta3))
+     (constraint_verifier
+      .verify_that(constraints.ta_meets_shift_requirement)
+      .given_solution(timetable)
+      .penalizes(0))
+     
+     # Does not penalize if TA is assigned to more than their required number of shifts
+     timetable.shift_assignments.append(ShiftAssignment(id="6", shift=shift3, assigned_ta=ta1))
      (constraint_verifier
       .verify_that(constraints.ta_meets_shift_requirement)
       .given_solution(timetable)

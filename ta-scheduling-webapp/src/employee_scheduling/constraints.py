@@ -52,7 +52,7 @@ def penalize_over_assignment(constraint_factory: ConstraintFactory) -> Constrain
             .for_each(ShiftAssignment)
             .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.count())
             .filter(lambda ta, count: count > ta.required_shifts)
-            .penalize(HardSoftScore.ONE_SOFT)
+            .penalize(HardSoftScore.ONE_SOFT, lambda ta, count: count - ta.required_shifts)
             .as_constraint("TA should not to more than the required shifts"))
     
 # TA doesnt work on unavailable days
