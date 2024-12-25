@@ -4,6 +4,9 @@ from employee_scheduling.domain import Shift, ShiftAssignment, TA, Timetable
 import employee_scheduling.constraints as constraints 
 
 from datetime import date, datetime, time, timedelta
+from dataclasses import dataclass
+
+import pytest
 
 DAY_1 = date(2021, 2, 1)
 DAY_2 = date(2021, 2, 2)
@@ -17,57 +20,60 @@ DAY_END_TIME = datetime.combine(DAY_1, time(17, 0))
 AFTERNOON_START_TIME = datetime.combine(DAY_1, time(13, 0))
 AFTERNOON_END_TIME = datetime.combine(DAY_1, time(21, 0))
 
-constraint_verifier = ConstraintVerifier.build(constraints.define_constraints, Timetable, ShiftAssignment)
-
 def get_time(datetime: datetime) -> time:
      return datetime.time()
 
 def get_day_of_week(datetime: datetime) -> str:
      return datetime.strftime("%a")
 
-# Mock Shifts
-SHIFT1 = Shift(id="1", series="L01", 
-               day_of_week="Wed", required_tas=1, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
+@dataclass
+class TestData:
 
-SHIFT2 = Shift(id="2", series="L02", 
-               day_of_week="Wed", required_tas=2, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
+     # Mock Shifts
+     SHIFT1 = Shift(id="1", series="L01", 
+                    day_of_week="Wed", required_tas=1, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
 
-SHIFT3 = Shift(id="3", series="L03", 
-               day_of_week="Wed", required_tas=1, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
+     SHIFT2 = Shift(id="2", series="L02", 
+                    day_of_week="Wed", required_tas=2, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
 
-SHIFT4 = Shift(id="4", series="L04", 
-               day_of_week="Wed", required_tas=2, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
+     SHIFT3 = Shift(id="3", series="L03", 
+                    day_of_week="Wed", required_tas=1, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
 
-# Mock TAs
-TA1 = TA(id="1", name="TA1", required_shifts=2, 
-     unavailable =[SHIFT1, SHIFT4], 
-     undesired   =[SHIFT2], 
-     desired     =[SHIFT3],
-     is_grad_student=True,
-     favourite_partners=[])
+     SHIFT4 = Shift(id="4", series="L04", 
+                    day_of_week="Wed", required_tas=2, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
 
-TA2 = TA(id="2", name="TA2", required_shifts=2, 
-     unavailable =[SHIFT1, SHIFT2], 
-     undesired   =[SHIFT2], 
-     desired     =[SHIFT3],
-     is_grad_student=True,
-     favourite_partners=[])
+     # Mock TAs
+     TA1 = TA(id="1", name="TA1", required_shifts=2, 
+          unavailable =[SHIFT1, SHIFT4], 
+          undesired   =[SHIFT2], 
+          desired     =[SHIFT3],
+          is_grad_student=True,
+          favourite_partners=[])
 
-TA3 = TA(id="3", name="TA3", required_shifts=1, 
-     unavailable =[SHIFT2, SHIFT4], 
-     undesired   =[SHIFT2], 
-     desired     =[SHIFT3],
-     is_grad_student=True,
-     favourite_partners=[])
+     TA2 = TA(id="2", name="TA2", required_shifts=2, 
+          unavailable =[SHIFT1, SHIFT2], 
+          undesired   =[SHIFT2], 
+          desired     =[SHIFT3],
+          is_grad_student=True,
+          favourite_partners=[])
 
-TA4 = TA(id="4", name="TA4", required_shifts=1, 
-     unavailable =[SHIFT3], 
-     undesired   =[SHIFT1, SHIFT2], 
-     desired     =[],
-     is_grad_student=True,
-     favourite_partners=[])
+     TA3 = TA(id="3", name="TA3", required_shifts=1, 
+          unavailable =[SHIFT2, SHIFT4], 
+          undesired   =[SHIFT2], 
+          desired     =[SHIFT3],
+          is_grad_student=True,
+          favourite_partners=[])
 
-def test_required_tas():
+     TA4 = TA(id="4", name="TA4", required_shifts=1, 
+          unavailable =[SHIFT3], 
+          undesired   =[SHIFT1, SHIFT2], 
+          desired     =[],
+          is_grad_student=True,
+          favourite_partners=[])
+
+constraint_verifier = ConstraintVerifier.build(constraints.define_constraints, Timetable, ShiftAssignment)
+
+def test_shift_meets_ta_requirement():
 
      # Mock Shifts
      shift1 = Shift(id="1", series="L01", 
@@ -77,7 +83,7 @@ def test_required_tas():
                     day_of_week="Wed", required_tas=2, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
 
      shift3 = Shift(id="3", series="L03", 
-                    day_of_week="Wed", required_tas=1, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
+                    day_of_week="Wed", required_tas=3, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
 
      shift4 = Shift(id="4", series="L04", 
                     day_of_week="Wed", required_tas=2, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
@@ -110,34 +116,134 @@ def test_required_tas():
           desired     =[],
           is_grad_student=True,
           favourite_partners=[])
-     # As
-     #SHIFT1.assigned_tas = [ta1]
-     assignment1 = ShiftAssignment(id="1", shift=shift1, assigned_ta=ta1)
+     
+     timetable = Timetable(shifts=[shift1, shift2, shift3, shift4], tas=[ta1, ta2, ta3, ta4], shift_assignments=[])
+
+     # Shift 1 (required_tas = 1)
+     timetable.shift_assignments.append(ShiftAssignment(id="1", shift=shift1, assigned_ta=ta1))
      (constraint_verifier
-      .verify_that(constraints.shift_must_have_required_tas_exactly).given(assignment1, ta1, shift1)
+      .verify_that(constraints.shift_must_have_required_tas_exactly)
+      .given_solution(timetable)
       .penalizes(0))
      
-     assignment2 = ShiftAssignment(id="2", shift=shift2, assigned_ta=ta1)
+     # Shift 2 (required_tas = 2)
+     timetable.shift_assignments.append(ShiftAssignment(id="2", shift=shift2, assigned_ta=ta1))
      (constraint_verifier
-      .verify_that(constraints.shift_must_have_required_tas_exactly).given(assignment2, ta1, shift2)
+      .verify_that(constraints.shift_must_have_required_tas_exactly)
+      .given_solution(timetable)
       .penalizes(1))
      
-     assignment3 = ShiftAssignment(id="3", shift=shift2, assigned_ta=ta2)
+     timetable.shift_assignments.append(ShiftAssignment(id="3", shift=shift2, assigned_ta=ta2))
      (constraint_verifier
-      .verify_that(constraints.shift_must_have_required_tas_exactly).given(assignment3, ta2, shift2)
+      .verify_that(constraints.shift_must_have_required_tas_exactly)
+      .given_solution(timetable)
       .penalizes(0))
      
-def test_shift_meets_ta_requirement():
-     pass
+     # Shift 3 (required_tas = 3)
+     timetable.shift_assignments.append(ShiftAssignment(id="4", shift=shift3, assigned_ta=ta1))
+     (constraint_verifier
+      .verify_that(constraints.shift_must_have_required_tas_exactly)
+      .given_solution(timetable)
+      .penalizes(1))
+     
+     timetable.shift_assignments.append(ShiftAssignment(id="5", shift=shift3, assigned_ta=ta2))
+     (constraint_verifier
+      .verify_that(constraints.shift_must_have_required_tas_exactly)
+      .given_solution(timetable)
+      .penalizes(1))
+     
+     timetable.shift_assignments.append(ShiftAssignment(id="6", shift=shift3, assigned_ta=ta3))
+     (constraint_verifier
+      .verify_that(constraints.shift_must_have_required_tas_exactly)
+      .given_solution(timetable)
+      .penalizes(0))
+     
+     # Shift 4 (required_tas = 2)
+     timetable.shift_assignments.append(ShiftAssignment(id="7", shift=shift4, assigned_ta=ta3))
+     (constraint_verifier
+      .verify_that(constraints.shift_must_have_required_tas_exactly)
+      .given_solution(timetable)
+      .penalizes(1))
+     
+     timetable.shift_assignments.append(ShiftAssignment(id="8", shift=shift4, assigned_ta=ta4))
+     (constraint_verifier
+      .verify_that(constraints.shift_must_have_required_tas_exactly)
+      .given_solution(timetable)
+      .penalizes(0))
+     
+
+def test_ta_duplicate_shift_assignment():
+
+     # Mock Shifts
+     shift1 = Shift(id="1", series="L01", 
+                    day_of_week="Wed", required_tas=2, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
+
+     shift2 = Shift(id="2", series="L02", 
+                    day_of_week="Wed", required_tas=3, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
+     
+     ta1 = TA(id="1", name="TA1", required_shifts=2, 
+          unavailable =[], 
+          undesired   =[shift1], 
+          desired     =[shift2],
+          is_grad_student=True,
+          favourite_partners=[])
+     
+     ta2 = TA(id="2", name="TA2", required_shifts=2,
+          unavailable =[], 
+          undesired   =[shift2], 
+          desired     =[shift1],
+          is_grad_student=True,
+          favourite_partners=[])
+     
+     # (1) Duplicate shift assignments for the same TA
+     timetable = Timetable(shifts=[shift1, shift2], tas=[ta1, ta2], shift_assignments=[])
+     timetable.shift_assignments.append(ShiftAssignment(id="1", shift=shift1, assigned_ta=ta1))
+     (constraint_verifier
+      .verify_that(constraints.ta_duplicate_shift_assignment)
+      .given_solution(timetable)
+      .penalizes(0))
+     
+     timetable.shift_assignments.append(ShiftAssignment(id="2", shift=shift1, assigned_ta=ta1))
+     (constraint_verifier
+      .verify_that(constraints.ta_duplicate_shift_assignment)
+      .given_solution(timetable)
+      .penalizes(1))
+     
+     # timetable.shift_assignments = [] # Reset shift assignments
+     timetable.shift_assignments.append(ShiftAssignment(id="3", shift=shift2, assigned_ta=ta2))
+     (constraint_verifier
+      .verify_that(constraints.ta_duplicate_shift_assignment)
+      .given_solution(timetable)
+      .penalizes(1))
+     
+     timetable.shift_assignments.append(ShiftAssignment(id="4", shift=shift2, assigned_ta=ta1))
+     (constraint_verifier
+      .verify_that(constraints.ta_duplicate_shift_assignment)
+      .given_solution(timetable)
+      .penalizes(1))
+     
+     timetable.shift_assignments.append(ShiftAssignment(id="5", shift=shift2, assigned_ta=ta2))
+     (constraint_verifier
+      .verify_that(constraints.ta_duplicate_shift_assignment)
+      .given_solution(timetable)
+      .penalizes(2))
 
 def test_ta_meets_shift_requirment():
-     pass
+     pytest.skip("Incomplete: Skipping this test!")
 
-def test_respect_ta_unavailability():
-     pass
+def test_ta_should_not_have_more_than_required_shifts():
+     pytest.skip("Incomplete: Skipping this test!")
 
+def test_ta_unavailable_shift():
+     pytest.skip("Incomplete: Skipping this test!")
+
+def test_ta_undesired_shift():
+     pytest.skip("Incomplete: Skipping this test!")
+
+def test_ta_desired_shift():
+     pytest.skip("Incomplete: Skipping this test!")
 
 
 if __name__ == "__main__":
      print("Running tests for constraints.py")
-     test_required_tas()
+     test_shift_meets_ta_requirement()

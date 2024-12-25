@@ -6,6 +6,7 @@ from .domain import Shift, TA, ShiftAssignment
 def define_constraints(constraint_factory: ConstraintFactory) -> list[Constraint]:
     return [
         shift_must_have_required_tas_exactly(constraint_factory),
+        ta_duplicate_shift_assignment(constraint_factory),
         ta_must_have_required_shifts(constraint_factory),
         ta_should_not_have_more_than_required_shifts(constraint_factory),
         ta_unavailable_shift(constraint_factory),
@@ -16,19 +17,27 @@ def define_constraints(constraint_factory: ConstraintFactory) -> list[Constraint
     ]
 
 
-# Each shift gets exactly their required number of TAs
 def shift_must_have_required_tas_exactly(constraint_factory: ConstraintFactory) -> Constraint:
-    
+    """ Each shift should have exactly the required number of TAs """
     return (constraint_factory
             .for_each(ShiftAssignment)
             # filter out shifts that don't have the required amount of TAs
             .group_by(lambda shift_assignment: shift_assignment.shift, ConstraintCollectors.count())
             .filter(lambda shift, count: count != shift.required_tas)
             .penalize(HardSoftScore.ONE_HARD)
-            .as_constraint("Required TAs"))
-    
-# Each TA teaches at least their minimum number of shifts
+            .as_constraint("Required TAs per shift violated"))
+
+def ta_duplicate_shift_assignment(constraint_factory: ConstraintFactory) -> Constraint:
+    """ Each TA should be assigned to a shift only once """
+    return (constraint_factory
+            .for_each(ShiftAssignment)
+            .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.to_list(lambda assignment: assignment.shift.id))
+            .filter(lambda ta, shift_ids: len(shift_ids) > len(set(shift_ids)))
+            .penalize(HardSoftScore.ONE_HARD)
+            .as_constraint("TA duplicate shift assignment"))
+
 def ta_must_have_required_shifts(constraint_factory: ConstraintFactory) -> Constraint:
+    """ Each TA should be assigned to at least their required number of shifts """
     return (constraint_factory
             .for_each(ShiftAssignment)
             .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.count())
@@ -38,6 +47,7 @@ def ta_must_have_required_shifts(constraint_factory: ConstraintFactory) -> Const
     
 # System penalizes if a TA is doing more than their required number of shifts
 def ta_should_not_have_more_than_required_shifts(constraint_factory: ConstraintFactory) -> Constraint:
+    """ Each TA should assigned to more than their required number of shifts should be penalized (Soft) """
     return (constraint_factory
             .for_each(ShiftAssignment)
             .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.count())
@@ -71,6 +81,8 @@ def ta_desired_shift (constraint_factory: ConstraintFactory) -> Constraint:
             .filter(lambda ta, shifts: any(shift in ta.desired for shift in shifts))
             .reward(HardSoftScore.ONE_SOFT)
             .as_constraint("TA desired"))
+
+
 
 # # TA's favourite partners should be assigned to the same shift
 # def favourite_partners(constraint_factory: ConstraintFactory) -> Constraint:
