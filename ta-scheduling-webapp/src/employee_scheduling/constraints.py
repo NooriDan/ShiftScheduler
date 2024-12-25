@@ -5,7 +5,7 @@ from .domain import Shift, TA, ShiftAssignment
 @constraint_provider
 def define_constraints(constraint_factory: ConstraintFactory) -> list[Constraint]:
     return [
-        required_tas(constraint_factory),
+        shift_must_have_required_tas_exactly(constraint_factory),
         ta_must_have_required_shifts(constraint_factory),
         ta_should_not_have_more_than_required_shifts(constraint_factory),
         ta_unavailable_shift(constraint_factory),
@@ -17,13 +17,13 @@ def define_constraints(constraint_factory: ConstraintFactory) -> list[Constraint
 
 
 # Each shift gets exactly their required number of TAs
-def required_tas(constraint_factory: ConstraintFactory) -> Constraint:
+def shift_must_have_required_tas_exactly(constraint_factory: ConstraintFactory) -> Constraint:
     
     return (constraint_factory
             .for_each(ShiftAssignment)
             # filter out shifts that don't have the required amount of TAs
             .group_by(lambda shift_assignment: shift_assignment.shift, ConstraintCollectors.count())
-            .filter(lambda shift, count: count < shift.required_tas)
+            .filter(lambda shift, count: count != shift.required_tas)
             .penalize(HardSoftScore.ONE_HARD)
             .as_constraint("Required TAs"))
     
