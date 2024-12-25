@@ -15,11 +15,11 @@ def define_constraints(constraint_factory: ConstraintFactory) -> list[Constraint
         ta_duplicate_shift_assignment(constraint_factory),
         ta_meets_shift_requirement(constraint_factory),
         ta_unavailable_shift(constraint_factory),
-        ta_undesired_shift(constraint_factory),
-        ta_desired_shift(constraint_factory),
 
         # Soft constraints
-        penalize_over_assignment(constraint_factory),   
+        penalize_over_assignment(constraint_factory),  
+        ta_undesired_shift(constraint_factory),
+        ta_desired_shift(constraint_factory), 
     ]
 
 
@@ -86,13 +86,14 @@ def ta_unavailable_shift(constraint_factory: ConstraintFactory) -> Constraint:
             .penalize(HardSoftScore.ONE_HARD)
             .as_constraint("TA unavailable"))
 
+# Soft  Constraints
 def ta_undesired_shift (constraint_factory: ConstraintFactory) -> Constraint:
     """ Penalize if a TA is assigned to a shift that they don't want to work on """
     return (constraint_factory
             .for_each(ShiftAssignment)
             .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.to_list(lambda assignment: assignment.shift))
             .filter(lambda ta, shifts: any(shift in ta.undesired for shift in shifts))
-            .penalize(HardSoftScore.ONE_SOFT)
+            .penalize(HardSoftScore.ONE_SOFT, lambda ta, shifts: 10)
             .as_constraint("TA undesired"))
 
 def ta_desired_shift (constraint_factory: ConstraintFactory) -> Constraint:
@@ -101,5 +102,5 @@ def ta_desired_shift (constraint_factory: ConstraintFactory) -> Constraint:
             .for_each(ShiftAssignment)
             .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.to_list(lambda assignment: assignment.shift))
             .filter(lambda ta, shifts: any(shift in ta.desired for shift in shifts))
-            .reward(HardSoftScore.ONE_SOFT)
+            .reward(HardSoftScore.ONE_SOFT, lambda ta, shifts: 1)
             .as_constraint("TA desired"))

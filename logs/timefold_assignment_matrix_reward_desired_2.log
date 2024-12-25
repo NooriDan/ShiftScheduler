@@ -1,0 +1,26 @@
+Solving started: time spent (19), best score (-10init/-5hard/0soft), environment mode (REPRODUCIBLE), move thread count (NONE), random (JDK with seed 0).
+Problem scale: entity count (10), variable count (10), approximate value count (5), approximate problem scale (9,765,625).
+Construction Heuristic phase (0) ended: time spent (55), best score (-2hard/3soft), move evaluation speed (2083/sec), step total (10).
+Local Search phase (1) ended: time spent (5000), best score (0hard/6soft), move evaluation speed (19303/sec), step total (12525).
+Solving ended: time spent (5004), best score (0hard/6soft), move evaluation speed (19081/sec), phase total (2), environment mode (REPRODUCIBLE), move thread count (NONE).
+=== Starting to print the assignment matrix ===
++------------------+------------------+------------------+------------------+------------------+------------------+
+|                  |M. Roghani (ID: 0)|D. Noori (ID: 1)  |A. Gholami (ID: 2)|M. Jafari (ID: 3) |A. Athar (ID: 4)  |
+|                  |(requires: 3)     |(requires: 2)     |(requires: 1)     |(requires: 2)     |(requires: 2)     |
++------------------+------------------+------------------+------------------+------------------+------------------+
+|L07 Mon 14:30     |                  |                  |A. Gholami        |                  |A. Athar          |
+|requires 2        |                  |                  |Desired           |                  |Desired           |
++------------------+------------------+------------------+------------------+------------------+------------------+
+|L08 Mon 18:30     |M. Roghani        |D. Noori          |                  |M. Jafari         |                  |
+|requires 3        |Desired           |Neutral           |                  |Desired           |                  |
++------------------+------------------+------------------+------------------+------------------+------------------+
+|L09 Tue 14:30     |M. Roghani        |                  |                  |                  |A. Athar          |
+|requires 2        |Desired           |                  |                  |                  |Undesired         |
++------------------+------------------+------------------+------------------+------------------+------------------+
+|L10 Tue 18:30     |M. Roghani        |                  |                  |                  |                  |
+|requires 1        |Undesired         |                  |                  |                  |                  |
++------------------+------------------+------------------+------------------+------------------+------------------+
+|L11 Thu 18:30     |                  |D. Noori          |                  |M. Jafari         |                  |
+|requires 2        |                  |Neutral           |                  |Neutral           |                  |
++------------------+------------------+------------------+------------------+------------------+------------------+
+=== Finished printing the assignment matrix ===
