@@ -44,7 +44,12 @@ class ShiftAssignment:
     assigned_ta: Annotated[TA | None,
                         PlanningVariable,
                         Field(default=None)]
-
+    
+    # def __str__(self):
+    #     return f'{self.shift} {self.assigned_ta}'
+    
+    # def __repr__(self):
+    #     return f'{self.shift.id}-{self.shift.sereis}_{self.assigned_ta.id}-{self.assigned_ta.name}'
 
 @planning_solution
 @dataclass
