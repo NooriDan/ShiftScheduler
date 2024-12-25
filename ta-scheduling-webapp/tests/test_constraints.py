@@ -124,52 +124,52 @@ def test_shift_meets_ta_requirement():
      # Shift 1 (required_tas = 1)
      timetable.shift_assignments.append(ShiftAssignment(id="1", shift=shift1, assigned_ta=ta1))
      (constraint_verifier
-      .verify_that(constraints.shift_must_have_required_tas_exactly)
+      .verify_that(constraints.shift_mmeet_ta_required_exactly)
       .given_solution(timetable)
       .penalizes(0))
      
      # Shift 2 (required_tas = 2)
      timetable.shift_assignments.append(ShiftAssignment(id="2", shift=shift2, assigned_ta=ta1))
      (constraint_verifier
-      .verify_that(constraints.shift_must_have_required_tas_exactly)
+      .verify_that(constraints.shift_mmeet_ta_required_exactly)
       .given_solution(timetable)
       .penalizes(1))
      
      timetable.shift_assignments.append(ShiftAssignment(id="3", shift=shift2, assigned_ta=ta2))
      (constraint_verifier
-      .verify_that(constraints.shift_must_have_required_tas_exactly)
+      .verify_that(constraints.shift_mmeet_ta_required_exactly)
       .given_solution(timetable)
       .penalizes(0))
      
      # Shift 3 (required_tas = 3)
      timetable.shift_assignments.append(ShiftAssignment(id="4", shift=shift3, assigned_ta=ta1))
      (constraint_verifier
-      .verify_that(constraints.shift_must_have_required_tas_exactly)
+      .verify_that(constraints.shift_mmeet_ta_required_exactly)
       .given_solution(timetable)
       .penalizes(1))
      
      timetable.shift_assignments.append(ShiftAssignment(id="5", shift=shift3, assigned_ta=ta2))
      (constraint_verifier
-      .verify_that(constraints.shift_must_have_required_tas_exactly)
+      .verify_that(constraints.shift_mmeet_ta_required_exactly)
       .given_solution(timetable)
       .penalizes(1))
      
      timetable.shift_assignments.append(ShiftAssignment(id="6", shift=shift3, assigned_ta=ta3))
      (constraint_verifier
-      .verify_that(constraints.shift_must_have_required_tas_exactly)
+      .verify_that(constraints.shift_mmeet_ta_required_exactly)
       .given_solution(timetable)
       .penalizes(0))
      
      # Shift 4 (required_tas = 2)
      timetable.shift_assignments.append(ShiftAssignment(id="7", shift=shift4, assigned_ta=ta3))
      (constraint_verifier
-      .verify_that(constraints.shift_must_have_required_tas_exactly)
+      .verify_that(constraints.shift_mmeet_ta_required_exactly)
       .given_solution(timetable)
       .penalizes(1))
      
      timetable.shift_assignments.append(ShiftAssignment(id="8", shift=shift4, assigned_ta=ta4))
      (constraint_verifier
-      .verify_that(constraints.shift_must_have_required_tas_exactly)
+      .verify_that(constraints.shift_mmeet_ta_required_exactly)
       .given_solution(timetable)
       .penalizes(0))
 

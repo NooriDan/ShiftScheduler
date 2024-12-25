@@ -5,19 +5,22 @@ from .domain import Shift, TA, ShiftAssignment
 @constraint_provider
 def define_constraints(constraint_factory: ConstraintFactory) -> list[Constraint]:
     return [
-        shift_must_have_required_tas_exactly(constraint_factory),
+        # Hard constraints
+        shift_mmeet_ta_required_exactly(constraint_factory),
         ta_duplicate_shift_assignment(constraint_factory),
         ta_meets_shift_requirement(constraint_factory),
-        penalize_over_assignment(constraint_factory),
         ta_unavailable_shift(constraint_factory),
         ta_undesired_shift(constraint_factory),
-        ta_desired_shift(constraint_factory)
+        ta_desired_shift(constraint_factory),
+
+        # Soft constraints
+        penalize_over_assignment(constraint_factory),   
         # at_least_one_grad_undergrad_ta(constraint_factory),
         # favourite_partners(constraint_factory),
     ]
 
 
-def shift_must_have_required_tas_exactly(constraint_factory: ConstraintFactory) -> Constraint:
+def shift_mmeet_ta_required_exactly(constraint_factory: ConstraintFactory) -> Constraint:
     """ Each shift should have exactly the required number of TAs """
     return (constraint_factory
             .for_each(ShiftAssignment)
