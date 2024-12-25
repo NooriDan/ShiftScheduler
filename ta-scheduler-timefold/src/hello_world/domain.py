@@ -73,7 +73,7 @@ class ShiftAssignment:
 class Timetable:
     id: Annotated[str, PlanningId]
     # problem facts
-    shift_groups: Annotated[list[Shift],
+    shifts: Annotated[list[Shift],
                          ProblemFactCollectionProperty,
                          ValueRangeProvider]
     tas: Annotated[list[TA],

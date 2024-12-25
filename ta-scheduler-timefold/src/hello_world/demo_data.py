@@ -90,7 +90,7 @@ def demo_data_A(name: str) -> Timetable:
 
    return Timetable(
                   id= name, 
-                  shift_groups=shifts, 
+                  shifts=shifts, 
                   tas=course_tas, 
                   shift_assignments= shift_assignments
          )

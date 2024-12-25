@@ -3,7 +3,7 @@ import os
 import datetime
 import csv
 import openpyxl
-import datetime
+import datetime as dt
 import pandas as pd
 
 from typing import Dict
@@ -32,7 +32,7 @@ class DataConstructor:
 
     def create(self):
         # Construction routine
-        self.timetable = Timetable(id=0, tas=[], shift_groups=[], shift_assignments=[])
+        self.timetable = Timetable(id=0, tas=[], shifts=[], shift_assignments=[])
         self.load_data()
         self.create_ta_objects()
         self.create_shift_objects()
@@ -56,6 +56,9 @@ class DataConstructor:
                 name=row['name'],
                 required_shifts= row['req_shift_per_week'],
                 is_grad_student= row['type'] == 'Grad',
+                desired=[],
+                undesired=[],
+                unavailable=[]
             )
             self.timetable.tas.append(ta)
 
@@ -66,12 +69,12 @@ class DataConstructor:
                 alias = row['name'],
                 series = row['series'],
                 day_of_week = row['day_of_week'],
-                shift_date = datetime.strptime(row['date'], '%Y-%m-%d').date(),
-                start_time = datetime.strptime(row['start_time'], '%H:%M').time(),
-                end_time = (datetime.strptime(row['start_time'], '%H:%M') + timedelta(hours=row["duration"])).time() ,
+                shift_date = dt.datetime.strptime(row['date'], '%Y-%m-%d').date(),
+                start_time = dt.datetime.strptime(row['start_time'], '%H:%M').time(),
+                end_time = (dt.datetime.strptime(row['start_time'], '%H:%M') + timedelta(hours=row["duration"])).time() ,
                 required_tas = row['req_ta_per_shift']
             )
-            self.timetable.shift_groups.append(shift)
+            self.timetable.shifts.append(shift)
 
     def create_shift_assignments(self):
         for shift in self.timetable.shifts:
@@ -138,21 +141,21 @@ class DataConstructor:
     def validate_ta_availability(self, log_error=True):
         missing_ta = 0
         for ta in self.timetable.tas:
-            if self.avialability_matrix.get(ta.macid) is None:
+            if self.avialability_matrix.get(ta.id) is None:
                 missing_ta += 1
                 if log_error:
                     print("========================================")
                     print(f"Found no record for TA: {ta.name}")
-                    print(f"MacID = {ta.macid}")
+                    print(f"MacID = {ta.id}")
                     print(f"missing {missing_ta}/{len(self.timetable.tas)} forms so far")
                     print("========================================")
             else:
-                count_available = sum(1 for availability in self.avialability_matrix[ta.macid] if availability != "Unavailable")
-                if count_available < ta.req_shift_per_week:
+                count_available = sum(1 for availability in self.avialability_matrix[ta.id] if availability != "Unavailable")
+                if count_available < ta.required_shifts:
                     if log_error:
                         print(f"TA {ta.id} has insufficient availability.")
                         print(f"Available shifts: {count_available}")
-                        print(f"Required shifts: {ta.req_shift_per_week}")
+                        print(f"Required shifts: {ta.required_shifts}")
 
                     return False
         return not missing_ta
@@ -161,7 +164,7 @@ class DataConstructor:
         
         if (self.validate_ta_availability(log_error=False)):
             for ta in self.timetable.tas:
-                availability_as_dict = self.avialability_matrix.get(ta.macid)
+                availability_as_dict = self.avialability_matrix.get(ta.id)
 
                 if availability_as_dict is None:
                     print(f"TA {ta.id} {ta.name}has no availability data. Assumes all shifts are available.")
@@ -169,7 +172,7 @@ class DataConstructor:
 
                 print(f"TA {ta.id} {ta.name} has availability data.")
                 for shift_group, availability_status in availability_as_dict.items():
-                    shift = next((shift for shift in self.timetable.shift_groups if shift.series == shift_group), None) # Find the shift group
+                    shift = next((shift for shift in self.timetable.shifts if shift.series == shift_group), None) # Find the shift group
                     if shift is None:
                         print(f"Shift group {shift_group} not found.")
                         continue
@@ -328,7 +331,7 @@ def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
 
     column_width = 18
     tas = time_table.tas
-    shift_groups = time_table.shift_groups
+    shift_groups = time_table.shifts
     shift_assignments = time_table.shift_assignments
     
     assignment_map = {

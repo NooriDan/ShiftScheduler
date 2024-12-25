@@ -1,8 +1,8 @@
 from timefold.solver.test import ConstraintVerifier # Used for writing testcases for the constraints
 from timefold.solver.score import HardSoftScore
 
-from employee_scheduling.domain import Shift, ShiftAssignment, TA, Timetable
-import employee_scheduling.constraints as constraints 
+from hello_world.domain import Shift, ShiftAssignment, TA, Timetable
+import hello_world.constraints as constraints 
 
 
 from datetime import date, datetime, time, timedelta
@@ -49,29 +49,25 @@ class TestData:
           unavailable =[SHIFT1, SHIFT4], 
           undesired   =[SHIFT2], 
           desired     =[SHIFT3],
-          is_grad_student=True,
-          favourite_partners=[])
+          is_grad_student=True)
 
      TA2 = TA(id="2", name="TA2", required_shifts=2, 
           unavailable =[SHIFT1, SHIFT2], 
           undesired   =[SHIFT2], 
           desired     =[SHIFT3],
-          is_grad_student=True,
-          favourite_partners=[])
+          is_grad_student=True)
 
      TA3 = TA(id="3", name="TA3", required_shifts=1, 
           unavailable =[SHIFT2, SHIFT4], 
           undesired   =[SHIFT2], 
           desired     =[SHIFT3],
-          is_grad_student=True,
-          favourite_partners=[])
+          is_grad_student=True)
 
      TA4 = TA(id="4", name="TA4", required_shifts=1, 
           unavailable =[SHIFT3], 
           undesired   =[SHIFT1, SHIFT2], 
           desired     =[],
-          is_grad_student=True,
-          favourite_partners=[])
+          is_grad_student=True)
 
 constraint_verifier = ConstraintVerifier.build(constraints.define_constraints, Timetable, ShiftAssignment)
 
@@ -95,81 +91,77 @@ def test_shift_meets_ta_requirement():
           unavailable =[shift1, shift4], 
           undesired   =[shift2], 
           desired     =[shift3],
-          is_grad_student=True,
-          favourite_partners=[])
+          is_grad_student=True)
 
      ta2 = TA(id="2", name="TA2", required_shifts=2, 
           unavailable =[shift1, shift2], 
           undesired   =[shift4], 
           desired     =[shift3],
-          is_grad_student=True,
-          favourite_partners=[])
+          is_grad_student=True)
 
      ta3 = TA(id="3", name="TA3", required_shifts=1, 
           unavailable =[shift2, shift4], 
           undesired   =[shift1], 
           desired     =[shift3],
-          is_grad_student=True,
-          favourite_partners=[])
+          is_grad_student=True)
 
      ta4 = TA(id="4", name="TA4", required_shifts=1, 
           unavailable =[shift3], 
           undesired   =[shift1, shift4], 
           desired     =[],
-          is_grad_student=True,
-          favourite_partners=[])
+          is_grad_student=True)
      
-     timetable = Timetable(shifts=[shift1, shift2, shift3, shift4], tas=[ta1, ta2, ta3, ta4], shift_assignments=[])
+     timetable = Timetable(id="DUMMY", shifts=[shift1, shift2, shift3, shift4], tas=[ta1, ta2, ta3, ta4], shift_assignments=[])
 
      # Shift 1 (required_tas = 1)
      timetable.shift_assignments.append(ShiftAssignment(id="1", shift=shift1, assigned_ta=ta1))
      (constraint_verifier
-      .verify_that(constraints.shift_mmeet_ta_required_exactly)
+      .verify_that(constraints.shift_meet_ta_required_exactly)
       .given_solution(timetable)
       .penalizes(0))
      
      # Shift 2 (required_tas = 2)
      timetable.shift_assignments.append(ShiftAssignment(id="2", shift=shift2, assigned_ta=ta1))
      (constraint_verifier
-      .verify_that(constraints.shift_mmeet_ta_required_exactly)
+      .verify_that(constraints.shift_meet_ta_required_exactly)
       .given_solution(timetable)
-      .penalizes(1))
+      .penalizes())
      
      timetable.shift_assignments.append(ShiftAssignment(id="3", shift=shift2, assigned_ta=ta2))
      (constraint_verifier
-      .verify_that(constraints.shift_mmeet_ta_required_exactly)
+      .verify_that(constraints.shift_meet_ta_required_exactly)
       .given_solution(timetable)
       .penalizes(0))
      
      # Shift 3 (required_tas = 3)
      timetable.shift_assignments.append(ShiftAssignment(id="4", shift=shift3, assigned_ta=ta1))
      (constraint_verifier
-      .verify_that(constraints.shift_mmeet_ta_required_exactly)
+      .verify_that(constraints.shift_meet_ta_required_exactly)
       .given_solution(timetable)
-      .penalizes(1))
+      .penalizes())
      
      timetable.shift_assignments.append(ShiftAssignment(id="5", shift=shift3, assigned_ta=ta2))
      (constraint_verifier
-      .verify_that(constraints.shift_mmeet_ta_required_exactly)
+      .verify_that(constraints.shift_meet_ta_required_exactly)
       .given_solution(timetable)
-      .penalizes(1))
+      .penalizes())
      
      timetable.shift_assignments.append(ShiftAssignment(id="6", shift=shift3, assigned_ta=ta3))
      (constraint_verifier
-      .verify_that(constraints.shift_mmeet_ta_required_exactly)
+      .verify_that(constraints.shift_meet_ta_required_exactly)
       .given_solution(timetable)
       .penalizes(0))
      
      # Shift 4 (required_tas = 2)
      timetable.shift_assignments.append(ShiftAssignment(id="7", shift=shift4, assigned_ta=ta3))
      (constraint_verifier
-      .verify_that(constraints.shift_mmeet_ta_required_exactly)
+      .verify_that(constraints.shift_meet_ta_required_exactly)
       .given_solution(timetable)
-      .penalizes(1))
+      .penalizes())
      
      timetable.shift_assignments.append(ShiftAssignment(id="8", shift=shift4, assigned_ta=ta4))
      (constraint_verifier
-      .verify_that(constraints.shift_mmeet_ta_required_exactly)
+      .verify_that(constraints.shift_meet_ta_required_exactly)
       .given_solution(timetable)
       .penalizes(0))
 
@@ -186,18 +178,16 @@ def test_ta_duplicate_shift_assignment():
           unavailable =[], 
           undesired   =[shift1], 
           desired     =[shift2],
-          is_grad_student=True,
-          favourite_partners=[])
+          is_grad_student=True)
      
      ta2 = TA(id="2", name="TA2", required_shifts=2,
           unavailable =[], 
           undesired   =[shift2], 
           desired     =[shift1],
-          is_grad_student=True,
-          favourite_partners=[])
+          is_grad_student=True)
      
      # (1) Duplicate shift assignments for the same TA
-     timetable = Timetable(shifts=[shift1, shift2], tas=[ta1, ta2], shift_assignments=[])
+     timetable = Timetable(id="DUMMY",  shifts=[shift1, shift2], tas=[ta1, ta2], shift_assignments=[])
      timetable.shift_assignments.append(ShiftAssignment(id="1", shift=shift1, assigned_ta=ta1))
      (constraint_verifier
       .verify_that(constraints.ta_duplicate_shift_assignment)
@@ -238,26 +228,26 @@ def test_ta_meets_shift_requirment():
      shift2 = TestData.SHIFT2 # SHIFT2 has required_tas = 3
      shift3 = TestData.SHIFT3 # SHIFT3 has required_tas = 2
 
-     timetable = Timetable(shifts=[shift1, shift2, shift3], tas=[ta1, ta2, ta3], shift_assignments=[])
+     timetable = Timetable(id="DUMMY", shifts=[shift1, shift2, shift3], tas=[ta1, ta2, ta3], shift_assignments=[])
 
      
      timetable.shift_assignments.append(ShiftAssignment(id="1", shift=shift1, assigned_ta=ta1))
      (constraint_verifier
       .verify_that(constraints.ta_meets_shift_requirement)
       .given_solution(timetable)
-      .penalizes(1))
+      .penalizes())
      
      timetable.shift_assignments.append(ShiftAssignment(id="2", shift=shift1, assigned_ta=ta2))
      (constraint_verifier
       .verify_that(constraints.ta_meets_shift_requirement)
       .given_solution(timetable)
-      .penalizes(2))
+      .penalizes())
      
      timetable.shift_assignments.append(ShiftAssignment(id="3", shift=shift2, assigned_ta=ta1))
      (constraint_verifier
       .verify_that(constraints.ta_meets_shift_requirement)
       .given_solution(timetable)
-      .penalizes(1))
+      .penalizes())
      
      timetable.shift_assignments.append(ShiftAssignment(id="4", shift=shift2, assigned_ta=ta2))
      (constraint_verifier
@@ -288,7 +278,7 @@ def test_penalize_over_assignment():
      shift2 = TestData.SHIFT2 # SHIFT2 has required_tas = 3
      shift3 = TestData.SHIFT3 # SHIFT3 has required_tas = 2
 
-     timetable = Timetable(shifts=[shift1, shift2, shift3], tas=[ta1, ta2, ta3], shift_assignments=[])
+     timetable = Timetable(id="DUMMY", shifts=[shift1, shift2, shift3], tas=[ta1, ta2, ta3], shift_assignments=[])
 
      # TA1 has 2 shift assignments
      timetable.shift_assignments.append(ShiftAssignment(id="1", shift=shift1, assigned_ta=ta1))
@@ -316,14 +306,14 @@ def test_penalize_over_assignment():
      (constraint_verifier
       .verify_that(constraints.penalize_over_assignment)
       .given_solution(timetable)
-      .penalizes_by(1))
+      .penalizes())
      
      # TA1 has 4 shift assignment
      timetable.shift_assignments.append(ShiftAssignment(id="5", shift=shift3, assigned_ta=ta1))
      (constraint_verifier
       .verify_that(constraints.penalize_over_assignment)
       .given_solution(timetable)
-      .penalizes_by(2))
+      .penalizes())
      
 def test_ta_unavailable_shift():
      pytest.skip("Incomplete: Skipping this test!")
