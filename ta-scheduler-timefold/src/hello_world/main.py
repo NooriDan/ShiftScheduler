@@ -10,9 +10,6 @@ from hello_world.utils       import print_timetable, initialize_logger
 
 def run_demo():
 
-    # Initialize the logger
-    logger = initialize_logger()
-
     solver_factory = SolverFactory.create(
         SolverConfig(
             solution_class=Timetable,
@@ -29,6 +26,9 @@ def run_demo():
 
     # Load the problem
     problem = generate_demo_data()
+    
+    # Initialize the logger
+    logger = initialize_logger()
 
     # Solve the problem
     solver = solver_factory.build_solver()

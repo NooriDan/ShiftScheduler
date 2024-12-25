@@ -18,8 +18,8 @@ class Shift:
     end_time: time
     required_tas: int
     # Optional
-    alias: str = None
-    shift_date: date = None
+    alias: str = "DEFAULT"
+    shift_date: date = date(1900, 1, 1)
 
     def __str__(self):
         return f'{self.series} {self.day_of_week} {self.start_time.strftime("%H:%M")}'
