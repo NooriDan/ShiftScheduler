@@ -14,5 +14,6 @@ dependencies = [
 
 
 [project.scripts]
-run-app = "hello_world:main"
+run-demo = "hello_world:run_demo"
+roster-tas = "hello_world:roster_tas"
 test-demo-generator = "hello_world:generate_demo_data"

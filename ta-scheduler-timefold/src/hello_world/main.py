@@ -5,10 +5,13 @@ from timefold.solver import SolverFactory
 from hello_world.domain      import Timetable, ShiftAssignment, Shift, TA
 from hello_world.constraints import define_constraints
 from hello_world.demo_data   import generate_demo_data
-from hello_world.utils       import print_timetable
+from hello_world.utils       import print_timetable, initialize_logger
 
 
-def main():
+def run_demo():
+
+    # Initialize the logger
+    logger = initialize_logger()
 
     solver_factory = SolverFactory.create(
         SolverConfig(
@@ -32,7 +35,7 @@ def main():
     solution = solver.solve(problem)
 
     # Visualize the solution
-    print_timetable(solution)
+    print_timetable(time_table=solution, logger=logger)
 
 if __name__ == '__main__':
-    main()
+    run_demo()

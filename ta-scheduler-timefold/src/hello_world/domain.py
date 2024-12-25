@@ -17,6 +17,9 @@ class Shift:
     start_time: time
     end_time: time
     required_tas: int
+    # Optional
+    alias: str = None
+    shift_date: date = None
 
     def __str__(self):
         return f'{self.series} {self.day_of_week} {self.start_time.strftime("%H:%M")}'
@@ -26,11 +29,12 @@ class TA:
     id: Annotated[str, PlanningId]
     name: str
     required_shifts: int
-    # is_grad_student: bool
-    # favourite_partners: Annotated[list['TA'], Field(default=None)]
     desired: Annotated[list[Shift], Field(default_factory=list)]
     undesired: Annotated[list[Shift], Field(default_factory=list)]
     unavailable: Annotated[list[Shift], Field(default_factory=list)]
+
+    # favourite_partners: list['TA'] = None
+    is_grad_student: bool = True
 
     def __str__(self):
         return f'{self.name}'
