@@ -1,9 +1,15 @@
 import logging
+import os
+import datetime
 
 from .domain import ShiftAssignment, Timetable
 
 # Configure the logging
-LOG_FILE = "assignment_matrix.log"
+LOG_FILE = f"logs/timefold_assignment_matrix_{datetime.datetime.now().strftime('%y_%m_%d_%s')}.log"
+
+# Create the logs directory if it doesn't exist
+if not os.path.exists("logs"):
+    os.makedirs("logs")
 
 logging.basicConfig(
     level=logging.INFO,
