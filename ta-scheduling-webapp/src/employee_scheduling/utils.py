@@ -64,7 +64,7 @@ class DataConstructor:
 
     def create(self):
         # Construction routine
-        self.timetable = Timetable(id=0, tas=[], shifts=[], shift_assignments=[])
+        self.timetable = Timetable(id="DEFAULT", tas=[], shifts=[], shift_assignments=[])
         self.load_data()
         self.create_ta_objects()
         self.create_shift_objects()

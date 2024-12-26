@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from uuid import uuid4
 # Custom imports
 from .domain import Timetable
-from .utils  import DemoData, generate_demo_data, initialize_logger
+from .utils  import DemoData, generate_demo_data, initialize_logger, DataConstructor
 from .solver import solver_manager
 
 
@@ -32,6 +32,20 @@ async def get_demo_data(dataset_id: str) -> Timetable:
     demo_data = getattr(DemoData, dataset_id)
     logger.info(f"The demo key is {demo_data}")
     return generate_demo_data(demo_data)
+
+
+@app.get("/get/{data_folder}", response_model_exclude_none=True)
+async def get_timetable_from_data_folder(data_folder: str) -> Timetable:
+    logger.info(f"Extracting data from {data_folder}")
+    constructor = DataConstructor(
+        ta_csv_path=f"data/{data_folder}/ta_list.csv",
+        shift_csv_path=f"data/{data_folder}/shift_list.csv",
+        availability_folder=f"data/{data_folder}/availability",
+        load= True
+    )
+    logger.info(f"timetable extracted? {constructor.timetable is not None}")
+    return constructor.timetable
+
 
 @app.get("/schedules/{problem_id}",  response_model_exclude_none=True)
 async def get_timetable(problem_id: str) -> Timetable:
