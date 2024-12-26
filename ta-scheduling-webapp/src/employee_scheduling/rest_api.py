@@ -33,7 +33,7 @@ async def get_demo_data(dataset_id: str) -> Timetable:
     logger.info(f"The demo key is {demo_data}")
     return generate_demo_data(demo_data)
 
-
+# API call to create timetable from data folder
 @app.get("/get/{data_folder}", response_model_exclude_none=True)
 async def get_timetable_from_data_folder(data_folder: str) -> Timetable:
     logger.info(f"Extracting data from {data_folder}")
