@@ -85,6 +85,9 @@ class Timetable(JsonDomainBase):
     # score and solver status
     score: Annotated[HardSoftScore, PlanningScore] = Field(default=None)
 
+    def __str__(self):
+        return f"timetable_{self.id}"
+
 
 if __name__ == '__main__':
     # shift_group_1 = ShiftGroup("1", "L01", "Mon", time(14, 30), time(17, 30), 2)
