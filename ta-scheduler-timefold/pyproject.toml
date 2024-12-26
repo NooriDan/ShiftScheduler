@@ -14,5 +14,5 @@ dependencies = [
 
 
 [project.scripts]
-run-app = "hello_world:run_app"   
+roster-timefold = "hello_world:run_app"   
 test-demo-generator = "hello_world:generate_demo_data"
