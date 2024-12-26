@@ -300,6 +300,7 @@ class DataConstructor:
 
 """Provides printing utilities for the assignment matrix."""
 def id_generator():
+    """Generates unique IDs for the shift assignments."""
     current = 0
     while True:
         yield str(current)

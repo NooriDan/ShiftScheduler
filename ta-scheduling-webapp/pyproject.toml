@@ -5,6 +5,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "employee_scheduling"
+description = "A simple employee scheduling application"
 version = "1.0.0"
 requires-python = ">=3.11"
 dependencies = [

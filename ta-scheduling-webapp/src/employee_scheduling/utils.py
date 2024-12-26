@@ -6,13 +6,46 @@ import openpyxl
 import datetime as dt
 import pandas as pd
 
-from typing import Dict
+from typing import Dict, List
+from enum import Enum
 from pathlib import Path
 from datetime import timedelta, time, date
-
+from dataclasses import dataclass, field
 
 # Custom Imports 
 from .domain import ShiftAssignment, Shift, TA, Timetable
+
+DAY_START_TIME = time(14, 30)
+DAY_END_TIME   = time(17, 30)
+
+AFTERNOON_START_TIME =  time(18, 30)
+AFTERNOON_END_TIME   =  time(21, 30)
+
+def id_generator():
+    """Generates unique IDs for the shift assignments."""
+    current = 0
+    while True:
+        yield str(current)
+        current += 1
+
+def initialize_logger():
+    # Configure the logging
+    LOG_FILE = f"logs/timefold_webapp_{datetime.datetime.now().strftime('%y_%m_%d')}.log"
+
+    # Create the logs directory if it doesn't exist
+    if not os.path.exists("logs"):
+        os.makedirs("logs")
+
+    logging.basicConfig(
+        level=logging.INFO,
+        # format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        format="%(asctime)s - %(name)s - %(message)s",
+        handlers=[
+            logging.FileHandler(LOG_FILE, mode='w'),  # Save logs to a file, overwrite each run
+            logging.StreamHandler()  # Also display logs in the console
+        ]
+    )
+    return logging.getLogger('app')
 
 class DataConstructor:
     """utilities for creating the timetable from the data folder."""
@@ -194,3 +227,185 @@ class DataConstructor:
     def _find_xlsx_files(self, directory):
         path = Path(directory)
         return [str(file) for file in path.glob("*.xlsx") if not file.name.startswith('~$')]  # Exclude files starting with ~$ and no recursive search
+
+class DemoData(Enum):
+    DemoA = "DemoA"
+    DemoB = "DemoB"
+
+def generate_demo_data(name: str = "DemoA") -> Timetable:
+    if name == DemoData.DemoA:
+        return _demo_data_A()
+    if name == DemoData.DemoB:
+        return _demo_data_B()
+    else:
+        raise ValueError(f"Unknown demo data name: {name}")
+
+def _demo_data_A() -> Timetable:     
+    ids = id_generator()
+    shifts: List[Shift] = [
+        Shift(id=next(ids), series="L07", day_of_week="Mon",start_time=DAY_START_TIME, end_time=DAY_END_TIME, required_tas=2),
+        Shift(id=next(ids), series="L08", day_of_week = "Mon", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=3),
+        Shift(id=next(ids), series="L09", day_of_week="Tue", start_time=DAY_START_TIME, end_time=DAY_END_TIME, required_tas=2),
+        Shift(id=next(ids), series="L10", day_of_week="Tue", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=1),
+        Shift(id=next(ids), series="L11", day_of_week="Thu", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=2),
+        ]
+    
+    ids = id_generator()
+    course_tas: List[TA] = [
+        TA(id = next(ids), 
+            name = "M. Roghani", 
+            required_shifts= 3, 
+            unavailable= [shifts[4]], 
+            desired    = [shifts[0], shifts[1], shifts[2]],
+            undesired  = [shifts[3]]
+        ),
+        TA(id = next(ids), 
+            name = "D. Noori", 
+            required_shifts= 2, 
+            unavailable= [shifts[0]], 
+            desired    = [],
+            undesired  = [shifts[2]]
+        ),
+        TA(id = next(ids), 
+            name = "A. Gholami", 
+            required_shifts= 1, 
+            unavailable= [shifts[1]], 
+            desired    = [shifts[0]],
+            undesired  = [shifts[2]]
+        ),
+        TA(id = next(ids), 
+            name = "M. Jafari", 
+            required_shifts= 2, 
+            unavailable= [shifts[3]], 
+            desired    = [shifts[1]],
+            undesired  = [shifts[2]]
+        ),
+        TA(id = next(ids), 
+            name = "A. Athar", 
+            required_shifts= 2, 
+            unavailable= [], 
+            desired    = [shifts[0]],
+            undesired  = [shifts[2], shifts[1], shifts[3], shifts[4]]
+        ),
+    ]
+
+    ids = id_generator()
+    shift_assignments: List[ShiftAssignment] = []
+
+    for shift in shifts:
+        for i in range(shift.required_tas):
+            shift_assignments.append(ShiftAssignment(id= next(ids), shift= shift, assigned_ta= None))
+
+    return Timetable(
+                    id= "DemoA", 
+                    shifts=shifts, 
+                    tas=course_tas, 
+                    shift_assignments= shift_assignments
+            )
+
+def _demo_data_B() -> Timetable:
+    ids = id_generator()
+    shifts: List[Shift] = [
+        Shift(id=next(ids),series="L01", day_of_week="Mon", start_time=DAY_START_TIME, end_time=DAY_END_TIME, required_tas=2),
+        Shift(id=next(ids), series="L02", day_of_week="Mon", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=3),
+        Shift(id=next(ids), series="L03", day_of_week="Tue", start_time=DAY_START_TIME, end_time=DAY_END_TIME, required_tas=2),
+        Shift(id=next(ids), series="L04", day_of_week="Tue", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=1),
+        Shift(id=next(ids), series="L05", day_of_week="Wed", start_time=DAY_START_TIME, end_time=DAY_END_TIME, required_tas=2),
+        Shift(id=next(ids), series="L06", day_of_week="Wed", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=2),
+        Shift(id=next(ids), series="L07", day_of_week="Thu", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=3),
+        Shift(id=next(ids), series="L08", day_of_week="Thu", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=2),
+        Shift(id=next(ids), series="L09", day_of_week="Fri", start_time=DAY_START_TIME, end_time=DAY_END_TIME, required_tas=2),
+        Shift(id=next(ids), series="L10", day_of_week="Fri", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=2),
+        ]
+    # total number of shifts = 21
+
+    ids = id_generator()
+    course_tas: List[TA] = [
+        TA(id = next(ids), 
+            name = "M. Roghani", 
+            required_shifts= 3, 
+            unavailable= [shifts[6], shifts[7], shifts[8]], 
+            desired    = [shifts[0], shifts[1], shifts[2]],
+            undesired  = [shifts[3], shifts[4], shifts[5]]
+        ),
+
+        TA(id = next(ids), 
+            name = "D. Noori", 
+            required_shifts= 2, 
+            unavailable= shifts[0:5], 
+            desired    = [shifts[6], shifts[7]],
+            undesired  = [shifts[8]]
+        ),
+
+        TA(id = next(ids), 
+            name = "A. Gholami", 
+            required_shifts= 3, 
+            unavailable= [shifts[1], shifts[3], shifts[5]], 
+            desired    = [shifts[0], shifts[8]],
+            undesired  = [shifts[4], shifts[6], shifts[7], shifts[9]]
+        ),
+
+        TA(id = next(ids), 
+            name = "M. Jafari", 
+            required_shifts= 2, 
+            unavailable= [shifts[3]], 
+            desired    = [shifts[1]],
+            undesired  = [shifts[2]]
+        ),
+
+        TA(id = next(ids), 
+            name = "A. Athar", 
+            required_shifts= 2, 
+            unavailable= [], 
+            desired    = [shifts[0]],
+            undesired  = [shifts[2], shifts[1], shifts[3], shifts[4]]
+        ),
+
+        TA(id = next(ids),
+            name = "A. Anderson",
+            required_shifts= 3,
+            unavailable= shifts[6:-1],
+            desired=shifts[0:3],
+            undesired=[]
+        ),
+
+        TA(id = next(ids),
+            name = "B. Brown",
+            required_shifts= 3,
+            unavailable= [],
+            desired=[shifts[0]],
+            undesired=[shifts[2], shifts[1], shifts[3], shifts[4]]
+        ),
+
+        TA(id = next(ids),
+            name = "C. Campbell",
+            required_shifts= 1,
+            unavailable= [shifts[3], shifts[4]],
+            desired=[shifts[0], shifts[1]],
+            undesired=[shifts[2], shifts[1], shifts[5]]
+        ),
+
+        TA(id = next(ids),
+            name = "D. Davis",
+            required_shifts= 2,
+            unavailable= [],
+            desired=[shifts[0]],
+            undesired=[shifts[2], shifts[1], shifts[3], shifts[4]]
+        ),
+    ]
+    # total number of TAs = 5, total number of required shifts = 21
+
+    ids = id_generator()
+    shift_assignments: List[ShiftAssignment] = []
+
+    for shift in shifts:
+        for i in range(shift.required_tas):
+            shift_assignments.append(ShiftAssignment(id= next(ids), shift= shift, assigned_ta= None))
+
+    return Timetable(
+                id= "Demo_B", 
+                shifts=shifts, 
+                tas=course_tas, 
+                shift_assignments= shift_assignments
+        )
+

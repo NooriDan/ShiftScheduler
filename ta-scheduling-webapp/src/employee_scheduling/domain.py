@@ -8,7 +8,6 @@ from timefold.solver.score import HardSoftScore
 from timefold.solver import SolverStatus
 from pydantic import Field
 
-
 class Shift(JsonDomainBase):
     id: Annotated[str, PlanningId]
     series: str
@@ -56,8 +55,7 @@ class TA(JsonDomainBase):
 #     mandate_grad_undergrad: Annotated[bool, ProblemFactCollectionProperty]
 
 @planning_entity
-@dataclass
-class ShiftAssignment:
+class ShiftAssignment(JsonDomainBase):
     id: Annotated[str, PlanningId]
     shift: Shift
     assigned_ta: Annotated[TA | None,
@@ -72,8 +70,7 @@ class ShiftAssignment:
 
 
 @planning_solution
-@dataclass
-class Timetable:
+class Timetable(JsonDomainBase):
     id: Annotated[str, PlanningId]
     # problem facts
     shifts: Annotated[list[Shift],
