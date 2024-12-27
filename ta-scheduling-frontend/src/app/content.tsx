@@ -11,21 +11,21 @@ function TADisplay({ ta }: { ta: TA }) {
 }
 
 export default function HomeContent() {
-    //const { timetable, setTimetable } = useTimetableContext()
+    const { state } = useTimetableContext()
 
     return (<div className="flex flex-1 flex-col p-4">
         <div className="">
             <div className="text-xl font-bold">TA Management</div>
             <div>
-                {/*
+
                 <div>Shifts</div>
                 <div>
-                    {timetable.shifts.map(shift => <ShiftDisplay key={shift.id} shift={shift} />)}
+                    {state.shifts.map(shift => <ShiftDisplay key={shift.id} shift={shift} />)}
                 </div>
                 <div>TAs</div>
                 <div>
-                    {timetable.tas.map(ta => <TADisplay key={ta.id} ta={ta} />)}
-                </div>*/}
+                    {state.tas.map(ta => <TADisplay key={ta.id} ta={ta} />)}
+                </div>
             </div>
             <div>
                 <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400">Add Shift</button>
