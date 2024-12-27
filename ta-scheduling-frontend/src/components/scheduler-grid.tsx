@@ -7,6 +7,8 @@ for (let i = 8; i <= 20; i++) {
     times.push(i)
 }
 
+export const time_strings = times.map((time) => `${time == 12 ? 12 : time % 12}:30 ${time / 12 < 1 ? "AM" : "PM"}`)
+
 function BlockDivider({ row, time }: { row: number, time: number }) {
     return (
         <>
