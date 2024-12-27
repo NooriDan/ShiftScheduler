@@ -4,14 +4,14 @@ export class Shift {
     id: string
     series: string
     day_of_week: DayOfWeek
-    start_time: Date
-    end_time: Date
+    start_time: string
+    end_time: string
     required_tas: number
     // Optional
     alias: string = "DEFAULT"
     shift_date: Date = new Date(1900, 1, 1)
 
-    constructor(id: string, series: string, day_of_week: DayOfWeek, start_time: Date, end_time: Date, required_tas: number, alias: string = "DEFAULT", shift_date: Date = new Date(1900, 1, 1)) {
+    constructor(id: string, series: string, day_of_week: DayOfWeek, start_time: string, end_time: string, required_tas: number, alias: string = "DEFAULT", shift_date: Date = new Date(1900, 1, 1)) {
         this.id = id
         this.series = series
         this.day_of_week = day_of_week
