@@ -2,6 +2,7 @@
 
 const times: number[] = []
 
+// Edit this for when to start and when to end
 for (let i = 8; i <= 20; i++) {
     times.push(i)
 }
