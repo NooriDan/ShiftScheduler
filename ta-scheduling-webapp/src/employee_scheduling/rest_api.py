@@ -74,10 +74,36 @@ def update_schedule(problem_id: str, schedule: Timetable):
     data_sets[problem_id] = schedule
 
 
+def fix_timetable(schedule: Timetable) -> Timetable:
+    # essentially any soft "references" should be turned into hard "references"
+    # soft "references" are like the same Shift object in shifts and ta.desired but 2 different instances
+    # hard "references" are like the same Shift object in shifts and ta.desired and they are the same instance
+    
+    shifts_dict = {shift.id: shift for shift in schedule.shifts}
+    
+    tas = schedule.tas
+    for ta in tas:
+        ta.desired = [shifts_dict[shift.id] for shift in ta.desired]
+        ta.undesired = [shifts_dict[shift.id] for shift in ta.undesired]
+        ta.unavailable = [shifts_dict[shift.id] for shift in ta.unavailable]
+        
+
+    shift_assignments = schedule.shift_assignments
+    for shift_assignment in shift_assignments:
+        shift_assignment.shift = shifts_dict[shift_assignment.shift.id]
+        shift_assignment.assigned_ta = None
+        
+    schedule.tas = tas
+    schedule.shift_assignments = shift_assignments
+    
+    return schedule
+
+
 @app.post("/schedules")
 async def solve_timetable(schedule: Timetable) -> str:
     job_id = str(uuid4())
-    data_sets[job_id] = schedule
+    
+    data_sets[job_id] = fix_timetable(schedule)
     solver_manager.solve_and_listen(job_id, schedule,
                                     lambda solution: update_schedule(job_id, solution))
     return job_id

@@ -84,6 +84,7 @@ class Timetable(JsonDomainBase):
                        PlanningEntityCollectionProperty]
     # score and solver status
     score: Annotated[HardSoftScore, PlanningScore] = Field(default=None)
+    solver_status: Annotated[SolverStatus | None, Field(default=None)]
 
     def __str__(self):
         return f"timetable_{self.id}"
