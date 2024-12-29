@@ -68,21 +68,21 @@ export default function HomeContent() {
             body: JSON.stringify(state)
         })
         const job_id = (await response.text()).split("\"")[1]
+        console.log(job_id)
 
+        let status;
         do {
-            response = await fetch(`http://localhost:8080/schedules/${job_id}`)
-            const schedule = await response.json()
+            await new Promise(resolve => setTimeout(resolve, 2000))
 
-            if (schedule.score.hardScore !== 0 || schedule.score.softScore !== 0) {
-                setGenerationStatus("Complete")
-                console.log(schedule)
-                dispatch(setTimetable(schedule))
-                break
-            }
+            response = await fetch(`http://localhost:8080/schedules/${job_id}/status`)
+            status = await response.text()
 
-            await new Promise(resolve => setTimeout(resolve, 1000))
-        }
-        while (true)
+        } while (status !== "\"NOT_SOLVING\"");
+
+        response = await fetch(`http://localhost:8080/schedules/${job_id}`)
+        const schedule = await response.json()
+        setGenerationStatus("Complete")
+        dispatch(setTimetable(schedule))
     }
 
     const fetchDemoData = async () => {

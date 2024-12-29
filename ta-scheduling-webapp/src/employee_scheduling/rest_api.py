@@ -64,6 +64,10 @@ async def get_timetable(problem_id: str) -> Timetable:
 async def list_schedules() -> dict[str, str]:
     return {problem_id: f"{data_sets[problem_id].id}--status: {solver_manager.get_solver_status(problem_id)}" for problem_id in data_sets}
 
+@app.get("/schedules/{problem_id}/status")
+async def get_solver_status(problem_id: str) -> str:
+    return solver_manager.get_solver_status(problem_id)
+
 
 def update_schedule(problem_id: str, schedule: Timetable):
     global data_sets
