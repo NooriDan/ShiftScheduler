@@ -146,9 +146,9 @@ export default function HomeContent() {
 
         const tas: TA[] = _tas.map((ta: any) => {
             const newTA = new TA(ta.id, ta.name, ta.required_shifts)
-            newTA.desired = ta.desired.map((shift_id: string) => shifts.find(s => s.id === shift_id)!)
-            newTA.undesired = ta.undesired.map((shift_id: string) => shifts.find(s => s.id === shift_id)!)
-            newTA.unavailable = ta.unavailable.map((shift_id: string) => shifts.find(s => s.id === shift_id)!)
+            newTA.desired = ta.desired.map((shift: any) => shifts.find(s => s.id === shift.id)!)
+            newTA.undesired = ta.undesired.map((shift: any) => shifts.find(s => s.id === shift.id)!)
+            newTA.unavailable = ta.unavailable.map((shift: any) => shifts.find(s => s.id === shift.id)!)
             newTA.is_grad_student = ta.is_grad_student
             return newTA
         })
