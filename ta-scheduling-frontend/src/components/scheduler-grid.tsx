@@ -1,5 +1,5 @@
 import { useTimetableContext } from "@/context/app-context";
-import { Shift } from "@/models/domain";
+import { get_status_for_shift, Shift } from "@/models/domain";
 import { convertEuropeanToAmericanTime } from "@/models/time-utils";
 import React from "react";
 
@@ -49,12 +49,12 @@ function calculateShiftPosition(startTime: string, endTime: string) {
 
 function ShiftBlock({ shift }: { shift: Shift }) {
     const { startOffset, duration } = calculateShiftPosition(
-        shift.start_time,
-        shift.end_time
+        shift.startTime,
+        shift.endTime
     );
     const { state } = useTimetableContext()
-    // TODO: later when working with API, replace this with shift assignments and modify it to show whether it is desired, undesired, neutral, or unavailable
-    const assignments = state.shift_assignments.filter(assignment => assignment.shift.id === shift.id).filter(assignment => assignment.assigned_ta).map(assignment => assignment.assigned_ta!.name)
+
+    const assignments = state.shiftAssignments.filter(assignment => assignment.shift.id === shift.id).filter(assignment => assignment.assignedTa).map(assignment => assignment)
 
     return (
         <div
@@ -65,9 +65,9 @@ function ShiftBlock({ shift }: { shift: Shift }) {
             }}
         >
             <div>{shift.series}</div>
-            <div>Required TAs: {shift.required_tas}</div>
+            <div>Required TAs: {shift.requiredTas}</div>
 
-            {assignments.map((name, idx) => <div key={idx}>{name}</div>)}
+            {assignments.map((assignment, idx) => <div key={idx}>{assignment.assignedTa!.name} - {get_status_for_shift(assignment.assignedTa!, shift)}</div>)}
         </div>
     );
 
@@ -90,7 +90,7 @@ function DayBlock({ day }: { day: string }) {
 
         {/* Render shifts for the current day */}
         {state.shifts
-            .filter((shift) => shift.day_of_week === day)
+            .filter((shift) => shift.dayOfWeek === day)
             .map((shift, idx) => <ShiftBlock key={idx} shift={shift} />)}
     </div>)
 }

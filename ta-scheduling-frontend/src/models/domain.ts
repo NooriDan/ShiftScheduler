@@ -11,69 +11,67 @@ export enum DayOfWeek {
 export class Shift {
     id: string
     series: string
-    day_of_week: DayOfWeek
-    start_time: string
-    end_time: string
-    required_tas: number
+    dayOfWeek: DayOfWeek
+    startTime: string
+    endTime: string
+    requiredTas: number
     // Optional
     alias: string = "DEFAULT"
-    shift_date: Date = new Date(1900, 1, 1)
+    shiftDate: string = "1900-01-01"
 
-    constructor(id: string, series: string, day_of_week: DayOfWeek, start_time: string, end_time: string, required_tas: number, alias: string = "DEFAULT", shift_date: Date = new Date(1900, 1, 1)) {
+    constructor(id: string, series: string, day_of_week: DayOfWeek, start_time: string, end_time: string, required_tas: number, alias: string = "DEFAULT", shift_date: string = "1900-01-01") {
         this.id = id
         this.series = series
-        this.day_of_week = day_of_week
-        this.start_time = start_time
-        this.end_time = end_time
-        this.required_tas = required_tas
+        this.dayOfWeek = day_of_week
+        this.startTime = start_time
+        this.endTime = end_time
+        this.requiredTas = required_tas
         this.alias = alias
-        this.shift_date = shift_date
+        this.shiftDate = shift_date
     }
 }
 
 export class TA {
     id: string
     name: string
-    required_shifts: number
+    requiredShifts: number
     desired: Shift[] = []
     undesired: Shift[] = []
     unavailable: Shift[] = []
     // favourite_partners: TA[] = None
-    is_grad_student: boolean = true
+    isGradStudent: boolean = true
 
     constructor(id: string, name: string, required_shifts: number, desired: Shift[] = [], undesired: Shift[] = [], unavailable: Shift[] = [], is_grad_student: boolean = true) {
         this.id = id
         this.name = name
-        this.required_shifts = required_shifts
+        this.requiredShifts = required_shifts
         this.desired = desired
         this.undesired = undesired
         this.unavailable = unavailable
-        this.is_grad_student = is_grad_student
+        this.isGradStudent = is_grad_student
     }
 
-    get_status_for_shift(shift: Shift): string {
-        if (this.desired.includes(shift))
-            return 'Desired'
-        if (this.undesired.includes(shift))
-            return 'Undesired'
-        if (this.unavailable.includes(shift))
-            return 'Unavailable'
-        return 'Neutral'
-    }
 
-    is_available_for_shift(shift: Shift): boolean {
-        return !this.unavailable.includes(shift)
-    }
+}
+
+export function get_status_for_shift(ta: TA, shift: Shift): string {
+    if (ta.desired.map(shift => shift.id).includes(shift.id))
+        return 'Desired'
+    if (ta.undesired.map(shift => shift.id).includes(shift.id))
+        return 'Undesired'
+    if (ta.unavailable.map(shift => shift.id).includes(shift.id))
+        return 'Unavailable'
+    return 'Neutral'
 }
 
 export class ShiftAssignment {
     id: string
-    assigned_ta?: TA
+    assignedTa?: TA
     shift: Shift
 
     constructor(id: string, shift: Shift, assigned_ta?: TA) {
         this.id = id
-        this.assigned_ta = assigned_ta
+        this.assignedTa = assigned_ta
         this.shift = shift
     }
 }
@@ -96,14 +94,14 @@ export class Timetable {
     shifts: Shift[]
     tas: TA[]
     // planning entities
-    shift_assignments: ShiftAssignment[]
+    shiftAssignments: ShiftAssignment[]
     score: Score
 
     constructor(id: string, shifts: Shift[], tas: TA[], shift_assignments: ShiftAssignment[], score: Score = new Score()) {
         this.id = id
         this.shifts = shifts
         this.tas = tas
-        this.shift_assignments = shift_assignments
+        this.shiftAssignments = shift_assignments
         this.score = score
     }
 }

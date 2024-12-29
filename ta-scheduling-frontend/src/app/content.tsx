@@ -17,7 +17,7 @@ function ShiftDisplay({ shift }: { shift: Shift }) {
     }
 
     return (<div className="flex flex-row">
-        <div>{shift.series} - {shift.day_of_week} {convertEuropeanToAmericanTime(shift.start_time)}-{convertEuropeanToAmericanTime(shift.end_time)}</div>
+        <div>{shift.series} - {shift.dayOfWeek} {convertEuropeanToAmericanTime(shift.startTime)}-{convertEuropeanToAmericanTime(shift.endTime)}</div>
         <button className="text-red-500 font-bold hover:cursor-pointer mx-2" onClick={onClick}>X</button>
     </div>)
 }
@@ -30,7 +30,7 @@ function TADisplay({ ta }: { ta: TA }) {
     }
 
     return (<div className="flex flex-row">
-        <div>{ta.name} {ta.is_grad_student ? "Grad" : "Undergrad"} - Required Shifts: {ta.required_shifts}</div>
+        <div>{ta.name} {ta.isGradStudent ? "Grad" : "Undergrad"} - Required Shifts: {ta.requiredShifts}</div>
         <button className="text-red-500 font-bold hover:cursor-pointer mx-2" onClick={onClick}>X</button>
     </div>)
 }
@@ -38,34 +38,6 @@ function TADisplay({ ta }: { ta: TA }) {
 type FormState = "Hidden" | "Shift" | "TA";
 type ViewState = "Schedule" | "Shifts" | "TA"
 type GenerationStatus = "Idle" | "Generating" | "Complete"
-
-function timeToEuropean(time: string): string {
-    const hour = time.split(":")[0]
-    const minute = time.split(":")[1]
-    const amPM = time.split(" ")[1]
-
-    return `${amPM === "PM" && hour != "12" ? Number.parseInt(hour) + 12 : hour}:${minute}:00`
-}
-
-function cloneStateChangeTime(timetable: Timetable): Timetable {
-    const shifts = timetable.shifts.map(shift => {
-        const start_time = timeToEuropean(shift.start_time)
-        const end_time = timeToEuropean(shift.end_time)
-        const newShift = new Shift(shift.id, shift.series, shift.day_of_week, start_time, end_time, shift.required_tas)
-        return newShift
-    })
-    const tas = timetable.tas.map(ta => {
-        const newTA = new TA(ta.id, ta.name, ta.required_shifts)
-        newTA.desired = ta.desired.map(shift => shifts.find(s => s.id === shift.id)!)
-        newTA.undesired = ta.undesired.map(shift => shifts.find(s => s.id === shift.id)!)
-        newTA.unavailable = ta.unavailable.map(shift => shifts.find(s => s.id === shift.id)!)
-        newTA.is_grad_student = ta.is_grad_student
-        return newTA
-    })
-    const newTimetable = new Timetable("1", shifts, tas, [])
-    return newTimetable
-
-}
 
 export default function HomeContent() {
     const { state, dispatch } = useTimetableContext()
@@ -93,15 +65,24 @@ export default function HomeContent() {
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify(cloneStateChangeTime(state))
+            body: JSON.stringify(state)
         })
-        const job_id = await response.text()
-        console.log(job_id)
+        const job_id = (await response.text()).split("\"")[1]
 
-        response = await fetch(`http://localhost:8080/schedules/${job_id}`)
-        const schedule = await response.json()
-        setGenerationStatus("Complete")
-        dispatch(setTimetable(schedule))
+        do {
+            response = await fetch(`http://localhost:8080/schedules/${job_id}`)
+            const schedule = await response.json()
+
+            if (schedule.score.hardScore !== 0 || schedule.score.softScore !== 0) {
+                setGenerationStatus("Complete")
+                console.log(schedule)
+                dispatch(setTimetable(schedule))
+                break
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 1000))
+        }
+        while (true)
     }
 
     const fetchDemoData = async () => {
@@ -142,6 +123,7 @@ export default function HomeContent() {
             }
 
             const newShift = new Shift(shift.id, shift.series, day_of_week, shift.startTime, shift.endTime, shift.requiredTas)
+            newShift.shiftDate = shift.shiftDate
             return newShift
         })
 
@@ -150,7 +132,7 @@ export default function HomeContent() {
             newTA.desired = ta.desired.map((shift: any) => shifts.find(s => s.id === shift.id)!)
             newTA.undesired = ta.undesired.map((shift: any) => shifts.find(s => s.id === shift.id)!)
             newTA.unavailable = ta.unavailable.map((shift: any) => shifts.find(s => s.id === shift.id)!)
-            newTA.is_grad_student = ta.isGradStudent
+            newTA.isGradStudent = ta.isGradStudent
             return newTA
         })
 

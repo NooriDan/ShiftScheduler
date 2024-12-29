@@ -1,23 +1,23 @@
 import { useTimetableContext } from "@/context/app-context"
-import { Shift, ShiftAssignment, TA } from "@/models/domain"
+import { get_status_for_shift, Shift, ShiftAssignment, TA } from "@/models/domain"
 
 function TABlock({ ta, index }: { ta: TA, index: number }) {
-    return (<div className={`bg-gray-200 row-start-1 col-start-${index + 2}`}>{ta.name} (ID: {ta.id}) (requires: {ta.required_shifts})</div>);
+    return (<div className={`bg-gray-200 row-start-1 col-start-${index + 2}`}>{ta.name} (ID: {ta.id}) (requires: {ta.requiredShifts})</div>);
 }
 
 function ShiftBlock({ shift, row }: { shift: Shift, row: number }) {
-    return (<div className={`bg-gray-200 col-start-1 row-start-${row + 2}`}>{shift.series} {shift.day_of_week} {shift.start_time} requires {shift.required_tas}</div>);
+    return (<div className={`bg-gray-200 col-start-1 row-start-${row + 2}`}>{shift.series} {shift.dayOfWeek} {shift.startTime} requires {shift.requiredTas}</div>);
 }
 
 function ShiftAssignmentBlock({ ta, shift, row, col }: { ta: TA, shift: Shift, row: number, col: number }) {
     const { state } = useTimetableContext()
-    const shift_assignments = state.shift_assignments
-    const assignment = shift_assignments.find(assignment => assignment.assigned_ta && assignment.assigned_ta.id === ta.id && assignment.shift.id === shift.id) as ShiftAssignment
+    const shift_assignments = state.shiftAssignments
+    const assignment = shift_assignments.find(assignment => assignment.assignedTa && assignment.assignedTa.id === ta.id && assignment.shift.id === shift.id) as ShiftAssignment
 
     if (assignment) {
-        const desiredness = ta.desired.includes(shift) ? "desired" : ta.undesired.includes(shift) ? "undesired" : ta.unavailable.includes(shift) ? "unavailable" : "neutral"
+        const desiredness = get_status_for_shift(ta, shift)
 
-        return (<div className={`col-start-${col + 2} row-start-${row + 2}`}>{ta.name} {desiredness}</div>)
+        return (<div className={`col-start-${col + 2} row-start-${row + 2}`}>{ta.name} - {desiredness}</div>)
     } else {
         return (<div className={`col-start-${col + 2} row-start-${row + 2}`}></div>)
     }

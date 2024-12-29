@@ -25,7 +25,7 @@ export default function TAForm() {
         const is_grad_student = formData.get("is_grad_student") as string
 
         const ta = new TA("", name, required_shifts)
-        ta.is_grad_student = is_grad_student === "on"
+        ta.isGradStudent = is_grad_student === "on"
 
         // Add the desired shifts
         ta.desired = desiredShifts.map(id => shifts.find(shift => shift === id) as Shift)
