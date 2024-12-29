@@ -6,6 +6,7 @@ import TAView from "@/components/ta-view";
 import { useTimetableContext } from "@/context/app-context";
 import { removeShift, removeTA, setTimetable } from "@/context/app-reducers";
 import { DayOfWeek, Shift, ShiftAssignment, TA, Timetable } from "@/models/domain";
+import { convertEuropeanToAmericanTime } from "@/models/time-utils";
 import { useState } from "react";
 
 function ShiftDisplay({ shift }: { shift: Shift }) {
@@ -16,7 +17,7 @@ function ShiftDisplay({ shift }: { shift: Shift }) {
     }
 
     return (<div className="flex flex-row">
-        <div>{shift.series} - {shift.day_of_week} {shift.start_time}-{shift.end_time}</div>
+        <div>{shift.series} - {shift.day_of_week} {convertEuropeanToAmericanTime(shift.start_time)}-{convertEuropeanToAmericanTime(shift.end_time)}</div>
         <button className="text-red-500 font-bold hover:cursor-pointer mx-2" onClick={onClick}>X</button>
     </div>)
 }
@@ -114,7 +115,7 @@ export default function HomeContent() {
         const shifts: Shift[] = _shifts.map((shift: any) => {
             let day_of_week;
 
-            switch (shift.day_of_week) {
+            switch (shift.dayOfWeek) {
                 case "Mon":
                     day_of_week = DayOfWeek.Monday
                     break
@@ -140,22 +141,22 @@ export default function HomeContent() {
                     day_of_week = DayOfWeek.Monday
             }
 
-            const newShift = new Shift(shift.id, shift.series, day_of_week, shift.start_time, shift.end_time, shift.required_tas)
+            const newShift = new Shift(shift.id, shift.series, day_of_week, shift.startTime, shift.endTime, shift.requiredTas)
             return newShift
         })
 
         const tas: TA[] = _tas.map((ta: any) => {
-            const newTA = new TA(ta.id, ta.name, ta.required_shifts)
+            const newTA = new TA(ta.id, ta.name, ta.requiredShifts)
             newTA.desired = ta.desired.map((shift: any) => shifts.find(s => s.id === shift.id)!)
             newTA.undesired = ta.undesired.map((shift: any) => shifts.find(s => s.id === shift.id)!)
             newTA.unavailable = ta.unavailable.map((shift: any) => shifts.find(s => s.id === shift.id)!)
-            newTA.is_grad_student = ta.is_grad_student
+            newTA.is_grad_student = ta.isGradStudent
             return newTA
         })
 
         const shift_assignments: ShiftAssignment[] = _shift_assignments.map((assignment: any) => {
             const ta = tas.find(ta => ta.id === assignment.ta_id)
-            const shift = shifts.find(shift => shift.id === assignment.shift_id)!
+            const shift = shifts.find(shift => shift.id === assignment.shift.id)!
             return new ShiftAssignment(assignment.id, shift, ta)
         })
 

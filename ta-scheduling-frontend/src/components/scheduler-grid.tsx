@@ -1,40 +1,39 @@
 import { useTimetableContext } from "@/context/app-context";
 import { Shift } from "@/models/domain";
+import { convertEuropeanToAmericanTime } from "@/models/time-utils";
 import React from "react";
 
 export const time_strings = [
-    "8:30 AM",
-    "9:30 AM",
-    "10:30 AM",
-    "11:30 AM",
-    "12:30 PM",
-    "1:30 PM",
-    "2:30 PM",
-    "3:30 PM",
-    "4:30 PM",
-    "5:30 PM",
-    "6:30 PM",
-    "7:30 PM",
-    "8:30 PM",
-    "9:30 PM",
-    "10:30 PM"
+    "8:30:00",
+    "9:30:00",
+    "10:30:00",
+    "11:30:00",
+    "12:30:00",
+    "13:30:00",
+    "14:30:00",
+    "15:30:00",
+    "16:30:00",
+    "17:30:00",
+    "18:30:00",
+    "19:30:00",
+    "20:30:00",
+    "21:30:00",
+    "22:30:00"
 ];
 
 function TimeBlock({ time }: { time: string }) {
     return (<div
         className="h-16 pl-2 flex flex-row items-center justify-center text-center text-sm"
     >
-        {time} <hr className="h-[0.125rem] flex-1 bg-black" />
+        {convertEuropeanToAmericanTime(time)} <hr className="h-[0.125rem] flex-1 bg-black" />
     </div>)
 }
 
 // Shift placement calculation
 function calculateShiftPosition(startTime: string, endTime: string) {
     const convertTimeToIndex = (time: string) => {
-        const [hour, minute, period] = time.match(/(\d+):(\d+)\s*(AM|PM)/i)!.slice(1);
-        let hour24 = parseInt(hour) % 12 + (period === "PM" ? 12 : 0);
-        const minutes = parseInt(minute);
-        const totalMinutes = hour24 * 60 + minutes;
+        const [hour, minute] = time.match(/(\d+):(\d+):(\d+)/i)!.slice(1);
+        const totalMinutes = parseInt(hour) * 60 + parseInt(minute);
         return totalMinutes;
     };
 
@@ -55,7 +54,7 @@ function ShiftBlock({ shift }: { shift: Shift }) {
     );
     const { state } = useTimetableContext()
     // TODO: later when working with API, replace this with shift assignments and modify it to show whether it is desired, undesired, neutral, or unavailable
-    const assignments = state.shift_assignments.filter(assignment => assignment.shift.id === shift.id).map(assignment => assignment.assigned_ta.name)
+    const assignments = state.shift_assignments.filter(assignment => assignment.shift.id === shift.id).filter(assignment => assignment.assigned_ta).map(assignment => assignment.assigned_ta!.name)
 
     return (
         <div
@@ -97,7 +96,6 @@ function DayBlock({ day }: { day: string }) {
 }
 
 export default function Scheduler() {
-    const timeSlots = time_strings
     const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
 
@@ -107,7 +105,7 @@ export default function Scheduler() {
             <div className="grid grid-cols-[100px_repeat(5,_1fr)] gap-0 border">
                 {/* Time Column */}
                 <div className="bg-gray-200 border-r border-black">
-                    {timeSlots.map((time, idx) => <TimeBlock key={idx} time={time} />)}
+                    {time_strings.map((time, idx) => <TimeBlock key={idx} time={time} />)}
                 </div>
 
                 {/* Weekdays */}

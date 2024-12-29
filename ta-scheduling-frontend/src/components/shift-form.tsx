@@ -2,6 +2,7 @@ import { addShift } from "@/context/app-reducers"
 import { time_strings } from "./scheduler-grid"
 import { useTimetableContext } from "@/context/app-context"
 import { DayOfWeek, Shift } from "@/models/domain"
+import { convertEuropeanToAmericanTime } from "@/models/time-utils"
 
 export default function ShiftForm() {
     const { dispatch } = useTimetableContext()
@@ -46,14 +47,14 @@ export default function ShiftForm() {
             <div>
                 <label>Start Time: </label>
                 <select name="start_time" className="border rounded p-1" required>
-                    {time_strings.map(time => <option key={time}>{time}</option>)}
+                    {time_strings.map(time => <option key={time}>{convertEuropeanToAmericanTime(time)}</option>)}
                 </select>
             </div>
 
             <div>
                 <label>End Time: </label>
                 <select name="end_time" className="border rounded p-1" required>
-                    {time_strings.map(time => <option key={time}>{time}</option>)}
+                    {time_strings.map(time => <option key={time}>{convertEuropeanToAmericanTime(time)}</option>)}
                 </select>
             </div>
             <button className="p-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer">Add Shift</button>

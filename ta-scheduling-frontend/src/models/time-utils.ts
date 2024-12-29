@@ -1,4 +1,7 @@
 
-export function to_time_string(date: Date) {
-    return `${date.getHours() == 12 ? 12: date.getHours()}:${date.getMinutes()} ${date.getHours() < 12 ? "AM" : "PM"}`
+export function convertEuropeanToAmericanTime(time: string) {
+    const hour = parseInt(time.split(":")[0])
+    const minute = parseInt(time.split(":")[1])
+
+    return `${hour > 12 ? hour - 12 : hour}:${minute} ${hour >= 12 ? "PM" : "AM"}`
 }
