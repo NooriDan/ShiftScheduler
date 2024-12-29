@@ -1,6 +1,8 @@
 import SchedulerGrid, { time_strings } from "@/components/scheduler-grid";
 import ShiftForm from "@/components/shift-form";
+import ShiftView from "@/components/shifts-view";
 import TAForm from "@/components/ta-form";
+import TAView from "@/components/ta-view";
 import { useTimetableContext } from "@/context/app-context";
 import { removeShift, removeTA } from "@/context/app-reducers";
 import { Shift, TA } from "@/models/domain";
@@ -33,10 +35,12 @@ function TADisplay({ ta }: { ta: TA }) {
 }
 
 type FormState = "Hidden" | "Shift" | "TA";
+type ViewState = "Schedule" | "Shifts" | "TA"
 
 export default function HomeContent() {
     const { state } = useTimetableContext()
     const [formState, setFormState] = useState<FormState>("Hidden")
+    const [viewState, setViewState] = useState<ViewState>("Schedule")
 
     const clickAddShift = () => {
         setFormState("Shift")
@@ -74,9 +78,16 @@ export default function HomeContent() {
                 <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer" onClick={clickAddTA}>Add TAs</button>
                 <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer">Generate Schedule</button>
                 <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer" onClick={printSchedule}>Print Schedule</button>
+                <div className="border border-black p-2">
+                    <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer disabled:bg-gray-200 disabled:cursor-default" onClick={() => setViewState("Schedule")} disabled={viewState == "Schedule"}>Schedule View</button>
+                    <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer disabled:bg-gray-200 disabled:cursor-default" onClick={() => setViewState("Shifts")} disabled={viewState == "Shifts"}>Shifts View</button>
+                    <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer disabled:bg-gray-200 disabled:cursor-default" onClick={() => setViewState("TA")} disabled={viewState == "TA"}>TAs View</button>
+                </div>
             </div>
 
         </div>
-        <SchedulerGrid />
+        {viewState === "Schedule" && <SchedulerGrid />}
+        {viewState === "TA" && <TAView />}
+        {viewState === "Shifts" && <ShiftView />}
     </div>)
 }
