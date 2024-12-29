@@ -12,7 +12,7 @@ function ShiftBlock({ shift, row }: { shift: Shift, row: number }) {
 function ShiftAssignmentBlock({ ta, shift, row, col }: { ta: TA, shift: Shift, row: number, col: number }) {
     const { state } = useTimetableContext()
     const shift_assignments = state.shift_assignments
-    const assignment = shift_assignments.find(assignment => assignment.assigned_ta.id === ta.id && assignment.shift.id === shift.id) as ShiftAssignment
+    const assignment = shift_assignments.find(assignment => assignment.assigned_ta && assignment.assigned_ta.id === ta.id && assignment.shift.id === shift.id) as ShiftAssignment
 
     if (assignment) {
         const desiredness = ta.desired.includes(shift) ? "desired" : ta.undesired.includes(shift) ? "undesired" : ta.unavailable.includes(shift) ? "unavailable" : "neutral"

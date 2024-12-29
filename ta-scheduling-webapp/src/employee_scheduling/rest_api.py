@@ -5,7 +5,7 @@ from uuid import uuid4
 from .domain import Timetable
 from .utils  import DemoData, generate_demo_data, initialize_logger, DataConstructor
 from .solver import solver_manager
-
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI(title="TA Shift Rostering",
@@ -16,6 +16,12 @@ app = FastAPI(title="TA Shift Rostering",
                 contact={"name": "API Support", "email": "support@example.com"},
                 license_info={"name": "Apache 2.0", "url": "https://www.apache.org/licenses/LICENSE-2.0.html"}
             )
+
+origins = [
+    "http://localhost:3000"
+]
+app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
+
 data_sets: dict[str, Timetable] = {}
 
 logger = initialize_logger()

@@ -68,10 +68,10 @@ export class TA {
 
 export class ShiftAssignment {
     id: string
-    assigned_ta: TA
+    assigned_ta?: TA
     shift: Shift
 
-    constructor(id: string, assigned_ta: TA, shift: Shift) {
+    constructor(id: string, shift: Shift, assigned_ta?: TA) {
         this.id = id
         this.assigned_ta = assigned_ta
         this.shift = shift

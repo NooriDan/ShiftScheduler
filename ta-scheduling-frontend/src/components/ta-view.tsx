@@ -24,7 +24,7 @@ export default function TAView() {
                         <td className="p-2">{ta.desired.map(shift => shift.series).join(", ")}</td>
                         <td className="p-2">{ta.undesired.map(shift => shift.series).join(", ")}</td>
                         <td className="p-2">{ta.unavailable.map(shift => shift.series).join(", ")}</td>
-                        <td className="p-2">{state.shift_assignments.filter(assignment => assignment.assigned_ta.id === ta.id).map(assignment => assignment.shift.series).join(", ")}</td>
+                        <td className="p-2">{state.shift_assignments.filter(assignment => assignment.assigned_ta && assignment.assigned_ta.id === ta.id).map(assignment => assignment.shift.series).join(", ")}</td>
                     </tr>)
                 }
             </tbody>

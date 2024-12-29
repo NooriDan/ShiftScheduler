@@ -57,6 +57,9 @@ export function reducer(state: Timetable, action: TimetableActions): Timetable {
 
             const taId = action.payload
             return { ...state, tas: state.tas.filter(ta => ta.id !== taId) }
+        case TimetableActionTypes.SET_TIMETABLE:
+
+            return action.payload
         default:
             return state
     }
