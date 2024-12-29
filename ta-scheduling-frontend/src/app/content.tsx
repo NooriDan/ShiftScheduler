@@ -16,7 +16,7 @@ function ShiftDisplay({ shift }: { shift: Shift }) {
     }
 
     return (<div className="flex flex-row">
-        <div>ID={shift.id} {shift.series} - {shift.day_of_week} {shift.start_time}-{shift.end_time}</div>
+        <div>{shift.series} - {shift.day_of_week} {shift.start_time}-{shift.end_time}</div>
         <button className="text-red-500 font-bold hover:cursor-pointer mx-2" onClick={onClick}>X</button>
     </div>)
 }
