@@ -2,7 +2,7 @@ import { addTA } from "@/context/app-reducers"
 import { useTimetableContext } from "@/context/app-context"
 import { Shift, TA } from "@/models/domain"
 import { useReducer } from "react"
-import DesiredChooser, { reducer } from "./desired-chooser"
+import AvailabilityChooser, { reducer } from "./availability-chooser"
 
 export default function TAForm() {
     const { state, dispatch } = useTimetableContext()
@@ -53,12 +53,22 @@ export default function TAForm() {
 
             <div>
                 <label>Is Grad Student: </label>
-                <input name="is_grad_student" type="checkbox" className="border rounded p-1" required />
+                <input name="is_grad_student" type="checkbox" className="border rounded p-1" />
             </div>
 
             <div>
                 <div>Desired Shifts:</div>
-                <DesiredChooser shifts={desiredShifts} dispatch={desiredShiftsDispatch} available={available} />
+                <AvailabilityChooser shifts={desiredShifts} dispatch={desiredShiftsDispatch} available={available} name="desired" />
+            </div>
+
+            <div>
+                <div>Undesired Shifts:</div>
+                <AvailabilityChooser shifts={undesiredShifts} dispatch={undesiredShiftsDispatch} available={available} name="undesired" />
+            </div>
+
+            <div>
+                <div>Unavailable Shifts:</div>
+                <AvailabilityChooser shifts={unavailableShifts} dispatch={unavailableShiftsDispatch} available={available} name="unavailable" />
             </div>
 
             <button className="p-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer">Add TA</button>

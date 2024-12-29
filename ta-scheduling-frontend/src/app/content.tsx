@@ -46,6 +46,10 @@ export default function HomeContent() {
         setFormState("TA")
     }
 
+    const printSchedule = () => {
+        console.log(state)
+    }
+
     return (<div className="flex flex-1 flex-col p-4">
         <div className="">
             <div className="text-xl font-bold">TA Management</div>
@@ -69,6 +73,7 @@ export default function HomeContent() {
                 <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer" onClick={clickAddShift}>Add Shift</button>
                 <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer" onClick={clickAddTA}>Add TAs</button>
                 <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer">Generate Schedule</button>
+                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer" onClick={printSchedule}>Print Schedule</button>
             </div>
 
         </div>

@@ -12,10 +12,11 @@ export function reducer(state: Shift[], action: any) {
     }
 }
 
-export interface DesiredChooserProps {
+export interface AvailabilityChooserProps {
     shifts: Shift[]
     dispatch: ActionDispatch<any>
     available: Shift[]
+    name: string
 }
 
 export function addShift(shift: Shift) {
@@ -26,7 +27,7 @@ export function removeShift(shift: Shift) {
     return { type: "remove", payload: shift }
 }
 
-export default function DesiredChooser({ shifts, dispatch, available }: DesiredChooserProps) {
+export default function AvailabilityChooser({ shifts, dispatch, available, name }: AvailabilityChooserProps) {
     const [current, setCurrent] = useState<string>("Choose option")
 
     const addClick = () => {
@@ -43,7 +44,7 @@ export default function DesiredChooser({ shifts, dispatch, available }: DesiredC
 
     return (<div className="border border-black p-2">
         <div className="border border-black p-2">
-            <label>Add desired shifts: </label>
+            <label>Add {name} shifts: </label>
             <select className="rounded border border-black p-2" value={current} onChange={e => setCurrent(e.target.value)}>
                 <option disabled value="Choose option">Choose option</option>
                 {available.map((shift) => <option key={shift.id} value={shift.id}>{shift.series}</option>)}
