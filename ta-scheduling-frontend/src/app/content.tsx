@@ -14,7 +14,7 @@ function ShiftDisplay({ shift }: { shift: Shift }) {
     }
 
     return (<div className="flex flex-row">
-        <div>ID={shift.id} {shift.alias} - {shift.day_of_week} {shift.start_time}-{shift.end_time}</div>
+        <div>ID={shift.id} {shift.series} - {shift.day_of_week} {shift.start_time}-{shift.end_time}</div>
         <button className="text-red-500 font-bold hover:cursor-pointer mx-2" onClick={onClick}>X</button>
     </div>)
 }
@@ -39,14 +39,10 @@ export default function HomeContent() {
     const [formState, setFormState] = useState<FormState>("Hidden")
 
     const clickAddShift = () => {
-        //const shift = new Shift("1", "CS 100", "Monday", "8:30 AM", "9:30 AM", 2, "CS 100 Lab")
-        //dispatch(addShift(shift))
         setFormState("Shift")
     }
 
     const clickAddTA = () => {
-        //const ta = new TA("1", "John Doe", 2)
-        //dispatch(addTA(ta))
         setFormState("TA")
     }
 
