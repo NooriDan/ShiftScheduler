@@ -1,10 +1,10 @@
-import SchedulerGrid, { time_strings } from "@/components/scheduler-grid";
+import SchedulerGrid from "@/components/scheduler-grid";
 import ShiftForm from "@/components/shift-form";
 import ShiftView from "@/components/shifts-view";
 import TAForm from "@/components/ta-form";
 import TAView from "@/components/ta-view";
 import { useTimetableContext } from "@/context/app-context";
-import { removeShift, removeTA } from "@/context/app-reducers";
+import { removeShift, removeTA, setTimetable } from "@/context/app-reducers";
 import { Shift, TA } from "@/models/domain";
 import { useState } from "react";
 
@@ -36,11 +36,13 @@ function TADisplay({ ta }: { ta: TA }) {
 
 type FormState = "Hidden" | "Shift" | "TA";
 type ViewState = "Schedule" | "Shifts" | "TA"
+type GenerationStatus = "Idle" | "Generating" | "Complete"
 
 export default function HomeContent() {
-    const { state } = useTimetableContext()
+    const { state, dispatch } = useTimetableContext()
     const [formState, setFormState] = useState<FormState>("Hidden")
     const [viewState, setViewState] = useState<ViewState>("Schedule")
+    const [generationStatus, setGenerationStatus] = useState<GenerationStatus>("Idle")
 
     const clickAddShift = () => {
         setFormState("Shift")
@@ -52,6 +54,25 @@ export default function HomeContent() {
 
     const printSchedule = () => {
         console.log(state)
+    }
+
+    const generateSchedule = async () => {
+        setGenerationStatus("Generating")
+
+        let response = await fetch("http://localhost:8080/schedules", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(state)
+        })
+        const job_id = await response.text()
+        console.log(job_id)
+
+        response = await fetch(`http://localhost:8080/schedules/${job_id}`)
+        const schedule = await response.json()
+        setGenerationStatus("Complete")
+        dispatch(setTimetable(schedule))
     }
 
     return (<div className="flex flex-1 flex-col p-4">
@@ -73,10 +94,21 @@ export default function HomeContent() {
                     {formState === "TA" && <TAForm />}
                 </div>
             </div>
+
+            <div>
+                <div>Generation Status: {generationStatus}</div>
+                {generationStatus === "Complete" && <>
+                    <div>Score:</div>
+                    <div>Hardscore: {state.score.hardScore}</div>
+                    <div>Softscore: {state.score.softScore}</div>
+                    <div>Initscore: {state.score.initScore}</div>
+                </>}
+            </div>
+
             <div>
                 <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer" onClick={clickAddShift}>Add Shift</button>
                 <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer" onClick={clickAddTA}>Add TAs</button>
-                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer">Generate Schedule</button>
+                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer" onClick={generateSchedule}>Generate Schedule</button>
                 <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer" onClick={printSchedule}>Print Schedule</button>
                 <div className="border border-black p-2">
                     <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer disabled:bg-gray-200 disabled:cursor-default" onClick={() => setViewState("Schedule")} disabled={viewState == "Schedule"}>Schedule View</button>
@@ -84,6 +116,7 @@ export default function HomeContent() {
                     <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer disabled:bg-gray-200 disabled:cursor-default" onClick={() => setViewState("TA")} disabled={viewState == "TA"}>TAs View</button>
                 </div>
             </div>
+
 
         </div>
         {viewState === "Schedule" && <SchedulerGrid />}

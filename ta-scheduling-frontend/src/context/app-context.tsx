@@ -3,7 +3,7 @@ import { createContext, Dispatch, useContext, useReducer } from "react";
 import { reducer, TimetableActions } from "./app-reducers";
 
 // Initial timetable state
-const initialState = new Timetable("", [], [], [], 0)
+const initialState = new Timetable("", [], [], [])
 
 // Context properties
 export interface ITimetableContextProps {

@@ -78,6 +78,18 @@ export class ShiftAssignment {
     }
 }
 
+export class Score {
+    hardScore: number
+    softScore: number
+    initScore: number
+
+    constructor(hardScore: number = 0, softScore: number = 0, initScore: number = 0) {
+        this.hardScore = hardScore
+        this.softScore = softScore
+        this.initScore = initScore
+    }
+}
+
 export class Timetable {
     id: string
     // problem facts
@@ -85,9 +97,9 @@ export class Timetable {
     tas: TA[]
     // planning entities
     shift_assignments: ShiftAssignment[]
-    score: number
+    score: Score
 
-    constructor(id: string, shifts: Shift[], tas: TA[], shift_assignments: ShiftAssignment[], score: number) {
+    constructor(id: string, shifts: Shift[], tas: TA[], shift_assignments: ShiftAssignment[], score: Score = new Score()) {
         this.id = id
         this.shifts = shifts
         this.tas = tas
