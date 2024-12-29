@@ -2,11 +2,11 @@ import { useTimetableContext } from "@/context/app-context"
 import { get_status_for_shift, Shift, ShiftAssignment, TA } from "@/models/domain"
 
 function TABlock({ ta, index }: { ta: TA, index: number }) {
-    return (<div className={`bg-gray-200 row-start-1 col-start-${index + 2}`}>{ta.name} (ID: {ta.id}) (requires: {ta.requiredShifts})</div>);
+    return (<div className={`bg-gray-200 row-start-1 col-start-${index + 2} border border-black`}>{ta.name} (ID: {ta.id}) (requires: {ta.requiredShifts})</div>);
 }
 
 function ShiftBlock({ shift, row }: { shift: Shift, row: number }) {
-    return (<div className={`bg-gray-200 col-start-1 row-start-${row + 2}`}>{shift.series} {shift.dayOfWeek} {shift.startTime} requires {shift.requiredTas}</div>);
+    return (<div className={`bg-gray-200 col-start-1 row-start-${row + 2} border border-black`}>{shift.series} {shift.dayOfWeek} {shift.startTime} requires {shift.requiredTas}</div>);
 }
 
 function ShiftAssignmentBlock({ ta, shift, row, col }: { ta: TA, shift: Shift, row: number, col: number }) {
@@ -17,9 +17,9 @@ function ShiftAssignmentBlock({ ta, shift, row, col }: { ta: TA, shift: Shift, r
     if (assignment) {
         const desiredness = get_status_for_shift(ta, shift)
 
-        return (<div className={`col-start-${col + 2} row-start-${row + 2}`}>{ta.name} - {desiredness}</div>)
+        return (<div className={`col-start-${col + 2} row-start-${row + 2} border border-black`}>{ta.name} - {desiredness}</div>)
     } else {
-        return (<div className={`col-start-${col + 2} row-start-${row + 2}`}></div>)
+        return (<div className={`col-start-${col + 2} row-start-${row + 2} border border-black`}></div>)
     }
 }
 
@@ -41,7 +41,7 @@ export default function ShiftView() {
     return (<div>
         <div className="font-bold">Shifts View</div>
 
-        <div className={`grid grid-cols-[repeat(${tas.length + 1},minmax(0,1fr))] grid-rows-[repeat(${shifts.length + 1},minmax(0,1fr))] gap-2`}>
+        <div className={`grid grid-cols-[repeat(${tas.length + 1},minmax(0,1fr))] grid-rows-[repeat(${shifts.length + 1},minmax(0,1fr))]`}>
             {/* Column Headers */}
             <div className="bg-gray-200 row-start-1 col-start-1"></div>
             {tas.map((ta, index) => <TABlock key={ta.id} ta={ta} index={index} />)}

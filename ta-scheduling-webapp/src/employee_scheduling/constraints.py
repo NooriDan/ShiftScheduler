@@ -81,8 +81,8 @@ def ta_unavailable_shift(constraint_factory: ConstraintFactory) -> Constraint:
     """ Each TA should not be assigned to a shift that they are unavailable for """
     return (constraint_factory
             .for_each(ShiftAssignment)
-            .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.to_list(lambda assignment: assignment.shift))
-            .filter(lambda ta, shifts: any(shift in ta.unavailable for shift in shifts))
+            .group_by(lambda shift_assignment: [shift.id for shift in shift_assignment.assigned_ta.unavailable], ConstraintCollectors.to_list(lambda assignment: assignment.shift.id))
+            .filter(lambda unavailable, shift_ids: any(id in unavailable for id in shift_ids))
             .penalize(HardSoftScore.ONE_HARD)
             .as_constraint("TA unavailable"))
 
@@ -91,8 +91,8 @@ def ta_undesired_shift (constraint_factory: ConstraintFactory) -> Constraint:
     """ Penalize if a TA is assigned to a shift that they don't want to work on """
     return (constraint_factory
             .for_each(ShiftAssignment)
-            .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.to_list(lambda assignment: assignment.shift))
-            .filter(lambda ta, shifts: any(shift in ta.undesired for shift in shifts))
+            .group_by(lambda shift_assignment: [shift.id for shift in shift_assignment.assigned_ta.undesired], ConstraintCollectors.to_list(lambda assignment: assignment.shift.id))
+            .filter(lambda unavailable, shift_ids: any(id in unavailable for id in shift_ids))
             .penalize(HardSoftScore.ONE_SOFT, lambda ta, shifts: 10)
             .as_constraint("TA undesired"))
 
@@ -100,7 +100,7 @@ def ta_desired_shift (constraint_factory: ConstraintFactory) -> Constraint:
     """ Reward if a TA is assigned to a shift that they want to work on """
     return (constraint_factory
             .for_each(ShiftAssignment)
-            .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.to_list(lambda assignment: assignment.shift))
-            .filter(lambda ta, shifts: any(shift in ta.desired for shift in shifts))
+            .group_by(lambda shift_assignment: [shift.id for shift in shift_assignment.assigned_ta.desired], ConstraintCollectors.to_list(lambda assignment: assignment.shift.id))
+            .filter(lambda unavailable, shift_ids: any(id in unavailable for id in shift_ids))
             .reward(HardSoftScore.ONE_SOFT, lambda ta, shifts: 1)
             .as_constraint("TA desired"))

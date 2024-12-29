@@ -15,12 +15,13 @@ def demo_data_A(name: str) -> Timetable:
     
    ids = id_generator()
    shifts: List[Shift] = [
-      Shift(next(ids),"L07", "Mon", DAY_START_TIME, DAY_END_TIME, 2),
-      Shift(next(ids),"L08", "Mon", AFTERNOON_START_TIME, AFTERNOON_END_TIME, 3),
-      Shift(next(ids),"L09", "Tue", DAY_START_TIME, DAY_END_TIME, 2),
-      Shift(next(ids),"L10", "Tue", AFTERNOON_START_TIME, AFTERNOON_END_TIME, 1),
-      Shift(next(ids),"L11", "Thu", AFTERNOON_START_TIME, AFTERNOON_END_TIME, 2),
+      Shift(id=next(ids),series="L07", day_of_week="Mon", start_time=DAY_START_TIME, end_time=DAY_END_TIME, required_tas=2),
+      Shift(id=next(ids),series="L08", day_of_week="Mon", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=3),
+      Shift(id=next(ids),series="L09", day_of_week="Tue", start_time=DAY_START_TIME, end_time=DAY_END_TIME, required_tas=2),
+      Shift(id=next(ids),series="L10", day_of_week="Tue", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=1),
+      Shift(id=next(ids),series="L11", day_of_week="Thu", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=2),
       ]
+   
    
    ids = id_generator()
    course_tas: List[TA] = [

@@ -2,15 +2,15 @@ from timefold.solver.domain import (planning_entity, planning_solution, Planning
                                     PlanningEntityCollectionProperty,
                                     ProblemFactCollectionProperty, ValueRangeProvider,
                                     PlanningScore)
+from timefold.solver import SolverStatus
 from timefold.solver.score import HardSoftScore
 from dataclasses import dataclass, field
 from datetime import time, date
 from typing import Annotated
-from pydantic import Field
+from pydantic import Field, BaseModel
 
 
-@dataclass
-class Shift:
+class Shift(BaseModel):
     id: Annotated[str, PlanningId]
     series: str
     day_of_week: str
@@ -24,8 +24,7 @@ class Shift:
     def __str__(self):
         return f'{self.series} {self.day_of_week} {self.start_time.strftime("%H:%M")}'
     
-@dataclass
-class TA:
+class TA(BaseModel):
     id: Annotated[str, PlanningId]
     name: str
     required_shifts: int
@@ -54,8 +53,7 @@ class TA:
 
 
 @planning_entity
-@dataclass
-class ShiftAssignment:
+class ShiftAssignment(BaseModel):
     id: Annotated[str, PlanningId]
     shift: Shift
     assigned_ta: Annotated[TA | None,
@@ -69,8 +67,7 @@ class ShiftAssignment:
     #     return f'{self.shift.id}-{self.shift.sereis}_{self.assigned_ta.id}-{self.assigned_ta.name}'
 
 @planning_solution
-@dataclass
-class Timetable:
+class Timetable(BaseModel):
     id: Annotated[str, PlanningId]
     # problem facts
     shifts: Annotated[list[Shift],
@@ -83,7 +80,8 @@ class Timetable:
     shift_assignments: Annotated[list[ShiftAssignment],
                        PlanningEntityCollectionProperty]
     # score and solver status
-    score: Annotated[HardSoftScore, PlanningScore] = field(default=None)
+    score: Annotated[HardSoftScore | None, PlanningScore, Field(default=None)]
+    solver_status: Annotated[SolverStatus, Field(default=SolverStatus.NOT_SOLVING)]
 
 
 if __name__ == '__main__':

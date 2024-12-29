@@ -328,6 +328,7 @@ def initialize_logger():
 def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
 
     LOGGER = logger
+    LOGGER.info(f"Score: {time_table.score}")
     LOGGER.info("=== Starting to print the assignment matrix ===")
 
     column_width = 18
@@ -355,7 +356,7 @@ def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
         def get_row_shifts():
             for ta in tas:
                 yield assignment_map.get((ta.name, shift_group.series, shift_group.start_time),
-                                     ShiftAssignment(next(ids), shift=None, assigned_ta=None))
+                                     ShiftAssignment(id=next(ids), shift=shift_group, assigned_ta=None))
 
         # Logging the shift group
         row_shifts = [*get_row_shifts()]
