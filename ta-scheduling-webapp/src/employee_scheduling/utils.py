@@ -41,7 +41,7 @@ def initialize_logger():
         # format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         format="%(asctime)s - %(name)s - %(message)s",
         handlers=[
-            logging.FileHandler(LOG_FILE, mode='w'),  # Save logs to a file, overwrite each run
+            # logging.FileHandler(LOG_FILE, mode='w'),  # Save logs to a file, overwrite each run
             logging.StreamHandler()  # Also display logs in the console
         ]
     )
