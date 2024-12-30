@@ -74,15 +74,14 @@ export default function HomeContent() {
         do {
             await new Promise(resolve => setTimeout(resolve, 2000))
 
-            response = await fetch(`http://localhost:8080/schedules/${job_id}/status`)
-            status = await response.text()
+            response = await fetch(`http://localhost:8080/schedules/${job_id}`)
+            const schedule = await response.json()
+            status = schedule.solverStatus
+            dispatch(setTimetable(schedule))
 
-        } while (status !== "\"NOT_SOLVING\"");
+        } while (status !== "NOT_SOLVING");
 
-        response = await fetch(`http://localhost:8080/schedules/${job_id}`)
-        const schedule = await response.json()
         setGenerationStatus("Complete")
-        dispatch(setTimetable(schedule))
     }
 
     const fetchDemoData = async () => {
@@ -167,7 +166,7 @@ export default function HomeContent() {
 
             <div>
                 <div>Generation Status: {generationStatus}</div>
-                {generationStatus === "Complete" && <>
+                {generationStatus !== "Idle" && <>
                     <div>Score:</div>
                     <div>Hardscore: {state.score.hardScore}</div>
                     <div>Softscore: {state.score.softScore}</div>
