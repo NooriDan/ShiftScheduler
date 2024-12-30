@@ -20,11 +20,17 @@ export default function TAForm() {
 
         const formData = new FormData(e.currentTarget)
 
+        const id = formData.get("id") as string
         const name = formData.get("name") as string
         const required_shifts = parseInt(formData.get("required_shifts") as string)
         const is_grad_student = formData.get("is_grad_student") as string
 
-        const ta = new TA("", name, required_shifts)
+        if (state.tas.find(ta => ta.id === id)) {
+            alert("TA already exists")
+            return
+        }
+
+        const ta = new TA(id, name, required_shifts)
         ta.isGradStudent = is_grad_student === "on"
 
         // Add the desired shifts
@@ -41,6 +47,11 @@ export default function TAForm() {
     return (<div>
         <div className="font-bold">TA Form</div>
         <form onSubmit={onSubmit}>
+            <div>
+                <label>Mac ID: </label>
+                <input name="id" type="text" placeholder="Mac ID" className="border rounded p-1" required />
+            </div>
+
             <div>
                 <label>Name: </label>
                 <input name="name" type="text" placeholder="Name" className="border rounded p-1" required />
