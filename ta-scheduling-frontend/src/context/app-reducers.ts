@@ -47,7 +47,8 @@ export function reducer(state: Timetable, action: TimetableActions): Timetable {
 
             const ta = action.payload
             // Add unique id
-            ta.id = Math.random().toString(36).substring(7)
+            if (!ta.id || ta.id.trim() === "")
+                ta.id = Math.random().toString(36).substring(7)
             return { ...state, tas: [...state.tas, ta] }
         case TimetableActionTypes.REMOVE_SHIFT:
 

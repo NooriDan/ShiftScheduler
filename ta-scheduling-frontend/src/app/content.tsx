@@ -74,15 +74,14 @@ export default function HomeContent() {
         do {
             await new Promise(resolve => setTimeout(resolve, 2000))
 
-            response = await fetch(`http://localhost:8080/schedules/${job_id}/status`)
-            status = await response.text()
+            response = await fetch(`http://localhost:8080/schedules/${job_id}`)
+            const schedule = await response.json()
+            status = schedule.solverStatus
+            dispatch(setTimetable(schedule))
 
-        } while (status !== "\"NOT_SOLVING\"");
+        } while (status !== "NOT_SOLVING");
 
-        response = await fetch(`http://localhost:8080/schedules/${job_id}`)
-        const schedule = await response.json()
         setGenerationStatus("Complete")
-        dispatch(setTimetable(schedule))
     }
 
     const fetchDemoData = async () => {
@@ -150,11 +149,11 @@ export default function HomeContent() {
             <div className="text-xl font-bold">TA Management</div>
             <div className="flex flex-row">
                 <div className="flex-1">
-                    <div>Shifts:</div>
+                    <div className="font-bold">Shifts:</div>
                     <div>
                         {state.shifts.map(shift => <ShiftDisplay key={shift.id} shift={shift} />)}
                     </div>
-                    <div>TAs:</div>
+                    <div className="font-bold">TAs:</div>
                     <div>
                         {state.tas.map(ta => <TADisplay key={ta.id} ta={ta} />)}
                     </div>
@@ -166,12 +165,12 @@ export default function HomeContent() {
             </div>
 
             <div>
-                <div>Generation Status: {generationStatus}</div>
-                {generationStatus === "Complete" && <>
-                    <div>Score:</div>
-                    <div>Hardscore: {state.score.hardScore}</div>
-                    <div>Softscore: {state.score.softScore}</div>
-                    <div>Initscore: {state.score.initScore}</div>
+                <div className="font-bold">Generation Status: {generationStatus}</div>
+                {generationStatus !== "Idle" && <>
+                    <div className="font-bold">Score:</div>
+                    <div className="font-bold">Hardscore: {state.score.hardScore}</div>
+                    <div className="font-bold">Softscore: {state.score.softScore}</div>
+                    <div className="font-bold">Initscore: {state.score.initScore}</div>
                 </>}
             </div>
 

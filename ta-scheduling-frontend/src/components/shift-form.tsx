@@ -5,7 +5,7 @@ import { DayOfWeek, Shift } from "@/models/domain"
 import { convertEuropeanToAmericanTime } from "@/models/time-utils"
 
 export default function ShiftForm() {
-    const { dispatch } = useTimetableContext()
+    const { state, dispatch } = useTimetableContext()
 
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -18,7 +18,17 @@ export default function ShiftForm() {
         const start_time = formData.get("start_time") as string
         const end_time = formData.get("end_time") as string
 
+        console.log(start_time)
+        console.log(end_time)
+
         const shift = new Shift("", series, day_of_week, start_time, end_time, required_tas, "CS 100 Lab")
+
+        const duplicate = state.shifts.find(s => s.series === shift.series && s.dayOfWeek === shift.dayOfWeek && s.startTime === shift.startTime && s.endTime === shift.endTime)
+
+        if (duplicate) {
+            alert("Shift already exists")
+            return
+        }
         dispatch(addShift(shift))
     }
 
@@ -47,14 +57,14 @@ export default function ShiftForm() {
             <div>
                 <label>Start Time: </label>
                 <select name="start_time" className="border rounded p-1" required>
-                    {time_strings.map(time => <option key={time}>{convertEuropeanToAmericanTime(time)}</option>)}
+                    {time_strings.map(time => <option key={time} value={time}>{convertEuropeanToAmericanTime(time)}</option>)}
                 </select>
             </div>
 
             <div>
                 <label>End Time: </label>
                 <select name="end_time" className="border rounded p-1" required>
-                    {time_strings.map(time => <option key={time}>{convertEuropeanToAmericanTime(time)}</option>)}
+                    {time_strings.map(time => <option key={time} value={time}>{convertEuropeanToAmericanTime(time)}</option>)}
                 </select>
             </div>
             <button className="p-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer">Add Shift</button>
