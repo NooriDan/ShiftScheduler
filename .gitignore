@@ -309,3 +309,4 @@ TSWLatexianTemp*
 timefold-quickstarts/
 .DS_Store
 .DS_Store
+/ta-scheduling-webapp/src/employee_scheduling/__pycache__
