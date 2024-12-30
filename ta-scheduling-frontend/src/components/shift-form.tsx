@@ -5,7 +5,7 @@ import { DayOfWeek, Shift } from "@/models/domain"
 import { convertEuropeanToAmericanTime } from "@/models/time-utils"
 
 export default function ShiftForm() {
-    const { dispatch } = useTimetableContext()
+    const { state, dispatch } = useTimetableContext()
 
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -22,6 +22,13 @@ export default function ShiftForm() {
         console.log(end_time)
 
         const shift = new Shift("", series, day_of_week, start_time, end_time, required_tas, "CS 100 Lab")
+
+        const duplicate = state.shifts.find(s => s.series === shift.series && s.dayOfWeek === shift.dayOfWeek && s.startTime === shift.startTime && s.endTime === shift.endTime)
+
+        if (duplicate) {
+            alert("Shift already exists")
+            return
+        }
         dispatch(addShift(shift))
     }
 
