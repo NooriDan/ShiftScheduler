@@ -4,7 +4,7 @@ import { useTimetableContext } from "@/context/app-context"
 import { DayOfWeek, Shift } from "@/models/domain"
 import { convertEuropeanToAmericanTime } from "@/models/time-utils"
 
-export default function ShiftForm({ action }: { action: (ta: Shift) => void }) {
+export default function ShiftForm({ shift, action }: { shift?: Shift, action: (ta: Shift) => void }) {
     const { state } = useTimetableContext()
 
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -18,19 +18,16 @@ export default function ShiftForm({ action }: { action: (ta: Shift) => void }) {
         const start_time = formData.get("start_time") as string
         const end_time = formData.get("end_time") as string
 
-        console.log(start_time)
-        console.log(end_time)
+        const _shift = new Shift(shift ? shift.id : "", series, day_of_week, start_time, end_time, required_tas, "CS 100 Lab")
 
-        const shift = new Shift("", series, day_of_week, start_time, end_time, required_tas, "CS 100 Lab")
+        const duplicate = state.shifts.find(s => s.series === _shift.series && s.dayOfWeek === _shift.dayOfWeek && s.startTime === _shift.startTime && s.endTime === _shift.endTime)
 
-        const duplicate = state.shifts.find(s => s.series === shift.series && s.dayOfWeek === shift.dayOfWeek && s.startTime === shift.startTime && s.endTime === shift.endTime)
-
-        if (duplicate) {
+        if (!shift && duplicate) {
             alert("Shift already exists")
             return
         }
 
-        action(shift)
+        action(_shift)
     }
 
     return (<div>
@@ -38,17 +35,17 @@ export default function ShiftForm({ action }: { action: (ta: Shift) => void }) {
         <form onSubmit={onSubmit}>
             <div>
                 <label>Series: </label>
-                <input name="series" type="text" placeholder="Series" className="border rounded p-1" required />
+                <input name="series" type="text" defaultValue={shift && shift.series} placeholder="Series" className="border rounded p-1" required />
             </div>
 
             <div>
                 <label>Required TAs: </label>
-                <input name="required_tas" type="number" placeholder="Required TAs" className="border rounded p-1" required />
+                <input name="required_tas" type="number" defaultValue={shift && shift.requiredTas} placeholder="Required TAs" className="border rounded p-1" required />
             </div>
 
             <div>
                 <label>Day of Week: </label>
-                <select name="day_of_week" className="border rounded p-1" required>
+                <select name="day_of_week" className="border rounded p-1" defaultValue={shift && shift.dayOfWeek} required>
                     {
                         Object.values(DayOfWeek).map(day => <option key={day}>{day}</option>)
                     }
@@ -57,18 +54,18 @@ export default function ShiftForm({ action }: { action: (ta: Shift) => void }) {
 
             <div>
                 <label>Start Time: </label>
-                <select name="start_time" className="border rounded p-1" required>
+                <select name="start_time" className="border rounded p-1" defaultValue={shift && shift.startTime} required>
                     {time_strings.map(time => <option key={time} value={time}>{convertEuropeanToAmericanTime(time)}</option>)}
                 </select>
             </div>
 
             <div>
                 <label>End Time: </label>
-                <select name="end_time" className="border rounded p-1" required>
+                <select name="end_time" className="border rounded p-1" defaultValue={shift && shift.endTime} required>
                     {time_strings.map(time => <option key={time} value={time}>{convertEuropeanToAmericanTime(time)}</option>)}
                 </select>
             </div>
-            <button className="p-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer">Add Shift</button>
+            <button className="p-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer">{shift ? "Edit" : "Add"} Shift</button>
         </form>
     </div>)
 }

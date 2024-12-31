@@ -5,12 +5,12 @@ import ShiftView from "@/components/shifts-view";
 import TAForm from "@/components/ta-form";
 import TAView from "@/components/ta-view";
 import { useTimetableContext } from "@/context/app-context";
-import { addShift, addTA, removeShift, removeTA, setTimetable } from "@/context/app-reducers";
+import { addShift, addTA, removeShift, removeTA, setTimetable, updateShift, updateTA } from "@/context/app-reducers";
 import { DayOfWeek, Shift, ShiftAssignment, TA, Timetable } from "@/models/domain";
 import { convertEuropeanToAmericanTime } from "@/models/time-utils";
 import { useState } from "react";
 
-function ShiftDisplay({ shift }: { shift: Shift }) {
+function ShiftDisplay({ shift, onEdit }: { shift: Shift, onEdit: (shift: Shift) => void }) {
     const { dispatch } = useTimetableContext()
 
     const onClick = () => {
@@ -25,12 +25,12 @@ function ShiftDisplay({ shift }: { shift: Shift }) {
             <td className="p-2 border-x">{convertEuropeanToAmericanTime(shift.endTime)}</td>
             <td className="p-2 border-x">{shift.requiredTas}</td>
             <td className="p-2 border-x"><button className="text-red-500 font-bold hover:cursor-pointer mx-2" onClick={onClick}>Delete</button></td>
-            <td className="p-2 border-x"></td>
+            <td className="p-2 border-x"><button className="font-bold hover:cursor-pointer mx-2" onClick={() => onEdit(shift)}>Edit</button></td>
         </tr>
     )
 }
 
-function TADisplay({ ta }: { ta: TA }) {
+function TADisplay({ ta, onEdit }: { ta: TA, onEdit: (ta: TA) => void }) {
     const { dispatch } = useTimetableContext()
 
     const onClick = () => {
@@ -47,27 +47,45 @@ function TADisplay({ ta }: { ta: TA }) {
             <td className="p-2 border-x">{ta.undesired.map(s => s.series).join(", ")}</td>
             <td className="p-2 border-x">{ta.unavailable.map(s => s.series).join(", ")}</td>
             <td className="p-2 border-x"><button className="text-red-500 font-bold hover:cursor-pointer mx-2" onClick={onClick}>Delete</button></td>
-            <td className="p-2 border-x"></td>
+            <td className="p-2 border-x"><button className="font-bold hover:cursor-pointer mx-2" onClick={() => onEdit(ta)}>Edit</button></td>
         </tr>)
 
 }
 
-type FormState = "Hidden" | "Shift" | "TA";
+type FormState = "Hidden" | "Add Shift" | "Add TA" | "Edit Shift" | "Edit TA";
 type ViewState = "Schedule" | "Shifts" | "TA"
+
+// TODO: Create a new formState which is "Edit Shift" and "Edit TA" which will allow the user to edit the shift or TA onclick
+// Also store the previous edit state in the state so that the form can be prepopulated with the previous values
+// Also make sure that when its changing state to the edit state, once its done it'll get rid of the saved state
+// Also update the ShiftForm to be identiical to the TAForm
 type GenerationStatus = "Idle" | "Generating" | "Complete"
 
 export default function HomeContent() {
     const { state, dispatch } = useTimetableContext()
     const [formState, setFormState] = useState<FormState>("Hidden")
+    const [editState, setEditState] = useState<Shift | TA>()
     const [viewState, setViewState] = useState<ViewState>("Schedule")
     const [generationStatus, setGenerationStatus] = useState<GenerationStatus>("Idle")
 
     const clickAddShift = () => {
-        setFormState("Shift")
+        setFormState("Add Shift")
+        setEditState(undefined)
     }
 
     const clickAddTA = () => {
-        setFormState("TA")
+        setFormState("Add TA")
+        setEditState(undefined)
+    }
+
+    const clickEditShift = (shift: Shift) => {
+        setEditState(shift)
+        setFormState("Edit Shift")
+    }
+
+    const clickEditTA = (ta: TA) => {
+        setEditState(ta)
+        setFormState("Edit TA")
     }
 
     const printSchedule = () => {
@@ -91,8 +109,6 @@ export default function HomeContent() {
             body: JSON.stringify(state)
         })
         const job_id = (await response.text()).split("\"")[1]
-        console.log(job_id)
-        await new Promise(resolve => setTimeout(resolve, 5000))
 
         let status;
         do {
@@ -100,7 +116,6 @@ export default function HomeContent() {
             response = await fetch(`http://localhost:8080/schedules/${job_id}`)
             const schedule = await response.json()
             status = schedule.solverStatus
-            console.log(status)
             dispatch(setTimetable(schedule))
 
         } while (status !== "NOT_SOLVING")
@@ -109,12 +124,14 @@ export default function HomeContent() {
     }
 
     const fetchDemoData = async () => {
+        setEditState(undefined)
+        setFormState("Hidden")
+
         const response = await fetch("http://localhost:8080/demo-data/DemoA")
         const timetable = await response.json()
 
         const _shifts = timetable.shifts
         const _tas = timetable.tas
-        const _shift_assignments = timetable.shiftAssignments
 
         const shifts: Shift[] = _shifts.map((shift: any) => {
             let day_of_week;
@@ -159,18 +176,15 @@ export default function HomeContent() {
             return newTA
         })
 
-        const shift_assignments: ShiftAssignment[] = _shift_assignments.map((assignment: any) => {
-            const ta = tas.find(ta => ta.id === assignment.ta_id)
-            const shift = shifts.find(shift => shift.id === assignment.shift.id)!
-            return new ShiftAssignment(assignment.id, shift, ta)
-        })
-
-        dispatch(setTimetable(new Timetable(timetable.id, shifts, tas, shift_assignments)))
+        dispatch(setTimetable(new Timetable(timetable.id, shifts, tas, [])))
     }
 
     const clickHideSide = () => {
         setFormState("Hidden")
+        setEditState(undefined)
     }
+
+    
 
     return (<div className="flex flex-1 flex-col p-4">
         <div className="">
@@ -191,7 +205,7 @@ export default function HomeContent() {
                             </tr>
                         </thead>
                         <tbody>
-                            {state.shifts.map(shift => <ShiftDisplay key={shift.id} shift={shift} />)}
+                            {state.shifts.map(shift => <ShiftDisplay key={shift.id} shift={shift} onEdit={clickEditShift} />)}
                         </tbody>
                     </table>
                     <div className="font-bold">TAs:</div>
@@ -210,23 +224,19 @@ export default function HomeContent() {
                             </tr>
                         </thead>
                         <tbody>
-                            {state.tas.map(ta => <TADisplay key={ta.id} ta={ta} />)}
+                            {state.tas.map(ta => <TADisplay key={ta.id} ta={ta} onEdit={clickEditTA} />)}
                         </tbody>
                     </table>
                 </div>
                 {formState !== "Hidden" &&
                     <div className="basis-1/3">
-                        {formState === "Shift" && <ShiftForm action={shift => dispatch(addShift(shift))} />}
-                        {formState === "TA" && <TAForm action={ta => dispatch(addTA(ta))} />}
+                        {formState === "Add Shift" && <ShiftForm action={shift => dispatch(addShift(shift))} />}
+                        {formState === "Add TA" && <TAForm action={ta => dispatch(addTA(ta))} />}
+                        {formState === "Edit Shift" && <ShiftForm shift={editState as Shift} action={shift => dispatch(updateShift(shift))} />}
+                        {formState === "Edit TA" && <TAForm ta={editState as TA} action={ta => dispatch(updateTA(ta))} />}
                     </div>
                 }
             </div>
-            {
-                // TODO: Create a new formState which is "Edit Shift" and "Edit TA" which will allow the user to edit the shift or TA onclick
-                // Also store the previous edit state in the state so that the form can be prepopulated with the previous values
-                // Also make sure that when its changing state to the edit state, once its done it'll get rid of the saved state
-                // Also update the ShiftForm to be identiical to the TAForm
-            }
 
             <div>
                 <div className="font-bold">Generation Status: {generationStatus}</div>

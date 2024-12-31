@@ -19,6 +19,8 @@ export enum TimetableActionTypes {
     ADD_TA = 'timetable.addTA',
     REMOVE_SHIFT = 'timetable.removeShift',
     REMOVE_TA = 'timetable.removeTA',
+    UPDATE_SHIFT = 'timetable.updateShift',
+    UPDATE_TA = 'timetable.updateTA',
     SET_TIMETABLE = 'timetable.setTimetable'
 }
 
@@ -29,6 +31,8 @@ export type TimetablePayload = {
     [TimetableActionTypes.REMOVE_SHIFT]: string
     [TimetableActionTypes.REMOVE_TA]: string
     [TimetableActionTypes.SET_TIMETABLE]: Timetable
+    [TimetableActionTypes.UPDATE_SHIFT]: Shift
+    [TimetableActionTypes.UPDATE_TA]: TA
 }
 
 // Action map of timetable actions
@@ -61,6 +65,14 @@ export function reducer(state: Timetable, action: TimetableActions): Timetable {
         case TimetableActionTypes.SET_TIMETABLE:
 
             return action.payload
+        case TimetableActionTypes.UPDATE_SHIFT:
+
+            const updatedShift = action.payload
+            return { ...state, shifts: state.shifts.map(shift => shift.id === updatedShift.id ? updatedShift : shift) }
+        case TimetableActionTypes.UPDATE_TA:
+
+            const updatedTA = action.payload
+            return { ...state, tas: state.tas.map(ta => ta.id === updatedTA.id ? updatedTA : ta) }
         default:
             return state
     }
@@ -81,6 +93,14 @@ export function removeShift(shiftId: string): TimetableActions {
 
 export function removeTA(taId: string): TimetableActions {
     return { type: TimetableActionTypes.REMOVE_TA, payload: taId }
+}
+
+export function updateShift(shift: Shift): TimetableActions {
+    return { type: TimetableActionTypes.UPDATE_SHIFT, payload: shift }
+}
+
+export function updateTA(ta: TA): TimetableActions {
+    return { type: TimetableActionTypes.UPDATE_TA, payload: ta }
 }
 
 export function setTimetable(timetable: Timetable): TimetableActions {
