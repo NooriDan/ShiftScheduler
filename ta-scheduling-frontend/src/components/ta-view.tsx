@@ -7,7 +7,7 @@ export default function TAView() {
     return (<div>
         <div className="font-bold">TA View</div>
 
-        <table className="table-auto">
+        <table className="table-auto border-b">
             <thead>
                 <tr className="border bg-gray-100">
                     <th className="p-2 border-x">TA</th>

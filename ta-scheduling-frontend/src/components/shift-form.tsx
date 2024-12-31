@@ -4,8 +4,8 @@ import { useTimetableContext } from "@/context/app-context"
 import { DayOfWeek, Shift } from "@/models/domain"
 import { convertEuropeanToAmericanTime } from "@/models/time-utils"
 
-export default function ShiftForm() {
-    const { state, dispatch } = useTimetableContext()
+export default function ShiftForm({ action }: { action: (ta: Shift) => void }) {
+    const { state } = useTimetableContext()
 
     const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
@@ -29,7 +29,8 @@ export default function ShiftForm() {
             alert("Shift already exists")
             return
         }
-        dispatch(addShift(shift))
+
+        action(shift)
     }
 
     return (<div>

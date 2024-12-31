@@ -4,12 +4,12 @@ import { Shift, TA } from "@/models/domain"
 import { useReducer } from "react"
 import AvailabilityChooser, { reducer } from "./availability-chooser"
 
-export default function TAForm() {
-    const { state, dispatch } = useTimetableContext()
+export default function TAForm({ ta, action }: { ta?: TA, action: (ta: TA) => void }) {
+    const { state } = useTimetableContext()
     // States for desired, undesired, and unavailable shifts
-    const [desiredShifts, desiredShiftsDispatch] = useReducer<Shift[], any>(reducer, [])
-    const [undesiredShifts, undesiredShiftsDispatch] = useReducer<Shift[], any>(reducer, [])
-    const [unavailableShifts, unavailableShiftsDispatch] = useReducer<Shift[], any>(reducer, [])
+    const [desiredShifts, desiredShiftsDispatch] = useReducer<Shift[], any>(reducer, ta ? ta.desired : [])
+    const [undesiredShifts, undesiredShiftsDispatch] = useReducer<Shift[], any>(reducer, ta ? ta.undesired : [])
+    const [unavailableShifts, unavailableShiftsDispatch] = useReducer<Shift[], any>(reducer, ta ? ta.unavailable : [])
     // Get the shifts from the context
     const shifts = state.shifts
     const available = shifts.filter(shift => !desiredShifts.includes(shift) && !undesiredShifts.includes(shift) && !unavailableShifts.includes(shift))
@@ -40,8 +40,7 @@ export default function TAForm() {
         // Add the unavailable shifts
         ta.unavailable = unavailableShifts.map(id => shifts.find(shift => shift === id) as Shift)
 
-        // Add the TA to the context
-        dispatch(addTA(ta))
+        action(ta)
     }
 
     return (<div>
@@ -49,22 +48,22 @@ export default function TAForm() {
         <form onSubmit={onSubmit}>
             <div>
                 <label>Mac ID: </label>
-                <input name="id" type="text" placeholder="Mac ID" className="border rounded p-1" required />
+                <input name="id" type="text" defaultValue={ta && ta.id} placeholder="Mac ID" className="border rounded p-1" required />
             </div>
 
             <div>
                 <label>Name: </label>
-                <input name="name" type="text" placeholder="Name" className="border rounded p-1" required />
+                <input name="name" type="text" defaultValue={ta && ta.name} placeholder="Name" className="border rounded p-1" required />
             </div>
 
             <div>
                 <label>Required Shifts: </label>
-                <input name="required_shifts" type="number" placeholder="Required Shifts" className="border rounded p-1" required />
+                <input name="required_shifts" type="number" defaultValue={ta && ta.requiredShifts} placeholder="Required Shifts" className="border rounded p-1" required />
             </div>
 
             <div>
                 <label>Is Grad Student: </label>
-                <input name="is_grad_student" type="checkbox" className="border rounded p-1" />
+                <input name="is_grad_student" type="checkbox" defaultValue={ta && ta.isGradStudent ? "on" : "off"} className="border rounded p-1" />
             </div>
 
             <div>

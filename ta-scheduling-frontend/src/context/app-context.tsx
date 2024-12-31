@@ -1,4 +1,5 @@
-import { DayOfWeek, Shift, Timetable } from "@/models/domain";
+"use client"
+import { Timetable } from "@/models/domain";
 import { createContext, Dispatch, useContext, useReducer } from "react";
 import { reducer, TimetableActions } from "./app-reducers";
 

@@ -1,10 +1,11 @@
+"use client"
 import SchedulerGrid from "@/components/scheduler-grid";
 import ShiftForm from "@/components/shift-form";
 import ShiftView from "@/components/shifts-view";
 import TAForm from "@/components/ta-form";
 import TAView from "@/components/ta-view";
 import { useTimetableContext } from "@/context/app-context";
-import { removeShift, removeTA, setTimetable } from "@/context/app-reducers";
+import { addShift, addTA, removeShift, removeTA, setTimetable } from "@/context/app-reducers";
 import { DayOfWeek, Shift, ShiftAssignment, TA, Timetable } from "@/models/domain";
 import { convertEuropeanToAmericanTime } from "@/models/time-utils";
 import { useState } from "react";
@@ -16,10 +17,17 @@ function ShiftDisplay({ shift }: { shift: Shift }) {
         dispatch(removeShift(shift.id))
     }
 
-    return (<div className="flex flex-row">
-        <div>{shift.series} - {shift.dayOfWeek} {convertEuropeanToAmericanTime(shift.startTime)}-{convertEuropeanToAmericanTime(shift.endTime)}</div>
-        <button className="text-red-500 font-bold hover:cursor-pointer mx-2" onClick={onClick}>X</button>
-    </div>)
+    return (
+        <tr className="border">
+            <td className="p-2 border-x">{shift.series}</td>
+            <td className="p-2 border-x">{shift.dayOfWeek}</td>
+            <td className="p-2 border-x">{convertEuropeanToAmericanTime(shift.startTime)}</td>
+            <td className="p-2 border-x">{convertEuropeanToAmericanTime(shift.endTime)}</td>
+            <td className="p-2 border-x">{shift.requiredTas}</td>
+            <td className="p-2 border-x"><button className="text-red-500 font-bold hover:cursor-pointer mx-2" onClick={onClick}>Delete</button></td>
+            <td className="p-2 border-x"></td>
+        </tr>
+    )
 }
 
 function TADisplay({ ta }: { ta: TA }) {
@@ -29,10 +37,19 @@ function TADisplay({ ta }: { ta: TA }) {
         dispatch(removeTA(ta.id))
     }
 
-    return (<div className="flex flex-row">
-        <div>{ta.name} {ta.isGradStudent ? "Grad" : "Undergrad"} - Required Shifts: {ta.requiredShifts}</div>
-        <button className="text-red-500 font-bold hover:cursor-pointer mx-2" onClick={onClick}>X</button>
-    </div>)
+    return (
+        <tr className="border">
+            <td className="p-2 border-x">{ta.name}</td>
+            <td className="p-2 border-x">{ta.id}</td>
+            <td className="p-2 border-x">{ta.isGradStudent ? "Grad" : "Undergrad"}</td>
+            <td className="p-2 border-x">{ta.requiredShifts}</td>
+            <td className="p-2 border-x">{ta.desired.map(s => s.series).join(", ")}</td>
+            <td className="p-2 border-x">{ta.undesired.map(s => s.series).join(", ")}</td>
+            <td className="p-2 border-x">{ta.unavailable.map(s => s.series).join(", ")}</td>
+            <td className="p-2 border-x"><button className="text-red-500 font-bold hover:cursor-pointer mx-2" onClick={onClick}>Delete</button></td>
+            <td className="p-2 border-x"></td>
+        </tr>)
+
 }
 
 type FormState = "Hidden" | "Shift" | "TA";
@@ -144,25 +161,65 @@ export default function HomeContent() {
         dispatch(setTimetable(new Timetable(timetable.id, shifts, tas, shift_assignments)))
     }
 
+    const clickHideSide = () => {
+        setFormState("Hidden")
+    }
+
     return (<div className="flex flex-1 flex-col p-4">
         <div className="">
-            <div className="text-xl font-bold">TA Management</div>
+            <div className="text-3xl font-bold">TA Management</div>
             <div className="flex flex-row">
                 <div className="flex-1">
                     <div className="font-bold">Shifts:</div>
-                    <div>
-                        {state.shifts.map(shift => <ShiftDisplay key={shift.id} shift={shift} />)}
-                    </div>
+                    <table className="table-auto  border-b">
+                        <thead>
+                            <tr className="border bg-gray-100">
+                                <th className="p-2 border-x">Series</th>
+                                <th className="p-2 border-x">Day Of the Week</th>
+                                <th className="p-2 border-x">Start Time</th>
+                                <th className="p-2 border-x">End Time</th>
+                                <th className="p-2 border-x">Required TAs</th>
+                                <th className="p-2 border-x">Delete button</th>
+                                <th className="p-2 border-x">Edit button</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {state.shifts.map(shift => <ShiftDisplay key={shift.id} shift={shift} />)}
+                        </tbody>
+                    </table>
                     <div className="font-bold">TAs:</div>
-                    <div>
-                        {state.tas.map(ta => <TADisplay key={ta.id} ta={ta} />)}
+                    <table className="table-auto border-b">
+                        <thead>
+                            <tr className="border bg-gray-100">
+                                <th className="p-2 border-x">Name</th>
+                                <th className="p-2 border-x">Mac ID</th>
+                                <th className="p-2 border-x">Type of student</th>
+                                <th className="p-2 border-x">Required Shifts</th>
+                                <th className="p-2 border-x">Desired Shifts</th>
+                                <th className="p-2 border-x">Undesired Shifts</th>
+                                <th className="p-2 border-x">Unavailable Shifts</th>
+                                <th className="p-2 border-x">Delete button</th>
+                                <th className="p-2 border-x">Edit button</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {state.tas.map(ta => <TADisplay key={ta.id} ta={ta} />)}
+                        </tbody>
+                    </table>
+                </div>
+                {formState !== "Hidden" &&
+                    <div className="basis-1/3">
+                        {formState === "Shift" && <ShiftForm action={shift => dispatch(addShift(shift))} />}
+                        {formState === "TA" && <TAForm action={ta => dispatch(addTA(ta))} />}
                     </div>
-                </div>
-                <div className="flex-1">
-                    {formState === "Shift" && <ShiftForm />}
-                    {formState === "TA" && <TAForm />}
-                </div>
+                }
             </div>
+            {
+                // TODO: Create a new formState which is "Edit Shift" and "Edit TA" which will allow the user to edit the shift or TA onclick
+                // Also store the previous edit state in the state so that the form can be prepopulated with the previous values
+                // Also make sure that when its changing state to the edit state, once its done it'll get rid of the saved state
+                // Also update the ShiftForm to be identiical to the TAForm
+            }
 
             <div>
                 <div className="font-bold">Generation Status: {generationStatus}</div>
@@ -175,19 +232,20 @@ export default function HomeContent() {
             </div>
 
             <div>
-                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer" onClick={clickAddShift}>Add Shift</button>
-                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer" onClick={clickAddTA}>Add TAs</button>
-                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer" onClick={generateSchedule}>Generate Schedule</button>
-                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer" onClick={fetchDemoData}>Fetch Demo Data</button>
-                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer" onClick={printSchedule}>Print Schedule</button>
-                <div className="border border-black p-2">
-                    <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer disabled:bg-gray-200 disabled:cursor-default" onClick={() => setViewState("Schedule")} disabled={viewState == "Schedule"}>Schedule View</button>
-                    <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer disabled:bg-gray-200 disabled:cursor-default" onClick={() => setViewState("Shifts")} disabled={viewState == "Shifts"}>Shifts View</button>
-                    <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer disabled:bg-gray-200 disabled:cursor-default" onClick={() => setViewState("TA")} disabled={viewState == "TA"}>TAs View</button>
-                </div>
+                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer font-bold " onClick={clickAddShift}>Add Shift</button>
+                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer font-bold " onClick={clickAddTA}>Add TAs</button>
+                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer font-bold " onClick={clickHideSide}>Hide Side View</button>
+                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer font-bold " onClick={generateSchedule}>Generate Schedule</button>
+                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer font-bold " onClick={fetchDemoData}>Fetch Demo Data</button>
+                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer font-bold " onClick={printSchedule}>Print Schedule</button>
+
             </div>
-
-
+        </div>
+        <div className="font-bold text-2xl pt-2">Scheduling View</div>
+        <div>
+            <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer disabled:bg-gray-200 disabled:cursor-default font-bold" onClick={() => setViewState("Schedule")} disabled={viewState == "Schedule"}>Schedule View</button>
+            <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer disabled:bg-gray-200 disabled:cursor-default font-bold" onClick={() => setViewState("Shifts")} disabled={viewState == "Shifts"}>Shifts View</button>
+            <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer disabled:bg-gray-200 disabled:cursor-default  font-bold" onClick={() => setViewState("TA")} disabled={viewState == "TA"}>TAs View</button>
         </div>
         {viewState === "Schedule" && <SchedulerGrid />}
         {viewState === "TA" && <TAView />}
