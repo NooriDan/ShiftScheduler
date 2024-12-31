@@ -1,5 +1,6 @@
 .venv/
 __pycache__/
+*.pyc
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
@@ -310,3 +311,8 @@ timefold-quickstarts/
 .DS_Store
 .DS_Store
 /ta-scheduling-webapp/src/employee_scheduling/__pycache__
+ta-scheduling-webapp/src/employee_scheduling/__pycache__/__init__.cpython-312.pyc
+ta-scheduling-webapp/src/employee_scheduling/__pycache__/__init__.cpython-312.pyc
+ta-scheduling-webapp/src/employee_scheduling/__pycache__/constraints.cpython-312.pyc
+ta-scheduling-webapp/src/employee_scheduling/__pycache__/utils.cpython-312.pyc
+ta-scheduling-webapp/src/employee_scheduling/__pycache__/solver.cpython-312.pyc

@@ -9,7 +9,7 @@ import pandas as pd
 from typing import Dict, List
 from enum import Enum
 from pathlib import Path
-from datetime import timedelta, time, date
+from datetime import timedelta, time, date, datetime
 from dataclasses import dataclass, field
 
 # Custom Imports 
@@ -30,7 +30,7 @@ def id_generator():
 
 def initialize_logger():
     # Configure the logging
-    LOG_FILE = f"logs/timefold_webapp_{datetime.datetime.now().strftime('%y_%m_%d')}.log"
+    LOG_FILE = f"logs/timefold_webapp_{datetime.now().strftime('%y_%m_%d')}.log"
 
     # Create the logs directory if it doesn't exist
     if not os.path.exists("logs"):
@@ -243,11 +243,11 @@ def generate_demo_data(name: str = "DemoA") -> Timetable:
 def _demo_data_A() -> Timetable:     
     ids = id_generator()
     shifts: List[Shift] = [
-        Shift(id=next(ids), series="L07", day_of_week="Mon",start_time=DAY_START_TIME, end_time=DAY_END_TIME, required_tas=2),
-        Shift(id=next(ids), series="L08", day_of_week = "Mon", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=3),
-        Shift(id=next(ids), series="L09", day_of_week="Tue", start_time=DAY_START_TIME, end_time=DAY_END_TIME, required_tas=2),
-        Shift(id=next(ids), series="L10", day_of_week="Tue", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=1),
-        Shift(id=next(ids), series="L11", day_of_week="Thu", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=2),
+        Shift(id=next(ids), series="L07", day_of_week="Mon",start_time=DAY_START_TIME, end_time=DAY_END_TIME, required_tas=2, shiftDate=datetime.now().date()),
+        Shift(id=next(ids), series="L08", day_of_week = "Mon", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=3, shiftDate=datetime.now().date()),
+        Shift(id=next(ids), series="L09", day_of_week="Tue", start_time=DAY_START_TIME, end_time=DAY_END_TIME, required_tas=2, shiftDate=datetime.now().date()+ timedelta(days=1)),
+        Shift(id=next(ids), series="L10", day_of_week="Tue", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=1, shiftDate=datetime.now().date()+ timedelta(days=1)),
+        Shift(id=next(ids), series="L11", day_of_week="Thu", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=2, shiftDate=datetime.now().date()+ timedelta(days=2)),
         ]
     
     ids = id_generator()
