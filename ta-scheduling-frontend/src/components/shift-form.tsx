@@ -2,7 +2,7 @@ import { addShift } from "@/context/app-reducers"
 import { time_strings } from "./scheduler-grid"
 import { useTimetableContext } from "@/context/app-context"
 import { DayOfWeek, Shift } from "@/models/domain"
-import { convertEuropeanToAmericanTime } from "@/models/time-utils"
+import { compareTimes, convertEuropeanToAmericanTime } from "@/models/time-utils"
 
 export default function ShiftForm({ shift, action }: { shift?: Shift, action: (ta: Shift) => void }) {
     const { state } = useTimetableContext()
@@ -17,6 +17,11 @@ export default function ShiftForm({ shift, action }: { shift?: Shift, action: (t
         const day_of_week = formData.get("day_of_week") as DayOfWeek
         const start_time = formData.get("start_time") as string
         const end_time = formData.get("end_time") as string
+
+        if (compareTimes(start_time, end_time) >= 0) {
+            alert("Start time must be before end time")
+            return
+        }
 
         const _shift = new Shift(shift ? shift.id : "", series, day_of_week, start_time, end_time, required_tas, "CS 100 Lab")
 

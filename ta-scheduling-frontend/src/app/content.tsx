@@ -184,7 +184,7 @@ export default function HomeContent() {
         setEditState(undefined)
     }
 
-    
+
 
     return (<div className="flex flex-1 flex-col p-4">
         <div className="">
@@ -228,14 +228,22 @@ export default function HomeContent() {
                         </tbody>
                     </table>
                 </div>
-                {formState !== "Hidden" &&
-                    <div className="basis-1/3">
+                <div className="flex-1">
+                    <div>
+                        <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer font-bold " onClick={clickAddShift}>Add Shift</button>
+                        <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer font-bold " onClick={clickAddTA}>Add TAs</button>
+                        <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer font-bold " onClick={clickHideSide}>Hide Forms</button>
+                        <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer font-bold " onClick={fetchDemoData}>Fetch Demo Data</button>
+                        <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer font-bold " onClick={printSchedule}>Print Schedule</button>
+                    </div>
+                    {formState !== "Hidden" && <>
                         {formState === "Add Shift" && <ShiftForm action={shift => dispatch(addShift(shift))} />}
                         {formState === "Add TA" && <TAForm action={ta => dispatch(addTA(ta))} />}
                         {formState === "Edit Shift" && <ShiftForm shift={editState as Shift} action={shift => dispatch(updateShift(shift))} />}
                         {formState === "Edit TA" && <TAForm ta={editState as TA} action={ta => dispatch(updateTA(ta))} />}
-                    </div>
-                }
+                    </>}
+                </div>
+
             </div>
 
             <div>
@@ -247,21 +255,13 @@ export default function HomeContent() {
                 </>}
             </div>
 
-            <div>
-                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer font-bold " onClick={clickAddShift}>Add Shift</button>
-                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer font-bold " onClick={clickAddTA}>Add TAs</button>
-                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer font-bold " onClick={clickHideSide}>Hide Side View</button>
-                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer font-bold " onClick={generateSchedule}>Generate Schedule</button>
-                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer font-bold " onClick={fetchDemoData}>Fetch Demo Data</button>
-                <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer font-bold " onClick={printSchedule}>Print Schedule</button>
-
-            </div>
         </div>
         <div className="font-bold text-2xl pt-2">Scheduling View</div>
         <div>
             <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer disabled:bg-gray-200 disabled:cursor-default font-bold" onClick={() => setViewState("Schedule")} disabled={viewState == "Schedule"}>Schedule View</button>
             <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer disabled:bg-gray-200 disabled:cursor-default font-bold" onClick={() => setViewState("Shifts")} disabled={viewState == "Shifts"}>Shifts View</button>
             <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer disabled:bg-gray-200 disabled:cursor-default  font-bold" onClick={() => setViewState("TA")} disabled={viewState == "TA"}>TAs View</button>
+            <button className="p-2 m-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer font-bold " onClick={generateSchedule}>Generate Schedule</button>
         </div>
         {viewState === "Schedule" && <SchedulerGrid />}
         {viewState === "TA" && <TAView />}
