@@ -101,11 +101,14 @@ export default function HomeContent() {
     const generateSchedule = async () => {
         setGenerationStatus("Generating")
 
+        const shiftAssignments: ShiftAssignment[] = []
         for (const shift of state.shifts) {
             for (let j = 0; j < shift.requiredTas; j++) {
-                state.shiftAssignments.push(new ShiftAssignment(Math.random().toString(36).substring(7), shift))
+                shiftAssignments.push(new ShiftAssignment(Math.random().toString(36).substring(7), shift))
             }
         }
+
+        state.shiftAssignments = shiftAssignments
 
         let response = await fetch("http://localhost:8080/schedules", {
             method: "POST",
@@ -256,8 +259,9 @@ export default function HomeContent() {
                 <div className="font-bold">Generation Status: {generationStatus}</div>
                 {generationStatus !== "Idle" && <>
                     <div className="font-bold">Score:</div>
-                    <div className="font-bold">Hardscore: {state.score.hardScore}</div>
-                    <div className="font-bold">Softscore: {state.score.softScore}</div>
+                    <div className="font-bold">Hard score: {state.score.hardScore}</div>
+                    <div className="font-bold">Medium score: {state.score.mediumScore}</div>
+                    <div className="font-bold">Soft score: {state.score.softScore}</div>
                 </>}
             </div>
 

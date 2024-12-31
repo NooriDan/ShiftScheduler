@@ -25,10 +25,10 @@ def run_servers():
         print("Detected Linux")
         # Set Terminal window titles for Linux (gnome-terminal)
         processes.append(subprocess.Popen(
-            ["gnome-terminal", "--", "bash", "-c", f"cd {webapp_dir} && echo 'WebApp Server' && run-app; exec bash"]
+            ["bash", "-c", f"cd {webapp_dir} && echo 'WebApp Server' && run-app; exec bash"]
         ))
         processes.append(subprocess.Popen(
-            ["gnome-terminal", "--", "bash", "-c", f"cd {frontend_dir} && echo 'Frontend Server' && npm run dev; exec bash"]
+            ["bash", "-c", f"cd {frontend_dir} && echo 'Frontend Server' && npm run dev; exec bash"]
         ))
 
     elif system == "Windows":  # Windows

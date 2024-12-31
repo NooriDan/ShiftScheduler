@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import time, date
 from typing import Annotated
 from timefold.solver.domain import *
-from timefold.solver.score import HardSoftScore
+from timefold.solver.score import HardMediumSoftScore
 from timefold.solver import SolverStatus
 from pydantic import Field
 
@@ -83,7 +83,7 @@ class Timetable(JsonDomainBase):
     shift_assignments: Annotated[list[ShiftAssignment],
                        PlanningEntityCollectionProperty]
     # score and solver status
-    score: Annotated[HardSoftScore, PlanningScore] = Field(default=None)
+    score: Annotated[HardMediumSoftScore, PlanningScore, Field(default=None)]
     solver_status: Annotated[SolverStatus | None, Field(default=None)]
 
     def __str__(self):

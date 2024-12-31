@@ -79,12 +79,12 @@ export class ShiftAssignment {
 export class Score {
     hardScore: number
     softScore: number
-    initScore: number
+    mediumScore: number
 
-    constructor(hardScore: number = 0, softScore: number = 0, initScore: number = 0) {
+    constructor(hardScore: number = 0, softScore: number = 0, mediumScore: number = 0) {
         this.hardScore = hardScore
         this.softScore = softScore
-        this.initScore = initScore
+        this.mediumScore = mediumScore
     }
 }
 
