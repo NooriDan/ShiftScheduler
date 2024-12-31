@@ -1,4 +1,3 @@
-import { addTA } from "@/context/app-reducers"
 import { useTimetableContext } from "@/context/app-context"
 import { Shift, TA } from "@/models/domain"
 import { useReducer } from "react"

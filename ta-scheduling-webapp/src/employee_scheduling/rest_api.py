@@ -102,7 +102,7 @@ def fix_timetable(schedule: Timetable) -> Timetable:
 @app.post("/schedules")
 async def solve_timetable(schedule: Timetable) -> str:
     job_id = str(uuid4())
-    
+    print("Hello world")
     data_sets[job_id] = fix_timetable(schedule)
     solver_manager.solve_and_listen(job_id, schedule,
                                     lambda solution: update_schedule(job_id, solution))

@@ -77,6 +77,12 @@ export default function HomeContent() {
     const generateSchedule = async () => {
         setGenerationStatus("Generating")
 
+        for (const shift of state.shifts) {
+            for (let j = 0; j < shift.requiredTas; j++) {
+                state.shiftAssignments.push(new ShiftAssignment(Math.random().toString(36).substring(7), shift))
+            }
+        }
+
         let response = await fetch("http://localhost:8080/schedules", {
             method: "POST",
             headers: {
@@ -86,17 +92,18 @@ export default function HomeContent() {
         })
         const job_id = (await response.text()).split("\"")[1]
         console.log(job_id)
+        await new Promise(resolve => setTimeout(resolve, 5000))
 
         let status;
         do {
-            await new Promise(resolve => setTimeout(resolve, 2000))
-
             response = await fetch(`http://localhost:8080/schedules/${job_id}`)
             const schedule = await response.json()
             status = schedule.solverStatus
+            console.log(status)
             dispatch(setTimetable(schedule))
+            await new Promise(resolve => setTimeout(resolve, 5000))
 
-        } while (status !== "NOT_SOLVING");
+        } while (status !== "NOT_SOLVING")
 
         setGenerationStatus("Complete")
     }
@@ -227,7 +234,6 @@ export default function HomeContent() {
                     <div className="font-bold">Score:</div>
                     <div className="font-bold">Hardscore: {state.score.hardScore}</div>
                     <div className="font-bold">Softscore: {state.score.softScore}</div>
-                    <div className="font-bold">Initscore: {state.score.initScore}</div>
                 </>}
             </div>
 

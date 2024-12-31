@@ -4,8 +4,8 @@ import { convertEuropeanToAmericanTime } from "@/models/time-utils";
 import React from "react";
 
 export const time_strings = [
-    "8:30:00",
-    "9:30:00",
+    "08:30:00",
+    "09:30:00",
     "10:30:00",
     "11:30:00",
     "12:30:00",
