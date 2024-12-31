@@ -3,14 +3,15 @@ from timefold.solver.domain import (planning_entity, planning_solution, Planning
                                     ProblemFactCollectionProperty, ValueRangeProvider,
                                     PlanningScore)
 from timefold.solver import SolverStatus
-from timefold.solver.score import HardSoftScore
+from timefold.solver.score import HardSoftScore, HardMediumSoftScore
 from dataclasses import dataclass, field
 from datetime import time, date
 from typing import Annotated
-from pydantic import Field, BaseModel
+from pydantic import Field
 
 
-class Shift(BaseModel):
+@dataclass
+class Shift():
     id: Annotated[str, PlanningId]
     series: str
     day_of_week: str
@@ -24,7 +25,8 @@ class Shift(BaseModel):
     def __str__(self):
         return f'{self.series} {self.day_of_week} {self.start_time.strftime("%H:%M")}'
     
-class TA(BaseModel):
+@dataclass    
+class TA():
     id: Annotated[str, PlanningId]
     name: str
     required_shifts: int
@@ -53,7 +55,8 @@ class TA(BaseModel):
 
 
 @planning_entity
-class ShiftAssignment(BaseModel):
+@dataclass
+class ShiftAssignment():
     id: Annotated[str, PlanningId]
     shift: Shift
     assigned_ta: Annotated[TA | None,
@@ -67,7 +70,8 @@ class ShiftAssignment(BaseModel):
     #     return f'{self.shift.id}-{self.shift.sereis}_{self.assigned_ta.id}-{self.assigned_ta.name}'
 
 @planning_solution
-class Timetable(BaseModel):
+@dataclass
+class Timetable():
     id: Annotated[str, PlanningId]
     # problem facts
     shifts: Annotated[list[Shift],
@@ -80,8 +84,11 @@ class Timetable(BaseModel):
     shift_assignments: Annotated[list[ShiftAssignment],
                        PlanningEntityCollectionProperty]
     # score and solver status
-    score: Annotated[HardSoftScore | None, PlanningScore, Field(default=None)]
-    solver_status: Annotated[SolverStatus, Field(default=SolverStatus.NOT_SOLVING)]
+    solver_status: Annotated[SolverStatus | None, Field(default=None)]  = Field(default=None)
+    score: Annotated[HardMediumSoftScore, PlanningScore] = field(default=None)
+
+    def __str__(self):
+        return f"timetable_{self.id}"
 
 
 if __name__ == '__main__':

@@ -1,10 +1,11 @@
 === Rostering the TAs from the demo data ===
-Solving started: time spent (43), best score (-10init/-5hard/0soft), environment mode (REPRODUCIBLE), move thread count (NONE), random (JDK with seed 0).
+Solving started: time spent (23), best score (-10init/-5hard/0soft), environment mode (REPRODUCIBLE), move thread count (NONE), random (JDK with seed 0).
 Problem scale: entity count (10), variable count (10), approximate value count (5), approximate problem scale (9,765,625).
-Construction Heuristic phase (0) ended: time spent (148), best score (-2hard/-27soft), move evaluation speed (537/sec), step total (10).
-Local Search phase (1) ended: time spent (10858), best score (0hard/-7soft), move evaluation speed (5370/sec), step total (7978).
-Solving ended: time spent (10858), best score (0hard/-7soft), move evaluation speed (5298/sec), phase total (2), environment mode (REPRODUCIBLE), move thread count (NONE).
+Construction Heuristic phase (0) ended: time spent (63), best score (-2hard/-17soft), move evaluation speed (1428/sec), step total (10).
+Local Search phase (1) ended: time spent (30246), best score (0hard/-7soft), move evaluation speed (28553/sec), step total (94444).
+Solving ended: time spent (30270), best score (0hard/-7soft), move evaluation speed (28471/sec), phase total (2), environment mode (REPRODUCIBLE), move thread count (NONE).
 ************************** Final Timetable **************************
+Score: 0hard/-7soft
 === Starting to print the assignment matrix ===
 +------------------+------------------+------------------+------------------+------------------+------------------+
 |                  |M. Roghani (ID: 0)|D. Noori (ID: 1)  |A. Gholami (ID: 2)|M. Jafari (ID: 3) |A. Athar (ID: 4)  |
@@ -19,11 +20,11 @@ Solving ended: time spent (10858), best score (0hard/-7soft), move evaluation sp
 |L09 Tue 14:30     |M. Roghani        |                  |                  |                  |A. Athar          |
 |requires 2        |Desired           |                  |                  |                  |Undesired         |
 +------------------+------------------+------------------+------------------+------------------+------------------+
-|L10 Tue 18:30     |                  |D. Noori          |                  |                  |                  |
-|requires 1        |                  |Neutral           |                  |                  |                  |
+|L10 Tue 18:30     |                  |                  |A. Gholami        |                  |                  |
+|requires 1        |                  |                  |Neutral           |                  |                  |
 +------------------+------------------+------------------+------------------+------------------+------------------+
-|L11 Thu 18:30     |                  |                  |A. Gholami        |M. Jafari         |                  |
-|requires 2        |                  |                  |Neutral           |Neutral           |                  |
+|L11 Thu 18:30     |                  |D. Noori          |                  |M. Jafari         |                  |
+|requires 2        |                  |Neutral           |                  |Neutral           |                  |
 +------------------+------------------+------------------+------------------+------------------+------------------+
 === Finished printing the assignment matrix ===
 === Done Solving ===
