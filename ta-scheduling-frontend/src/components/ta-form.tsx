@@ -24,22 +24,22 @@ export default function TAForm({ ta, action }: { ta?: TA, action: (ta: TA) => vo
         const required_shifts = parseInt(formData.get("required_shifts") as string)
         const is_grad_student = formData.get("is_grad_student") as string
 
-        if (state.tas.find(ta => ta.id === id)) {
+        if (!ta && state.tas.find(ta => ta.id === id)) {
             alert("TA already exists")
             return
         }
 
-        const ta = new TA(id, name, required_shifts)
-        ta.isGradStudent = is_grad_student === "on"
+        const _ta = new TA(id, name, required_shifts)
+        _ta.isGradStudent = is_grad_student === "on"
 
         // Add the desired shifts
-        ta.desired = desiredShifts.map(id => shifts.find(shift => shift === id) as Shift)
+        _ta.desired = desiredShifts.map(id => shifts.find(shift => shift === id) as Shift)
         // Add the undesired shifts
-        ta.undesired = undesiredShifts.map(id => shifts.find(shift => shift === id) as Shift)
+        _ta.undesired = undesiredShifts.map(id => shifts.find(shift => shift === id) as Shift)
         // Add the unavailable shifts
-        ta.unavailable = unavailableShifts.map(id => shifts.find(shift => shift === id) as Shift)
+        _ta.unavailable = unavailableShifts.map(id => shifts.find(shift => shift === id) as Shift)
 
-        action(ta)
+        action(_ta)
     }
 
     return (<div>
@@ -80,7 +80,7 @@ export default function TAForm({ ta, action }: { ta?: TA, action: (ta: TA) => vo
                 <AvailabilityChooser shifts={unavailableShifts} dispatch={unavailableShiftsDispatch} available={available} name="unavailable" />
             </div>
 
-            <button className="p-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer">Add TA</button>
+            <button className="p-2 bg-blue-300 rounded-xl hover:bg-blue-400 hover:cursor-pointer">{ta ? "Edit" : "Add"} TA</button>
         </form>
     </div>)
 }
