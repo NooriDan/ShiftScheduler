@@ -55,6 +55,7 @@ async def get_timetable_from_data_folder(data_folder: str) -> Timetable:
 
 @app.get("/schedules/{problem_id}",  response_model_exclude_none=True)
 async def get_timetable(problem_id: str) -> Timetable:
+    logger.info(f"accessing '{problem_id}' problem_id")
     schedule = data_sets[problem_id]
     return schedule.model_copy(update={
         'solver_status': solver_manager.get_solver_status(problem_id)
