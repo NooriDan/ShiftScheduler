@@ -96,12 +96,12 @@ export default function HomeContent() {
 
         let status;
         do {
+            await new Promise(resolve => setTimeout(resolve, 2000))
             response = await fetch(`http://localhost:8080/schedules/${job_id}`)
             const schedule = await response.json()
             status = schedule.solverStatus
             console.log(status)
             dispatch(setTimetable(schedule))
-            await new Promise(resolve => setTimeout(resolve, 5000))
 
         } while (status !== "NOT_SOLVING")
 
