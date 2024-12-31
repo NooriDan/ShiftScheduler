@@ -10,14 +10,14 @@ from pydantic import Field
 
 class Shift(JsonDomainBase):
     id: Annotated[str, PlanningId]
-    series: str
-    day_of_week: str
-    start_time: time
-    end_time: time
-    required_tas: int
+    series: str # must also be unique
+    day_of_week: str # not critical
+    start_time: time # not critical
+    end_time: time   # not critical
+    required_tas: int 
     # Optional
     alias: str = "DEFAULT"
-    shift_date: date = date(1900, 1, 1)
+    shift_date: date = date(1900, 1, 1) 
 
     def __str__(self):
         return f'{self.series} {self.day_of_week} {self.start_time.strftime("%H:%M")}'
@@ -25,7 +25,7 @@ class Shift(JsonDomainBase):
 
 class TA(JsonDomainBase):
     id: Annotated[str, PlanningId]
-    name: str
+    name: str # not critical
     required_shifts: int
     desired: Annotated[list[Shift], Field(default_factory=list)]
     undesired: Annotated[list[Shift], Field(default_factory=list)]
