@@ -78,12 +78,18 @@ export default function HomeContent() {
         setEditState(undefined)
     }
 
-    const clickEditShift = (shift: Shift) => {
+    const clickEditShift = async (shift: Shift) => {
+        setEditState(undefined)
+        setFormState("Hidden")
+        await 1;
         setEditState(shift)
         setFormState("Edit Shift")
     }
 
-    const clickEditTA = (ta: TA) => {
+    const clickEditTA = async (ta: TA) => {
+        setEditState(undefined)
+        setFormState("Hidden")
+        await 1;
         setEditState(ta)
         setFormState("Edit TA")
     }
