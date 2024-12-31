@@ -65,4 +65,4 @@ if __name__ == "__main__":
     run_servers()
 
     # Call cleanup_processes when the script exits
-    cleanup_processes()
+    # cleanup_processes()
