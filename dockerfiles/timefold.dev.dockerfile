@@ -1,4 +1,4 @@
-FROM python:3.12-slim
+FROM python:3.12
 
 RUN apt-get update && apt-get install -y curl zip unzip bash && \
     curl -s "https://get.sdkman.io" | bash && \
@@ -6,6 +6,8 @@ RUN apt-get update && apt-get install -y curl zip unzip bash && \
 
 ENV JAVA_HOME=/root/.sdkman/candidates/java/current
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
+
+EXPOSE 8080
 
 WORKDIR /app
 
