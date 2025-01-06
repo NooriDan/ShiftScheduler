@@ -1,0 +1,13 @@
+services:
+  frontend:
+    build:
+      context: ./ta-scheduling-frontend/
+      dockerfile: ../dockerfiles/frontend.dev.dockerfile
+    ports:
+      - "3000:3000"
+  backend:
+    build:
+      context: ./ta-scheduling-webapp/
+      dockerfile: ../dockerfiles/timefold.dev.dockerfile
+    ports:
+      - "8080:8080"

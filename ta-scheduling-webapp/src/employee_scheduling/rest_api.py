@@ -20,6 +20,13 @@ app = FastAPI(title="TA Shift Rostering",
 origins = [
     "http://localhost:3000"
 ]
+
+@app.middleware("http")
+async def log_requests(request, call_next):
+    logger.info(f"Request: {request.method} {request.url}")
+    response = await call_next(request)
+    return response
+
 app.add_middleware(CORSMiddleware, allow_origins=origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"])
 
 data_sets: dict[str, Timetable] = {}
