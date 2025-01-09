@@ -1,0 +1,6 @@
+﻿id,name,series,req_ta_per_shift,day_of_week,date,start_time,end_time,duration
+1,Lab 1,MON,2,MON,2024-01-07,14:30,17:30,3
+2,Lab 1,TUE,2,TUE,2024-01-07,14:30,17:30,3
+3,Lab 1,WED,2,WED,2024-01-08,14:30,17:30,3
+4,Lab 1,THU,2,THU,2024-01-08,14:30,17:30,3
+5,Lab 1,FRI,2,FRI,2024-01-09,14:30,21:30,3
