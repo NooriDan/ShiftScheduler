@@ -45,25 +45,25 @@ class TestData:
                     day_of_week="Thu", required_tas=3, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
 
      # Mock TAs
-     TA1 = TA(id="1", name="TA1", required_shifts=2, 
+     TA1 = TA(id="1", name="TA1", required_shifts_per_week=2, 
           unavailable =[SHIFT1, SHIFT4], 
           undesired   =[SHIFT2], 
           desired     =[SHIFT3],
           is_grad_student=True)
 
-     TA2 = TA(id="2", name="TA2", required_shifts=2, 
+     TA2 = TA(id="2", name="TA2", required_shifts_per_week=2, 
           unavailable =[SHIFT1, SHIFT2], 
           undesired   =[SHIFT2], 
           desired     =[SHIFT3],
           is_grad_student=True)
 
-     TA3 = TA(id="3", name="TA3", required_shifts=1, 
+     TA3 = TA(id="3", name="TA3", required_shifts_per_week=1, 
           unavailable =[SHIFT2, SHIFT4], 
           undesired   =[SHIFT2], 
           desired     =[SHIFT3],
           is_grad_student=True)
 
-     TA4 = TA(id="4", name="TA4", required_shifts=1, 
+     TA4 = TA(id="4", name="TA4", required_shifts_per_week=1, 
           unavailable =[SHIFT3], 
           undesired   =[SHIFT1, SHIFT2], 
           desired     =[],
@@ -87,25 +87,25 @@ def test_shift_meets_ta_requirement():
                     day_of_week="Wed", required_tas=2, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
 
      # Mock TAs
-     ta1 = TA(id="1", name="TA1", required_shifts=2, 
+     ta1 = TA(id="1", name="TA1", required_shifts_per_week=2, 
           unavailable =[shift1, shift4], 
           undesired   =[shift2], 
           desired     =[shift3],
           is_grad_student=True)
 
-     ta2 = TA(id="2", name="TA2", required_shifts=2, 
+     ta2 = TA(id="2", name="TA2", required_shifts_per_week=2, 
           unavailable =[shift1, shift2], 
           undesired   =[shift4], 
           desired     =[shift3],
           is_grad_student=True)
 
-     ta3 = TA(id="3", name="TA3", required_shifts=1, 
+     ta3 = TA(id="3", name="TA3", required_shifts_per_week=1, 
           unavailable =[shift2, shift4], 
           undesired   =[shift1], 
           desired     =[shift3],
           is_grad_student=True)
 
-     ta4 = TA(id="4", name="TA4", required_shifts=1, 
+     ta4 = TA(id="4", name="TA4", required_shifts_per_week=1, 
           unavailable =[shift3], 
           undesired   =[shift1, shift4], 
           desired     =[],
@@ -174,13 +174,13 @@ def test_ta_duplicate_shift_assignment():
      shift2 = Shift(id="2", series="L02", 
                     day_of_week="Wed", required_tas=3, start_time=DAY_START_TIME.time(), end_time=DAY_END_TIME.time())
      
-     ta1 = TA(id="1", name="TA1", required_shifts=2, 
+     ta1 = TA(id="1", name="TA1", required_shifts_per_week=2, 
           unavailable =[], 
           undesired   =[shift1], 
           desired     =[shift2],
           is_grad_student=True)
      
-     ta2 = TA(id="2", name="TA2", required_shifts=2,
+     ta2 = TA(id="2", name="TA2", required_shifts_per_week=2,
           unavailable =[], 
           undesired   =[shift2], 
           desired     =[shift1],
@@ -233,39 +233,39 @@ def test_ta_meets_shift_requirment():
      
      timetable.shift_assignments.append(ShiftAssignment(id="1", shift=shift1, assigned_ta=ta1))
      (constraint_verifier
-      .verify_that(constraints.ta_meets_shift_requirement)
+      .verify_that(constraints.legacy_ta_meets_shift_requirement_per_week)
       .given_solution(timetable)
       .penalizes())
      
      timetable.shift_assignments.append(ShiftAssignment(id="2", shift=shift1, assigned_ta=ta2))
      (constraint_verifier
-      .verify_that(constraints.ta_meets_shift_requirement)
+      .verify_that(constraints.legacy_ta_meets_shift_requirement_per_week)
       .given_solution(timetable)
       .penalizes())
      
      timetable.shift_assignments.append(ShiftAssignment(id="3", shift=shift2, assigned_ta=ta1))
      (constraint_verifier
-      .verify_that(constraints.ta_meets_shift_requirement)
+      .verify_that(constraints.legacy_ta_meets_shift_requirement_per_week)
       .given_solution(timetable)
       .penalizes())
      
      timetable.shift_assignments.append(ShiftAssignment(id="4", shift=shift2, assigned_ta=ta2))
      (constraint_verifier
-      .verify_that(constraints.ta_meets_shift_requirement)
+      .verify_that(constraints.legacy_ta_meets_shift_requirement_per_week)
       .given_solution(timetable)
       .penalizes(0))
      
      # TA3 has required_shifts = 1 (TA3 has only 1 shift assignment)
      timetable.shift_assignments.append(ShiftAssignment(id="5", shift=shift2, assigned_ta=ta3))
      (constraint_verifier
-      .verify_that(constraints.ta_meets_shift_requirement)
+      .verify_that(constraints.legacy_ta_meets_shift_requirement_per_week)
       .given_solution(timetable)
       .penalizes(0))
      
      # Does not penalize if TA is assigned to more than their required number of shifts
      timetable.shift_assignments.append(ShiftAssignment(id="6", shift=shift3, assigned_ta=ta1))
      (constraint_verifier
-      .verify_that(constraints.ta_meets_shift_requirement)
+      .verify_that(constraints.legacy_ta_meets_shift_requirement_per_week)
       .given_solution(timetable)
       .penalizes(0))
 
@@ -283,20 +283,20 @@ def test_penalize_over_assignment():
      # TA1 has 2 shift assignments
      timetable.shift_assignments.append(ShiftAssignment(id="1", shift=shift1, assigned_ta=ta1))
      (constraint_verifier
-      .verify_that(constraints.penalize_over_assignment)
+      .verify_that(constraints.penalize_over_assignment_in_a_week)
       .given_solution(timetable)
       .penalizes(0))
      
      timetable.shift_assignments.append(ShiftAssignment(id="2", shift=shift2, assigned_ta=ta1))
      (constraint_verifier
-      .verify_that(constraints.penalize_over_assignment)
+      .verify_that(constraints.penalize_over_assignment_in_a_week)
       .given_solution(timetable)
       .penalizes(0))
      
      # TA2 has 2 shift assignments (no penalty)
      timetable.shift_assignments.append(ShiftAssignment(id="3", shift=shift1, assigned_ta=ta2))
      (constraint_verifier
-      .verify_that(constraints.penalize_over_assignment)
+      .verify_that(constraints.penalize_over_assignment_in_a_week)
       .given_solution(timetable)
       .penalizes(0))
      
@@ -304,14 +304,14 @@ def test_penalize_over_assignment():
      # TA1 has 3 shift assignment
      timetable.shift_assignments.append(ShiftAssignment(id="4", shift=shift3, assigned_ta=ta1))
      (constraint_verifier
-      .verify_that(constraints.penalize_over_assignment)
+      .verify_that(constraints.penalize_over_assignment_in_a_week)
       .given_solution(timetable)
       .penalizes())
      
      # TA1 has 4 shift assignment
      timetable.shift_assignments.append(ShiftAssignment(id="5", shift=shift3, assigned_ta=ta1))
      (constraint_verifier
-      .verify_that(constraints.penalize_over_assignment)
+      .verify_that(constraints.penalize_over_assignment_in_a_week)
       .given_solution(timetable)
       .penalizes())
      

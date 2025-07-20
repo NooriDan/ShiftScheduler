@@ -6,7 +6,7 @@ from timefold.solver import SolverStatus
 from timefold.solver.score import HardSoftScore, HardMediumSoftScore
 from dataclasses import dataclass, field
 from datetime import time, date
-from typing import Annotated
+from typing import Annotated, List
 from pydantic import Field
 
 
@@ -15,6 +15,7 @@ class Shift():
     id: Annotated[str, PlanningId]
     series: str
     day_of_week: str
+    week_id: int
     start_time: time
     end_time: time
     required_tas: int
@@ -29,14 +30,18 @@ class Shift():
 class TA():
     id: Annotated[str, PlanningId]
     name: str
-    required_shifts: int
+    required_shifts_per_semester: int
+    skill_level: int
     desired: Annotated[list[Shift], Field(default_factory=list)]
     undesired: Annotated[list[Shift], Field(default_factory=list)]
     unavailable: Annotated[list[Shift], Field(default_factory=list)]
 
     # favourite_partners: list['TA'] = None
     is_grad_student: bool = True
+    min_shifts_per_week: int = 0
+    max_shifts_per_week: int = 2
 
+    
     def __str__(self):
         return f'{self.name}'
     
@@ -63,11 +68,8 @@ class ShiftAssignment():
                         PlanningVariable,
                         Field(default=None)]
     
-    # def __str__(self):
-    #     return f'{self.shift} {self.assigned_ta}'
-    
-    # def __repr__(self):
-    #     return f'{self.shift.id}-{self.shift.sereis}_{self.assigned_ta.id}-{self.assigned_ta.name}'
+    def __str__(self):
+        return f'{self.shift} {self.assigned_ta}'
 
 @planning_solution
 @dataclass
@@ -81,12 +83,12 @@ class Timetable():
                      ProblemFactCollectionProperty,
                      ValueRangeProvider]
     # planning entities
-    shift_assignments: Annotated[list[ShiftAssignment],
+    shift_assignments: Annotated[List[ShiftAssignment],
                        PlanningEntityCollectionProperty]
     # score and solver status
     solver_status: Annotated[SolverStatus | None, Field(default=None)]  = Field(default=None)
     score: Annotated[HardMediumSoftScore, PlanningScore] = field(default=None)
-
+    # score: Annotated[BendableScore, PlanningScore(bendable_hard_levels_size=2, bendable_soft_levels_size=3)] # custom score levels
     def __str__(self):
         return f"timetable_{self.id}"
 

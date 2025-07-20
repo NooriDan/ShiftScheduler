@@ -15,11 +15,11 @@ def demo_data_A(name: str) -> Timetable:
     
    ids = id_generator()
    shifts: List[Shift] = [
-      Shift(id=next(ids),series="L07", day_of_week="Mon", start_time=DAY_START_TIME, end_time=DAY_END_TIME, required_tas=2),
-      Shift(id=next(ids),series="L08", day_of_week="Mon", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=3),
-      Shift(id=next(ids),series="L09", day_of_week="Tue", start_time=DAY_START_TIME, end_time=DAY_END_TIME, required_tas=2),
-      Shift(id=next(ids),series="L10", day_of_week="Tue", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=1),
-      Shift(id=next(ids),series="L11", day_of_week="Thu", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=2),
+      Shift(id=next(ids),series="L07", day_of_week="Mon", start_time=DAY_START_TIME, end_time=DAY_END_TIME, required_tas=2, week_id= 1),
+      Shift(id=next(ids),series="L08", day_of_week="Mon", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=3, week_id= 1),
+      Shift(id=next(ids),series="L09", day_of_week="Tue", start_time=DAY_START_TIME, end_time=DAY_END_TIME, required_tas=2, week_id= 1),
+      Shift(id=next(ids),series="L10", day_of_week="Tue", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=1, week_id= 1),
+      Shift(id=next(ids),series="L11", day_of_week="Thu", start_time=AFTERNOON_START_TIME, end_time=AFTERNOON_END_TIME, required_tas=2, week_id= 1),
       ]
    
    
@@ -27,35 +27,50 @@ def demo_data_A(name: str) -> Timetable:
    course_tas: List[TA] = [
       TA(id = next(ids), 
          name = "M. Roghani", 
-         required_shifts= 3, 
+         min_shifts_per_week= 3, 
+         max_shifts_per_week= 3,
+         required_shifts_per_semester= 10,
+         skill_level= 3,
          unavailable= [shifts[4]], 
          desired    = [shifts[0], shifts[1], shifts[2]],
          undesired  = [shifts[3]]
       ),
       TA(id = next(ids), 
          name = "D. Noori", 
-         required_shifts= 2, 
+         min_shifts_per_week= 2, 
+         max_shifts_per_week= 2,
+         required_shifts_per_semester= 8,
+         skill_level= 2,
          unavailable= [shifts[0]], 
          desired    = [],
          undesired  = [shifts[2]]
       ),
       TA(id = next(ids), 
          name = "A. Gholami", 
-         required_shifts= 1, 
+         min_shifts_per_week= 1, 
+         max_shifts_per_week= 1,
+         required_shifts_per_semester= 5,
+         skill_level= 1,
          unavailable= [shifts[1]], 
          desired    = [shifts[0]],
          undesired  = [shifts[2]]
       ),
       TA(id = next(ids), 
          name = "M. Jafari", 
-         required_shifts= 2, 
+         min_shifts_per_week= 2,
+         max_shifts_per_week= 2,
+         required_shifts_per_semester= 6,
+         skill_level= 2,
          unavailable= [shifts[3]], 
          desired    = [shifts[1]],
          undesired  = [shifts[2]]
       ),
       TA(id = next(ids), 
          name = "A. Athar", 
-         required_shifts= 2, 
+         min_shifts_per_week= 2,
+         max_shifts_per_week= 2,
+         required_shifts_per_semester= 6,
+         skill_level= 2,
          unavailable= [], 
          desired    = [shifts[0]],
          undesired  = [shifts[2], shifts[1], shifts[3], shifts[4]]

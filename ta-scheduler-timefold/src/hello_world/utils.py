@@ -54,7 +54,7 @@ class DataConstructor:
             ta = TA(
                 id=row['macid'],
                 name=row['name'],
-                required_shifts= row['req_shift_per_week'],
+                required_shifts_per_week= row['req_shift_per_week'],
                 is_grad_student= row['type'] == 'Grad',
                 desired=[],
                 undesired=[],
@@ -151,11 +151,11 @@ class DataConstructor:
                     print("========================================")
             else:
                 count_available = sum(1 for availability in self.avialability_matrix[ta.id] if availability != "Unavailable")
-                if count_available < ta.required_shifts:
+                if count_available < ta.required_shifts_per_week:
                     if log_error:
                         print(f"TA {ta.id} has insufficient availability.")
                         print(f"Available shifts: {count_available}")
-                        print(f"Required shifts: {ta.required_shifts}")
+                        print(f"Required shifts: {ta.required_shifts_per_week}")
 
                     return False
         return not missing_ta
@@ -306,20 +306,21 @@ def id_generator():
         yield str(current)
         current += 1
 
-def initialize_logger():
-    # Configure the logging
-    LOG_FILE = f"logs/timefold_assignment_matrix_{datetime.datetime.now().strftime('%y_%m_%d_%s')}.log"
+def initialize_logger(constraint_version: str):
+    # Construct log directory path based on the constraint version argument
+    log_dir = os.path.join("logs", constraint_version)
+    os.makedirs(log_dir, exist_ok=True)
 
-    # Create the logs directory if it doesn't exist
-    if not os.path.exists("logs"):
-        os.makedirs("logs")
+    # Use readable timestamp for the filename
+    log_filename = f"timefold_assignment_matrix_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log"
+    log_path = os.path.join(log_dir, log_filename)
 
     logging.basicConfig(
         level=logging.INFO,
         # format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         format="%(message)s",
         handlers=[
-            logging.FileHandler(LOG_FILE, mode='w'),  # Save logs to a file, overwrite each run
+            logging.FileHandler(log_path, mode='w'),  # Save logs to a file, overwrite each run
             logging.StreamHandler()  # Also display logs in the console
         ]
     )
@@ -347,7 +348,7 @@ def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
 
     LOGGER.info(sep_format)
     LOGGER.info(row_format.format('', *[f"{ta.name} (ID: {ta.id})" for ta in tas]))
-    LOGGER.info(row_format.format('', *[f"(requires: {ta.required_shifts})" for ta in tas]))
+    LOGGER.info(row_format.format('', *[f"(requires: {ta.required_shifts_per_semester})" for ta in tas]))
 
     LOGGER.info(sep_format)
 
@@ -383,3 +384,21 @@ def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
 
     LOGGER.info("=== Finished printing the assignment matrix ===")
 
+
+# wrap the helper functions in a class
+class HelperFunctions:
+    """A class to wrap the helper functions for better organization."""
+    
+    @staticmethod
+    def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
+        """Prints the timetable in a formatted way."""
+        print_timetable(time_table, logger)
+    @staticmethod
+    def initialize_logger():
+        """Initializes the logger for the application."""
+        return initialize_logger()
+    
+# example on how to use the HelperFunctions class
+if __name__ == "__main__":
+    logger  = HelperFunctions.initialize_logger()
+    # Assuming `time_table` is an instance of `Timetable`
