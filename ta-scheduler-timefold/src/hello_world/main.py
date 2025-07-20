@@ -8,7 +8,7 @@ import sys, os
 
 from hello_world.domain      import Timetable, ShiftAssignment, Shift, TA
 from hello_world.constraints import constraints_provider_dict
-from hello_world.demo_data   import generate_demo_data
+from hello_world.demo_data   import generate_demo_data, generate_demo_data_dict
 from hello_world.utils       import print_timetable, initialize_logger, DataConstructor
 
 def get_args() -> argparse.Namespace:
@@ -40,6 +40,14 @@ def get_args() -> argparse.Namespace:
                         help='Choose the constraint version to use',
                         default='default')
     
+    # add an argument to select the demo data
+    parser.add_argument('--demo_data_select',
+                        type=str,
+                        choices=list(generate_demo_data_dict.keys()),
+                        help='Select the demo data to use',
+                        default='demo_data_weekly_scheduling-random')
+
+    
     args = parser.parse_args()
 
     return args
@@ -67,10 +75,15 @@ def create_solver_config(constraint_version: str) -> SolverConfig:
         )
     return solver_config
 
-def create_timetable_demo(solver_factory: SolverFactory, logger: logging.Logger):
+def create_timetable_demo(solver_factory: SolverFactory, logger: logging.Logger, demo_data_select: str = "demo_data_weekly_scheduling-random", print_initial_timetable: bool = False) -> Timetable:
 
     # Load the problem
-    problem = generate_demo_data()
+    logger.info(f"=== Loading the demo data {demo_data_select} ===")
+    problem = generate_demo_data(name="my_demo", select=demo_data_select)
+    # Visualize the problem
+    if print_initial_timetable:
+        logger.info("************************** Initial Timetable **************************")
+        print_timetable(time_table=problem, logger=logger)
 
     # Solve the problem
     solver = solver_factory.build_solver()
@@ -126,11 +139,6 @@ def run_app():
     solver_config  = create_solver_config(args.constraint_version)
     # Create the solver factory
     solver_factory = SolverFactory.create(solver_config)
-    # Print the solver configuration
-    print("Solver Configuration:")
-    print("========================================")
-    print(solver_config)
-    print("========================================")
 
     # initialize the logger
     logger = initialize_logger(args.constraint_version)
@@ -147,7 +155,9 @@ def run_app():
     else:
         logger.info("=== Rostering the TAs from the demo data ===")
         solution = create_timetable_demo(solver_factory=solver_factory, 
-                            logger=logger)
+                            logger=logger,
+                            demo_data_select=args.demo_data_select,
+                            print_initial_timetable=True if args.demo_data_select == "demo_data_weekly_scheduling_random" else False)
         logger.info("=== Done Solving ===")
 
 if __name__ == '__main__':

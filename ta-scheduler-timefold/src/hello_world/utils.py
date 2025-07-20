@@ -332,10 +332,15 @@ def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
     LOGGER.info(f"Score: {time_table.score}")
     LOGGER.info("=== Starting to print the assignment matrix ===")
 
-    column_width = 18
+    
     tas = time_table.tas
     shift_groups = time_table.shifts
     shift_assignments = time_table.shift_assignments
+    
+    PADDDING = 10
+    MIN_WIDTH = 22
+    # Calculate the maximum width for the columns based on TA names
+    column_width = max(max([len(ta.name) for ta in tas]) + PADDDING, MIN_WIDTH)  # Ensure a minimum width of 20 for better readability
     
     assignment_map = {
         (assignment.assigned_ta.name, assignment.shift.series, assignment.shift.start_time): assignment
@@ -348,7 +353,10 @@ def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
 
     LOGGER.info(sep_format)
     LOGGER.info(row_format.format('', *[f"{ta.name} (ID: {ta.id})" for ta in tas]))
-    LOGGER.info(row_format.format('', *[f"(requires: {ta.required_shifts_per_semester})" for ta in tas]))
+    LOGGER.info(row_format.format('', *[f"requires" for ta in tas]))
+    LOGGER.info(row_format.format('', *[f"  total:      {ta.required_shifts_per_semester} " for ta in tas]))
+    LOGGER.info(row_format.format('', *[f"  min_weekly: {ta.min_shifts_per_week} " for ta in tas]))
+    LOGGER.info(row_format.format('', *[f"  max_weekly: {ta.max_shifts_per_week} " for ta in tas]))
 
     LOGGER.info(sep_format)
 
@@ -368,7 +376,7 @@ def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
         ))
 
         LOGGER.info(row_format.format( 
-            f"requires {shift_group.required_tas}",
+            f"requires {shift_group.required_tas} TAs",
             *[assignment.assigned_ta.get_status_for_shift(shift_group) if assignment.assigned_ta is not None else " " 
               for assignment in row_shifts]
         ))
