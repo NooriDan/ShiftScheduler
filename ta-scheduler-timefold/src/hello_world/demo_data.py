@@ -197,7 +197,7 @@ def demo_data_semeseter_scheduling(name: str) -> Timetable:
 def demo_data_semeseter_scheduling_random(name: str) -> Timetable:
    pass
 
-generate_demo_data_dict = {
+_generate_demo_data_dict = {
    "demo_data_weekly_scheduling"                   : demo_data_weekly_scheduling,
    "demo_data_weekly_scheduling-random"            : demo_data_weekly_scheduling_random,
    "demo_data_semeseter_scheduling"                : demo_data_semeseter_scheduling,
@@ -206,11 +206,11 @@ generate_demo_data_dict = {
 
 
 def generate_demo_data(name: str = "CUSTOM", select: str = "demo_data_weekly_scheduling") -> Timetable:
-   if generate_demo_data_dict.get(select):
-      return generate_demo_data_dict[select](name)
+   if _generate_demo_data_dict.get(select):
+      return _generate_demo_data_dict[select](name)
    else:
       # provide options for the user
       print("Available demo data options:")
-      for key in generate_demo_data_dict.keys():
+      for key in _generate_demo_data_dict.keys():
          print(f"- {key}")
       raise ValueError(f"Unknown demo data name: {select}")

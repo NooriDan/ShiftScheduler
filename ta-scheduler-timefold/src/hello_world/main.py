@@ -8,7 +8,7 @@ import sys, os
 
 from hello_world.domain      import Timetable, ShiftAssignment, Shift, TA
 from hello_world.constraints import constraints_provider_dict
-from hello_world.demo_data   import generate_demo_data, generate_demo_data_dict
+from hello_world.demo_data   import generate_demo_data, _generate_demo_data_dict
 from hello_world.utils       import print_timetable, initialize_logger, DataConstructor
 
 def get_args() -> argparse.Namespace:
@@ -43,7 +43,7 @@ def get_args() -> argparse.Namespace:
     # add an argument to select the demo data
     parser.add_argument('--demo_data_select',
                         type=str,
-                        choices=list(generate_demo_data_dict.keys()),
+                        choices=list(_generate_demo_data_dict.keys()),
                         help='Select the demo data to use',
                         default='demo_data_weekly_scheduling-random')
 
