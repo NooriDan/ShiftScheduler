@@ -27,14 +27,14 @@ MIN_NUM_OF_SHIFT_PER_TA_PER_WEEK = 0
 MIN_TA_SKILL_LEVEL = 1
 MAX_TA_SKILL_LEVEL = 3
 
-MIN_NUM_OF_UNAVAILABLE_SHIFTS   = 0
-MAX_NUM_OF_UNAVAILABLE_SHIFTS   = MAX_NUM_SHIFTS_PER_WEEK // 3
+MIN_NUM_OF_UNAVAILABLE_SHIFTS_DIV   = 0     # in pecentage of the total weekly shifts
+MAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV   = 20    # in pecentage of the total weekly shifts
 
-MIN_NUM_OF_DESIRED_SHIFTS       = 0
-MAX_NUM_OF_DESIRED_SHIFTS       = MAX_NUM_SHIFTS_PER_WEEK // 2
+MIN_NUM_OF_DESIRED_SHIFTS_DIV       = 0     # in pecentage of the total weekly shifts
+MAX_NUM_OF_DESIRED_SHIFTS_DIV       = 40    # in pecentage of the total weekly shifts
 
-MIN_NUM_OF_UNDESIRED_SHIFTS     = 0
-MAX_NUM_OF_UNDESIRED_SHIFTS     = MAX_NUM_SHIFTS_PER_WEEK // 3
+MIN_NUM_OF_UNDESIRED_SHIFTS_DIV     = 0     # in pecentage of the total weekly shifts
+MAX_NUM_OF_UNDESIRED_SHIFTS_DIV     = 20    # in pecentage of the total weekly shifts
 
 
 
@@ -153,25 +153,25 @@ def demo_data_random(
     shift_series_prefix = shift_series_prefix.upper()   # Ensure the prefix is uppercase
 
     logger.info(f"============================")
-    logger.info(f"Generating demo data with name '{name}'")
+    logger.info(f"[Pre-processing] Generating demo data with name '{name}'")
     logger.info(f"============================")
     logger.info(f"Constants to be used:")
-    logger.info(f"\tMIN_NUM_SHIFTS_PER_WEEK           = {MIN_NUM_SHIFTS_PER_WEEK}\t# Minimum number of shifts per week")
-    logger.info(f"\tMAX_NUM_SHIFTS_PER_WEEK           = {MAX_NUM_SHIFTS_PER_WEEK}\t# Maximum number of shifts per week")
-    logger.info(f"\tMIN_NUM_OF_TAS_REQUIRED_PER_SHIFT = {MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT}\t# Minimum number of TAs required per shift")
-    logger.info(f"\tMAX_NUM_OF_TAS_REQUIRED_PER_SHIFT = {MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT}\t# Maximum number of TAs required per shift")
+    logger.info(f"\tMIN_NUM_SHIFTS_PER_WEEK                 = {MIN_NUM_SHIFTS_PER_WEEK}\t# Minimum number of shifts per week")
+    logger.info(f"\tMAX_NUM_SHIFTS_PER_WEEK                 = {MAX_NUM_SHIFTS_PER_WEEK}\t# Maximum number of shifts per week")
+    logger.info(f"\tMIN_NUM_OF_TAS_REQUIRED_PER_SHIFT       = {MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT}\t# Minimum number of TAs required per shift")
+    logger.info(f"\tMAX_NUM_OF_TAS_REQUIRED_PER_SHIFT       = {MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT}\t# Maximum number of TAs required per shift")
     logger.info(f"\t------------------------")
-    logger.info(f"\tMIN_TA_SKILL_LEVEL                = {MIN_TA_SKILL_LEVEL}\t# Minimum skill level for TAs")
-    logger.info(f"\tMAX_TA_SKILL_LEVEL                = {MAX_TA_SKILL_LEVEL}\t# Maximum skill level for TAs")
+    logger.info(f"\tMIN_TA_SKILL_LEVEL                      = {MIN_TA_SKILL_LEVEL}\t# Minimum skill level for TAs")
+    logger.info(f"\tMAX_TA_SKILL_LEVEL                      = {MAX_TA_SKILL_LEVEL}\t# Maximum skill level for TAs")
     logger.info(f"\t------------------------")
-    logger.info(f"\tMIN_NUM_OF_UNAVAILABLE_SHIFTS     = {MIN_NUM_OF_UNAVAILABLE_SHIFTS}\t# Minimum number of unavailable shifts for TAs")
-    logger.info(f"\tMAX_NUM_OF_UNAVAILABLE_SHIFTS     = {MAX_NUM_OF_UNAVAILABLE_SHIFTS}\t# Maximum number of unavailable shifts for TAs")
+    logger.info(f"\tMIN_NUM_OF_UNAVAILABLE_SHIFTS_DIV       = % {MIN_NUM_OF_UNAVAILABLE_SHIFTS_DIV}\t# Minimum pecentage of unavailable shifts in a week for TAs")
+    logger.info(f"\tMAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV       = % {MAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV}\t# Maximum pecentage of unavailable shifts in a week for TAs")
     logger.info(f"\t------------------------")
-    logger.info(f"\tMIN_NUM_OF_DESIRED_SHIFTS         = {MIN_NUM_OF_DESIRED_SHIFTS}\t# Minimum number of desired shifts for TAs")
-    logger.info(f"\tMAX_NUM_OF_DESIRED_SHIFTS         = {MAX_NUM_OF_DESIRED_SHIFTS}\t# Maximum number of desired shifts for TAs")
+    logger.info(f"\tMIN_NUM_OF_DESIRED_SHIFTS_DIV           = % {MIN_NUM_OF_DESIRED_SHIFTS_DIV}\t# Minimum pecentage of desired shifts in a week for TAs")
+    logger.info(f"\tMAX_NUM_OF_DESIRED_SHIFTS_DIV           = % {MAX_NUM_OF_DESIRED_SHIFTS_DIV}\t# Maximum pecentage of desired shifts in a week for TAs")
     logger.info(f"\t------------------------")
-    logger.info(f"\tMIN_NUM_OF_UNDESIRED_SHIFTS       = {MIN_NUM_OF_UNDESIRED_SHIFTS}\t# Minimum number of undesired shifts for TAs")
-    logger.info(f"\tMAX_NUM_OF_UNDESIRED_SHIFTS       = {MAX_NUM_OF_UNDESIRED_SHIFTS}\t# Maximum number of undesired shifts for TAs")
+    logger.info(f"\tMIN_NUM_OF_UNDESIRED_SHIFTS_DIV         = % {MIN_NUM_OF_UNDESIRED_SHIFTS_DIV}\t# Minimum pecentage of undesired shifts in a week for TAs")
+    logger.info(f"\tMAX_NUM_OF_UNDESIRED_SHIFTS_DIV         = % {MAX_NUM_OF_UNDESIRED_SHIFTS_DIV}\t# Maximum pecentage of undesired shifts in a week for TAs")
     logger.info(f"\t------------------------\n")
 
     # ======================
@@ -215,8 +215,13 @@ def demo_data_random(
                 required_tas=required_tas,
                 week_id=week_id
             ))
-    logger.info(f"Generated {len(shifts)} shifts with a total TA demand of {ta_demands} across {num_of_weeks} weeks.")
-    
+            logger.info(f"[ID: {int(shift_id):02d}] [weedk_id: {int(week_id):02d}] Generated Shift: {series} on {day} from {start_time} to {end_time} requiring {required_tas} TAs")
+    logger.info(f"============================")
+    logger.info(f"Generated {len(shifts)} shifts with a total TA demand of {ta_demands} across {num_of_weeks} weeks ({num_shifts_per_week} shifts per week)...")
+    logger.info(f"Each week has a total TA demand of {ta_demands_weekly} TAs.")
+    logger.info(f"Each shift requires between {MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT} and {MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT} TAs.")
+    logger.info(f"===========================\n")
+
     # ======================
     # Generate random TAs
     # ======================
@@ -236,6 +241,8 @@ def demo_data_random(
     #                                                                                     upper_deviation=1, 
     #                                                                                     lower_deviation=-1
     #                                                                                     )
+    min_shifts_per_week: int = 0
+    max_shifts_per_week: int = 0
     for index in range(num_tas):
         # Generate random TA details
         ta_id                           = next(ids)
@@ -253,20 +260,27 @@ def demo_data_random(
         # Pick unavailable, desired, and undesired *without replacement*
         unavailable = random.sample(
                                 population=shifts, 
-                                k=min(len(shifts), random.randint(MIN_NUM_OF_UNAVAILABLE_SHIFTS, MAX_NUM_OF_UNAVAILABLE_SHIFTS))
+                                k=min(len(shifts), random.randint(num_shifts_per_week*MIN_NUM_OF_UNAVAILABLE_SHIFTS_DIV//100, num_shifts_per_week*MAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV//100))
                                 )
         remaining   = remove_items_from_list(selected=unavailable, lst=shifts)
         
         desired     = random.sample(
                                 population=remaining, 
-                                k=min(len(remaining), random.randint(MIN_NUM_OF_DESIRED_SHIFTS, MAX_NUM_OF_DESIRED_SHIFTS))
+                                k=min(len(remaining), random.randint(num_shifts_per_week*MIN_NUM_OF_DESIRED_SHIFTS_DIV//100, num_shifts_per_week*MAX_NUM_OF_DESIRED_SHIFTS_DIV//100))
                                 )
         remaining   = remove_items_from_list(selected=desired, lst=remaining)
         
         undesired   = random.sample(
                                 remaining, 
-                                k=min(len(remaining), random.randint(MIN_NUM_OF_UNDESIRED_SHIFTS, MAX_NUM_OF_UNDESIRED_SHIFTS))
+                                k=min(len(remaining), random.randint(num_shifts_per_week*MIN_NUM_OF_UNDESIRED_SHIFTS_DIV//100, num_shifts_per_week*MAX_NUM_OF_UNDESIRED_SHIFTS_DIV//100))
                                 )
+        logger.info(f"(ID: {int(ta_id):02d}) {name_ta}")
+        logger.info(f"\t- Skill Level:              {skill_level}")
+        logger.info(f"\t- Required Shifts:          {required_shifts_per_semester}")
+        logger.info(f"\t- Min/Max Shifts per Week:  {min_shifts_per_week} / {max_shifts_per_week}")
+        logger.info(f"\t\t- Unavailable:    {len(unavailable)}")
+        logger.info(f"\t\t- Desired:        {len(desired)}")
+        logger.info(f"\t\t- Undesired:      {len(undesired)}")
         
         course_tas.append(TA(
             id=ta_id,
@@ -279,7 +293,11 @@ def demo_data_random(
             desired=desired,
             undesired=undesired,
         ))
-    
+    logger.info(f"===========================")
+    logger.info(f"Generated {len(course_tas)} TAs with a total TA demand of {ta_demands} across {num_of_weeks} weeks...")
+    logger.info(f"Each TA has a minimum of {min_shifts_per_week} and a maximum of {max_shifts_per_week} shifts per week.")
+    logger.info(f"===========================\n")
+
     # Generate shift assignments
     ids = id_generator()
     shift_assignments: List[ShiftAssignment] = []

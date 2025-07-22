@@ -354,7 +354,7 @@ def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
     LOGGER.info(sep_format)
     LOGGER.info(row_format.format('', *[f"{ta.name} (ID: {ta.id})" for ta in tas]))
     LOGGER.info(row_format.format('', *[f"requires" for ta in tas]))
-    LOGGER.info(row_format.format('', *[f"  total:      {ta.required_shifts_per_semester} " for ta in tas]))
+    LOGGER.info(row_format.format('', *[f"  budget:      {ta.required_shifts_per_semester} " for ta in tas]))
     LOGGER.info(row_format.format('', *[f"  min_weekly: {ta.min_shifts_per_week} " for ta in tas]))
     LOGGER.info(row_format.format('', *[f"  max_weekly: {ta.max_shifts_per_week} " for ta in tas]))
 
