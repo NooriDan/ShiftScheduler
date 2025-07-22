@@ -402,9 +402,9 @@ class HelperFunctions:
         """Prints the timetable in a formatted way."""
         print_timetable(time_table, logger)
     @staticmethod
-    def initialize_logger():
+    def initialize_logger(constraint_version: str = "default") -> logging.Logger:
         """Initializes the logger for the application."""
-        return initialize_logger()
+        return initialize_logger(constraint_version=constraint_version)
     
 # example on how to use the HelperFunctions class
 if __name__ == "__main__":
