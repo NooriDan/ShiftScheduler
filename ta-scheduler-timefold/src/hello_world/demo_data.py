@@ -32,8 +32,9 @@ MAX_NUM_OF_DESIRED_SHIFTS       = MAX_NUM_SHIFTS_PER_WEEK // 2
 MIN_NUM_OF_UNDESIRED_SHIFTS     = 0
 MAX_NUM_OF_UNDESIRED_SHIFTS     = MAX_NUM_SHIFTS_PER_WEEK // 3
 
-MIN_NUM_OF_TAS = MIN_NUM_SHIFTS_PER_WEEK * MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT
-# MAX_NUM_OF_TAS = TBD by the number of shifts and their requirements
+MIN_NUM_OF_SHIFTS_REQUIRED_PER_TA_PER_WEEK = 0
+MAX_NUM_OF_SHIFTS_REQUIRED_PER_TA_PER_WEEK = 2
+
 
 def demo_data_weekly_scheduling(name: str) -> Timetable:
     
@@ -185,19 +186,23 @@ def demo_data_random(
     ids                     = id_generator()
     num_tas: int            = len(ta_names) if len(ta_names) > 0 else 1  # Ensure at least one TA
     course_tas: List[TA]    = []
-    tas_shift_count: int    = ta_demands // num_tas if num_tas > 0 else 1  # Average shifts per TA, ensuring at least 1 shift per TA
-    
-    for _ in range(num_tas):
+    tas_shift_count: List[int] = draw_num_of_shifts_for_ta_per_semester_given_ta_demand(
+                                                                                        ta_demand=ta_demands, 
+                                                                                        num_of_tas=num_tas, 
+                                                                                        upper_deviation=2, 
+                                                                                        lower_deviation=-2
+                                                                                        )
+    for index in range(num_tas):
         ta_id                           = next(ids)
         skill_level                     = random.randint(MIN_TA_SKILL_LEVEL, MAX_TA_SKILL_LEVEL)
         name_ta                         = random.choice(ta_names)
         # Remove the selected name to avoid duplicates
         ta_names                        = remove_items_from_list(selected=[name_ta], lst=ta_names)
 
-        min_shifts_per_week             = random.randint(1, 2)
-        max_shifts_per_week             = min_shifts_per_week + random.randint(0, 1)
-
-        required_shifts_per_semester    = num_of_weeks * (min_shifts_per_week + max_shifts_per_week) // 2  # Average shifts per semester
+        required_shifts_per_semester    = tas_shift_count[index]  # Get the number of shifts for this TA
+        
+        min_shifts_per_week             = MIN_NUM_OF_SHIFTS_REQUIRED_PER_TA_PER_WEEK
+        max_shifts_per_week             = MAX_NUM_OF_SHIFTS_REQUIRED_PER_TA_PER_WEEK
         
         # Pick unavailable, desired, and undesired *without replacement*
         unavailable = random.sample(
@@ -292,3 +297,42 @@ def generate_demo_data(name: str = "CUSTOM", select: str = "demo_data_weekly_sch
 def remove_items_from_list(selected: List[Any], lst: List[Any]) -> List[Any]:
     """Remove items from a list based on another list."""
     return [item for item in lst if item not in selected]
+
+def draw_num_of_shifts_for_ta_per_semester_given_ta_demand(ta_demand: int, num_of_tas: int, upper_deviation: int = 2, lower_deviation: int = -2) -> List[int]:
+      """Draw a list of integers representing the number of shifts per semester for each TA.
+      The sum of the list should equal the total TA demand."""
+      # Sanity checks
+      if ta_demand <= 0:
+         raise ValueError("TA demand must be greater than zero.")
+      if num_of_tas <= 0:
+         raise ValueError("Number of TAs must be greater than zero.")
+      if upper_deviation < 0 or lower_deviation > 0:
+         raise ValueError("Deviations must be non-negative and non-positive respectively.")
+      if upper_deviation < lower_deviation:
+         raise ValueError("Upper deviation must be greater than or equal to lower deviation.")
+      
+      # Initialize the list to hold shifts per semester for each TA
+      tas_shift_per_semester: List[int] = []
+      avg_shifts_per_ta: int            = ta_demand // num_of_tas
+
+      # Calculate average shifts per TA
+      for _ in range(num_of_tas):
+          tas_shift_per_semester.append(avg_shifts_per_ta + random.randint(lower_deviation, upper_deviation))
+
+      diff: int = ta_demand - sum(tas_shift_per_semester)
+      for i in range(abs(diff)):
+         found_ta = False
+         while not found_ta:
+            index = random.randint(0, num_of_tas - 1)
+            if tas_shift_per_semester[index] > 0:
+               if diff > 0: # If we need to increase the total shifts (under-assigned)
+                  tas_shift_per_semester[index] += 1
+               else:       # If we need to decrease the total shifts (over-assigned)
+                  tas_shift_per_semester[index] -= 1
+               found_ta = True
+
+      # Ensure the total shifts match the TA demand
+      if sum(tas_shift_per_semester) != ta_demand:
+         raise ValueError("The total shifts per semester do not match the TA demand after adjustment. something went wrong...")
+      
+      return tas_shift_per_semester
