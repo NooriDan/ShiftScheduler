@@ -9,7 +9,7 @@ import sys, os
 from hello_world.domain      import Timetable, ShiftAssignment, Shift, TA
 from hello_world.constraints import constraints_provider_dict
 from hello_world.demo_data   import generate_demo_data, _generate_demo_data_dict
-from hello_world.utils       import print_timetable, initialize_logger, DataConstructor
+from hello_world.utils       import print_timetable, print_ta_availability, initialize_logger, DataConstructor
 
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Run the TA Rostering Program in Terminal')
@@ -83,7 +83,7 @@ def create_timetable_demo(solver_factory: SolverFactory, logger: logging.Logger,
     # Visualize the problem
     if print_initial_timetable:
         logger.info("************************** Initial Timetable **************************")
-        print_timetable(time_table=problem, logger=logger)
+        print_ta_availability(time_table=problem, logger=logger)
 
     # Solve the problem
     solver = solver_factory.build_solver()

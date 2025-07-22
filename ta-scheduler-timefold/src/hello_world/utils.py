@@ -6,7 +6,7 @@ import openpyxl
 import datetime as dt
 import pandas as pd
 
-from typing import Dict
+from typing import Dict, List
 from pathlib import Path
 from datetime import timedelta, time, date
 
@@ -330,7 +330,7 @@ def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
 
     LOGGER = logger
     LOGGER.info(f"Score: {time_table.score}")
-    LOGGER.info("=== Starting to print the assignment matrix ===")
+    # LOGGER.info("=== Starting to print the timetable ===")
 
     
     tas = time_table.tas
@@ -390,7 +390,28 @@ def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
         for shift in unassigned_shifts:
             LOGGER.info(f'{shift.shift} - {shift.assigned_ta}')
 
-    LOGGER.info("=== Finished printing the assignment matrix ===")
+    # LOGGER.info("=== Finished printing the timetable ===")
+
+def print_ta_availability(time_table: Timetable, logger: logging.Logger) -> None:
+    """Prints the TA availability in a formatted way."""
+    LOGGER = logger
+    LOGGER.info("=== Starting to print the TA availability ===")
+    
+    tas:                    List[TA]                = time_table.tas
+    shift_groups:           List[Shift]             = time_table.shifts
+    shift_assignments_new:  List[ShiftAssignment]   = []                # a dummy list to hold the cross product of TAs and shifts
+                                                                        # this is because we want to re-use the logic of the print_timetable function
+    # Create a cross product of TAs and shifts
+    ids = id_generator()
+    for ta in tas:
+        for shift in shift_groups:
+            if (shift in ta.desired) or (shift in ta.undesired) or (shift in ta.unavailable): # do not add "neutral" shifts
+                shift_assignments_new.append(ShiftAssignment(id=next(ids), shift=shift, assigned_ta=ta))
+
+    time_table.shift_assignments = shift_assignments_new
+    print_timetable(time_table, logger)
+
+    LOGGER.info("=== Finished printing the TA availability ===")
 
 
 # wrap the helper functions in a class
