@@ -2,12 +2,17 @@ import  random
 import  logging
 from    datetime   import time
 from    typing     import List, Any
+from    tqdm       import tqdm
 
 # Custom Imports
 from hello_world.domain import Shift, TA, ShiftAssignment, Timetable
 from hello_world.utils  import id_generator
 
 # Constants for random shift generation
+SEED = 42
+# standard library
+random.seed(SEED)
+
 DAY_START_TIME = time(14, 30)
 DAY_END_TIME   = time(17, 30)
 
@@ -386,16 +391,21 @@ def draw_num_of_shifts_for_ta_per_semester_given_ta_demand(ta_demand: int, num_o
           tas_shift_per_semester.append(avg_shifts_per_ta + random.randint(lower_deviation, upper_deviation))
 
       diff: int = ta_demand - sum(tas_shift_per_semester)
-      for i in range(abs(diff)):
+      for i in tqdm(range(abs(diff)), desc="Adjusting shifts to match TA demand", unit="shift"):
          found_ta = False
+         counter  = 0
          while not found_ta:
+            if counter > num_of_tas * 10:  # Prevent infinite loop
+               raise ValueError("Unable to adjust shifts to match TA demand. Please check the input parameters")
             index = random.randint(0, num_of_tas - 1)
-            if tas_shift_per_semester[index] > 0:
-               if diff > 0: # If we need to increase the total shifts (under-assigned)
-                  tas_shift_per_semester[index] += 1
-               else:       # If we need to decrease the total shifts (over-assigned)
-                  tas_shift_per_semester[index] -= 1
-               found_ta = True
+            if diff > 0: # If we need to increase the total shifts (under-assigned)
+               tas_shift_per_semester[index] += 1
+            else:       # If we need to decrease the total shifts (over-assigned)
+               if tas_shift_per_semester[index] < 1:
+                  counter += 1
+                  continue
+               tas_shift_per_semester[index] -= 1
+            found_ta = True
 
       # Ensure the total shifts match the TA demand
       if sum(tas_shift_per_semester) != ta_demand:
