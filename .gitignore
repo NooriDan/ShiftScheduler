@@ -317,3 +317,4 @@ ta-scheduling-webapp/src/employee_scheduling/__pycache__/constraints.cpython-312
 ta-scheduling-webapp/src/employee_scheduling/__pycache__/utils.cpython-312.pyc
 ta-scheduling-webapp/src/employee_scheduling/__pycache__/solver.cpython-312.pyc
 *.pyc
+ta-scheduler-timefold/logs/default/*
