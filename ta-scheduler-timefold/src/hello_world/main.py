@@ -157,7 +157,7 @@ def run_app():
         solution = create_timetable_demo(solver_factory=solver_factory, 
                             logger=logger,
                             demo_data_select=args.demo_data_select,
-                            print_initial_timetable=True if args.demo_data_select == "demo_data_weekly_scheduling_random" else False)
+                            print_initial_timetable=True if args.demo_data_select == "demo_data_weekly_scheduling-random" else False)
         logger.info("=== Done Solving ===")
 
 if __name__ == '__main__':
