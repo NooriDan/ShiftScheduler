@@ -1,10 +1,11 @@
-import random
-from datetime import time
-from typing import List, Any
+import  random
+import  logging
+from    datetime   import time
+from    typing     import List, Any
 
 # Custom Imports
 from hello_world.domain import Shift, TA, ShiftAssignment, Timetable
-from hello_world.utils import id_generator
+from hello_world.utils  import id_generator
 
 # Constants for random shift generation
 DAY_START_TIME = time(14, 30)
@@ -17,9 +18,12 @@ MIN_NUM_SHIFTS_PER_WEEK = 6
 MAX_NUM_SHIFTS_PER_WEEK = 12
 
 MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT = 2
-MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT = 4
+MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT = 3
 
 # Constants for random TA generation
+MIN_NUM_OF_SHIFT_PER_TA_PER_WEEK = 0
+# MAX_NUM_OF_SHIFT_PER_TA_PER_WEEK = ... # This value will be set dynamically based on the total TA demand and number of TAs (as to not over-constrain the problem)
+
 MIN_TA_SKILL_LEVEL = 1
 MAX_TA_SKILL_LEVEL = 3
 
@@ -32,11 +36,9 @@ MAX_NUM_OF_DESIRED_SHIFTS       = MAX_NUM_SHIFTS_PER_WEEK // 2
 MIN_NUM_OF_UNDESIRED_SHIFTS     = 0
 MAX_NUM_OF_UNDESIRED_SHIFTS     = MAX_NUM_SHIFTS_PER_WEEK // 3
 
-MIN_NUM_OF_SHIFTS_REQUIRED_PER_TA_PER_WEEK = 0
-MAX_NUM_OF_SHIFTS_REQUIRED_PER_TA_PER_WEEK = 2
 
 
-def demo_data_weekly_scheduling(name: str) -> Timetable:
+def demo_data_weekly_scheduling(name: str, logger: logging.Logger) -> Timetable:
     
    ids = id_generator()
    shifts: List[Shift] = [
@@ -138,6 +140,7 @@ def demo_data_weekly_scheduling(name: str) -> Timetable:
 
 def demo_data_random(
       name: str, 
+      logger: logging.Logger,
       days: List[str] = ["Mon", "Tue", "Wed", "Thu", "Fri"],
       shift_series_prefix: str = "L",
       ta_names = ["M. Roghani", "D. Noori", "A. Gholami", "M. Jafari", "A. Athar", "S. Smith", "J. Doe"],
@@ -148,25 +151,60 @@ def demo_data_random(
     # Pre-processing
     # ======================
     shift_series_prefix = shift_series_prefix.upper()   # Ensure the prefix is uppercase
-    
+
+    logger.info(f"============================")
+    logger.info(f"Generating demo data with name '{name}'")
+    logger.info(f"============================")
+    logger.info(f"Constants to be used:")
+    logger.info(f"\tMIN_NUM_SHIFTS_PER_WEEK           = {MIN_NUM_SHIFTS_PER_WEEK}\t# Minimum number of shifts per week")
+    logger.info(f"\tMAX_NUM_SHIFTS_PER_WEEK           = {MAX_NUM_SHIFTS_PER_WEEK}\t# Maximum number of shifts per week")
+    logger.info(f"\tMIN_NUM_OF_TAS_REQUIRED_PER_SHIFT = {MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT}\t# Minimum number of TAs required per shift")
+    logger.info(f"\tMAX_NUM_OF_TAS_REQUIRED_PER_SHIFT = {MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT}\t# Maximum number of TAs required per shift")
+    logger.info(f"\t------------------------")
+    logger.info(f"\tMIN_TA_SKILL_LEVEL                = {MIN_TA_SKILL_LEVEL}\t# Minimum skill level for TAs")
+    logger.info(f"\tMAX_TA_SKILL_LEVEL                = {MAX_TA_SKILL_LEVEL}\t# Maximum skill level for TAs")
+    logger.info(f"\t------------------------")
+    logger.info(f"\tMIN_NUM_OF_UNAVAILABLE_SHIFTS     = {MIN_NUM_OF_UNAVAILABLE_SHIFTS}\t# Minimum number of unavailable shifts for TAs")
+    logger.info(f"\tMAX_NUM_OF_UNAVAILABLE_SHIFTS     = {MAX_NUM_OF_UNAVAILABLE_SHIFTS}\t# Maximum number of unavailable shifts for TAs")
+    logger.info(f"\t------------------------")
+    logger.info(f"\tMIN_NUM_OF_DESIRED_SHIFTS         = {MIN_NUM_OF_DESIRED_SHIFTS}\t# Minimum number of desired shifts for TAs")
+    logger.info(f"\tMAX_NUM_OF_DESIRED_SHIFTS         = {MAX_NUM_OF_DESIRED_SHIFTS}\t# Maximum number of desired shifts for TAs")
+    logger.info(f"\t------------------------")
+    logger.info(f"\tMIN_NUM_OF_UNDESIRED_SHIFTS       = {MIN_NUM_OF_UNDESIRED_SHIFTS}\t# Minimum number of undesired shifts for TAs")
+    logger.info(f"\tMAX_NUM_OF_UNDESIRED_SHIFTS       = {MAX_NUM_OF_UNDESIRED_SHIFTS}\t# Maximum number of undesired shifts for TAs")
+    logger.info(f"\t------------------------\n")
+
     # ======================
     # Generate random shifts
     # ======================
-    shifts: List[Shift] = []
-    ta_demands: int     = 0     # Total TA demand across all shifts to help plan TA loads and describe the problem
+    logger.info(f"===========================")
+    logger.info(f"Generating random shifts for {num_of_weeks} weeks with prefix '{shift_series_prefix}'")
+    logger.info(f"============================")
+    logger.info(f"\tAvailable days:\t\t{', '.join(days)}")
+    logger.info(f"\t------------------------")
+    logger.info(f"\tAvailable TA names:\t{', '.join(ta_names)}")
+    logger.info(f"\t------------------------\n")
+
+    shifts: List[Shift]     = []
+    ta_demands: int         = 0         # Total TA demand across all shifts to help plan TA loads and describe the problem
+    ta_demands_weekly: int  = 0         # Total TA demand for each week (constant for all weeks)
 
     ids                 = id_generator()                # Unique ID generator for shifts
-    num_shifts          = random.randint(MIN_NUM_SHIFTS_PER_WEEK, MAX_NUM_SHIFTS_PER_WEEK)  # number of shifts (constant for all weeks)
+    num_shifts_per_week = random.randint(MIN_NUM_SHIFTS_PER_WEEK, MAX_NUM_SHIFTS_PER_WEEK)  # number of shifts (constant for all weeks)
     
-    for week_id in range(num_of_weeks):
-        for i in range(num_shifts):
-            # Generate random shift details
+    for i in range(num_shifts_per_week):
+        # Generate random shift details
+        required_tas   = random.randint(MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT, MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT)
+        day            = random.choice(days)
+        series         = f"{shift_series_prefix}{i + 1:02d}"  # e.g., L01, L02, ...
+        start_time     = random.choice([DAY_START_TIME, AFTERNOON_START_TIME])
+        end_time       = DAY_END_TIME if start_time == DAY_START_TIME else AFTERNOON_END_TIME
+        
+        ta_demands_weekly  += required_tas 
+        ta_demands         += required_tas * num_of_weeks
+
+        for week_id in range(num_of_weeks):
             shift_id       = next(ids)
-            day            = random.choice(days)
-            required_tas   = random.randint(MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT, MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT)
-            series         = f"{shift_series_prefix}{i + 1:02d}"  # e.g., L01, L02, ...
-            start_time     = random.choice([DAY_START_TIME, AFTERNOON_START_TIME])
-            end_time       = DAY_END_TIME if start_time == DAY_START_TIME else AFTERNOON_END_TIME
             # Add the shift to the list
             shifts.append(Shift(
                 id=shift_id,
@@ -177,8 +215,7 @@ def demo_data_random(
                 required_tas=required_tas,
                 week_id=week_id
             ))
-            # Increment the total TA demand
-            ta_demands += required_tas
+    logger.info(f"Generated {len(shifts)} shifts with a total TA demand of {ta_demands} across {num_of_weeks} weeks.")
     
     # ======================
     # Generate random TAs
@@ -186,13 +223,21 @@ def demo_data_random(
     ids                     = id_generator()
     num_tas: int            = len(ta_names) if len(ta_names) > 0 else 1  # Ensure at least one TA
     course_tas: List[TA]    = []
-    tas_shift_count: List[int] = draw_num_of_shifts_for_ta_per_semester_given_ta_demand(
+
+    tas_shift_count: List[int]          = draw_num_of_shifts_for_ta_per_semester_given_ta_demand(
                                                                                         ta_demand=ta_demands, 
                                                                                         num_of_tas=num_tas, 
                                                                                         upper_deviation=2, 
                                                                                         lower_deviation=-2
                                                                                         )
+    # tas_shift_count_weekly: List[int]   = draw_num_of_shifts_for_ta_per_semester_given_ta_demand(
+    #                                                                                     ta_demand=ta_demands_weekly, 
+    #                                                                                     num_of_tas=num_tas, 
+    #                                                                                     upper_deviation=1, 
+    #                                                                                     lower_deviation=-1
+    #                                                                                     )
     for index in range(num_tas):
+        # Generate random TA details
         ta_id                           = next(ids)
         skill_level                     = random.randint(MIN_TA_SKILL_LEVEL, MAX_TA_SKILL_LEVEL)
         name_ta                         = random.choice(ta_names)
@@ -201,8 +246,9 @@ def demo_data_random(
 
         required_shifts_per_semester    = tas_shift_count[index]  # Get the number of shifts for this TA
         
-        min_shifts_per_week             = MIN_NUM_OF_SHIFTS_REQUIRED_PER_TA_PER_WEEK
-        max_shifts_per_week             = MAX_NUM_OF_SHIFTS_REQUIRED_PER_TA_PER_WEEK
+        MAX_NUM_OF_SHIFT_PER_TA_PER_WEEK    = ta_demands_weekly // num_tas + 1 if ta_demands_weekly % num_tas > 0 else ta_demands_weekly // num_tas
+        min_shifts_per_week                 = MAX_NUM_OF_SHIFT_PER_TA_PER_WEEK if MIN_NUM_OF_SHIFT_PER_TA_PER_WEEK > MAX_NUM_OF_SHIFT_PER_TA_PER_WEEK else MIN_NUM_OF_SHIFT_PER_TA_PER_WEEK
+        max_shifts_per_week                 = MAX_NUM_OF_SHIFT_PER_TA_PER_WEEK
         
         # Pick unavailable, desired, and undesired *without replacement*
         unavailable = random.sample(
@@ -252,11 +298,12 @@ def demo_data_random(
         shift_assignments=shift_assignments
     )
 
-def demo_data_semeseter_scheduling(name: str) -> Timetable:
+def demo_data_semeseter_scheduling(name: str, logger: logging.Logger) -> Timetable:
    pass
 
 def demo_data_semeseter_scheduling_random(
-      name: str, 
+      name: str,
+      logger: logging.Logger,
       days: List[str] = ["Mon", "Tue", "Wed", "Thu", "Fri"],
       shift_series_prefix: str = "L",
       ta_names = ["M. Roghani", "D. Noori", "A. Gholami", "M. Jafari", "A. Athar", "S. Smith", "J. Doe"],
@@ -265,6 +312,7 @@ def demo_data_semeseter_scheduling_random(
    
    return demo_data_random(
       name=name,
+      logger=logger,
       days=days,
       shift_series_prefix=shift_series_prefix,
       ta_names=ta_names,
@@ -279,14 +327,14 @@ _generate_demo_data_dict = {
 }
 
 
-def generate_demo_data(name: str = "CUSTOM", select: str = "demo_data_weekly_scheduling") -> Timetable:
+def generate_demo_data(logger: logging.Logger, name: str = "CUSTOM", select: str = "demo_data_weekly_scheduling") -> Timetable:
    """   Generate demo data based on the provided name and selection.
        If the selection is not found, it will print available options.
        Args:
            name (str): Name of the demo Timetable data.
            select (str): Selection key for the demo data."""
    if _generate_demo_data_dict.get(select):
-      return _generate_demo_data_dict[select](name)
+      return _generate_demo_data_dict[select](name=name, logger=logger)
    else:
       # provide options for the user
       print("Available demo data options:")

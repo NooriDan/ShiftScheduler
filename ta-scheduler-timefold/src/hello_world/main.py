@@ -79,7 +79,7 @@ def create_timetable_demo(solver_factory: SolverFactory, logger: logging.Logger,
 
     # Load the problem
     logger.info(f"=== Loading the demo data {demo_data_select} ===")
-    problem = generate_demo_data(name="my_demo", select=demo_data_select)
+    problem = generate_demo_data(name="my_demo", select=demo_data_select, logger=logger)
     # Visualize the problem
     if print_initial_timetable:
         logger.info("************************** Initial Timetable **************************")
