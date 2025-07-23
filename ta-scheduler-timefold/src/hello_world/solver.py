@@ -58,11 +58,44 @@ def post_process_solution(solution: Timetable, solver_factory: SolverFactory, lo
     logger.info("=======================================================")
     logger.info("calling solver.explain to explain the constraints")
     logger.info("=======================================================")
-    print(solution_manager.explain(solution=solution).summary)
+    score_explanation = solution_manager.explain(solution=solution)
+    print(score_explanation.summary)
+
     logger.info("=======================================================")
     logger.info("calling solver.analyze to explain the constraints")
     logger.info("=======================================================")
-    print(solution_manager.analyze(solution=solution).summary)
+    score_analysis = solution_manager.analyze(solution=solution)
+    print(score_analysis.summary)
+
+    # When you have the ScoreAnalysis instance, you can find out which constraints are broken:
+    for constraint_ref, constraint_analysis in score_analysis.constraint_map.items():
+        constraint_id           = constraint_ref.constraint_id
+        score_per_constraint    = constraint_analysis.score
+
+        match_count = constraint_analysis.match_count
+        # If you wish to go further and find out which planning entities and problem facts are responsible for breaking the constraint, 
+        # you can further explore the ConstraintAnalysis instance you received from ScoreAnalysis.constraintMap():
+        for match_analysis in constraint_analysis.matches:
+            score_per_match = match_analysis.score
+            justification = match_analysis.justification
+            
+   
     # logger.info(solution_manager.analyze(solution=solution))
 
     return solution_manager
+
+def visualize_hot_planning_vars(solution: Timetable, solver_factory: SolverFactory, logger: logging.Logger):
+    solution_manager = SolutionManager.create(solver_factory)
+    score_explanation = solution_manager.explain(solution)
+    indictment_map = score_explanation.indictment_map
+    for assignment in solution.shift_assignments:
+        indictment = indictment_map.get(assignment)
+        if indictment is None:
+            continue
+        # The score impact of that planning entity
+        total_score = indictment.score
+
+        for constraint_match in indictment.constraint_match_set:
+            # constraint_name = constraint_match.constraint_name
+            score = constraint_match.score
+            
