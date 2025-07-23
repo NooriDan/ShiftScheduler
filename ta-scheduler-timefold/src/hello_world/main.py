@@ -1,15 +1,11 @@
-from timefold.solver.config import (SolverConfig, ScoreDirectorFactoryConfig,
-                                    TerminationConfig, Duration)
-from timefold.solver import SolverFactory
-
 import argparse
 import logging
 import sys, os
 
 from hello_world.domain      import Timetable, ShiftAssignment, Shift, TA
-from hello_world.constraints import constraints_provider_dict
 from hello_world.demo_data   import generate_demo_data, _generate_demo_data_dict
-from hello_world.utils       import print_timetable, print_ta_availability, initialize_logger, DataConstructor
+from hello_world.utils       import print_ta_availability, initialize_logger, DataConstructor
+from hello_world.solver      import solve_problem
 
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Run the TA Rostering Program in Terminal')
@@ -52,30 +48,7 @@ def get_args() -> argparse.Namespace:
 
     return args
 
-def create_solver_config(constraint_version: str) -> SolverConfig:
-    """ Create the solver configuration based on the constraint version """
-    if constraint_version not in constraints_provider_dict:
-        raise ValueError(f"Invalid constraint version: {constraint_version}. "
-                         f"Available versions: {list(constraints_provider_dict.keys())}")
-    # Get the appropriate constraints provider function
-    constraints_provider_function = constraints_provider_dict[constraint_version]
-    # Create the solver configuration
-    solver_config = SolverConfig(
-        solution_class=Timetable,
-        entity_class_list=[ShiftAssignment],
-        score_director_factory_config=ScoreDirectorFactoryConfig(
-            constraint_provider_function= constraints_provider_function
-        ),
-        termination_config=TerminationConfig(
-            # The solver runs only for 5 seconds on this small dataset.
-            # It's recommended to run for at least 5 minutes ("5m") otherwise.
-            spent_limit = Duration(seconds=40),
-            unimproved_spent_limit= Duration(seconds=5)
-        )
-        )
-    return solver_config
-
-def create_timetable_demo(solver_factory: SolverFactory, logger: logging.Logger, demo_data_select: str = "demo_data_weekly_scheduling-random", print_initial_timetable: bool = False) -> Timetable:
+def create_timetable_demo(logger: logging.Logger, demo_data_select: str = "demo_data_weekly_scheduling-random", print_initial_timetable: bool = False) -> Timetable:
 
     # Load the problem
     logger.info(f"=== Loading the demo data {demo_data_select} ===")
@@ -85,18 +58,10 @@ def create_timetable_demo(solver_factory: SolverFactory, logger: logging.Logger,
         logger.info("************************** Initial Timetable **************************")
         print_ta_availability(time_table=problem, logger=logger)
 
-    # Solve the problem
-    solver = solver_factory.build_solver()
-    solution = solver.solve(problem)
+    return problem
 
-    # Visualize the solution
-    logger.info("************************** Final Timetable **************************")
-    print_timetable(time_table=solution, logger=logger)
-
-    return solution
-
-def create_timetable_from_data_folder(solver_factory: SolverFactory,  logger: logging.Logger,
-                         ta_csv_path: str, shift_csv_path: str, availability_folder: str):
+def create_timetable_from_data_folder(logger: logging.Logger,
+                         ta_csv_path: str, shift_csv_path: str, availability_folder: str) -> Timetable:
 
     try:
         data_constructor = DataConstructor(
@@ -117,48 +82,29 @@ def create_timetable_from_data_folder(solver_factory: SolverFactory,  logger: lo
     # Load the problem
     problem = data_constructor.timetable
 
-    # # Initialize the logger
-    # logger = initialize_logger()
-
-    # Solve the problem
-    solver = solver_factory.build_solver()
-    solution = solver.solve(problem)
-
-    # Visualize the solution
-    logger.info("************************** Final Timetable **************************")
-    print_timetable(time_table=solution, logger=logger)
-
-    return solution
+    return problem
 
 def run_app():
-
     # Parse command line arguments
     args = get_args()
-
-    # Create the solver configuration
-    solver_config  = create_solver_config(args.constraint_version)
-    # Create the solver factory
-    solver_factory = SolverFactory.create(solver_config)
-
-    # initialize the logger
+    # Initialize the logger
     logger = initialize_logger(args.constraint_version)
-    
+    # Create the planning problem
     if args.overwrite:
         logger.info("=== Rostering the TAs from a custom location ===")
-        solution = create_timetable_from_data_folder(solver_factory= solver_factory, 
-                                        logger=logger, 
+        problem = create_timetable_from_data_folder(logger=logger, 
                                         ta_csv_path=args.ta_csv_path, 
                                         shift_csv_path=args.shift_csv_path, 
                                         availability_folder=args.availability_folder)
-        logger.info("=== Done Solving ===")
-
     else:
         logger.info("=== Rostering the TAs from the demo data ===")
-        solution = create_timetable_demo(solver_factory=solver_factory, 
-                            logger=logger,
+        problem = create_timetable_demo(logger=logger,
                             demo_data_select=args.demo_data_select,
                             print_initial_timetable=True if args.demo_data_select == "demo_data_weekly_scheduling-random" else False)
-        logger.info("=== Done Solving ===")
+    # Solve the problem
+    solution = solve_problem(problem=problem, constraint_version=args.constraint_version, logger=logger)
+    # Explain the solution (analysis) TODO
+    
 
 if __name__ == '__main__':
     try:

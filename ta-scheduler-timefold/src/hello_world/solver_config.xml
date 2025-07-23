@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<solver xmlns="https://timefold.ai/xsd/solver" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://timefold.ai/xsd/solver https://timefold.ai/xsd/solver/solver.xsd">
+  <!-- Define the model -->
+  <solutionClass>org.acme.schooltimetabling.domain.Timetable</solutionClass>
+  <entityClass>org.acme.schooltimetabling.domain.Lesson</entityClass>
+
+  <!-- Define the score function -->
+  <scoreDirectorFactory>
+    <constraintProviderClass>org.acme.schooltimetabling.solver.TimetableConstraintProvider</constraintProviderClass>
+  </scoreDirectorFactory>
+
+  <!-- Configure the optimization algorithms (optional) -->
+  <termination>
+    ...
+  </termination>
+  <constructionHeuristic>
+    ...
+  </constructionHeuristic>
+  <localSearch>
+    ...
+  </localSearch>
+</solver>

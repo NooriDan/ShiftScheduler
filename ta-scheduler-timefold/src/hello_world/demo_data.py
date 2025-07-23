@@ -33,13 +33,13 @@ MIN_TA_SKILL_LEVEL = 1
 MAX_TA_SKILL_LEVEL = 3
 
 MIN_NUM_OF_UNAVAILABLE_SHIFTS_DIV   = 0     # in pecentage of the total weekly shifts
-MAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV   = 20    # in pecentage of the total weekly shifts
+MAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV   = 0    # in pecentage of the total weekly shifts
 
 MIN_NUM_OF_DESIRED_SHIFTS_DIV       = 0     # in pecentage of the total weekly shifts
 MAX_NUM_OF_DESIRED_SHIFTS_DIV       = 40    # in pecentage of the total weekly shifts
 
 MIN_NUM_OF_UNDESIRED_SHIFTS_DIV     = 0     # in pecentage of the total weekly shifts
-MAX_NUM_OF_UNDESIRED_SHIFTS_DIV     = 20    # in pecentage of the total weekly shifts
+MAX_NUM_OF_UNDESIRED_SHIFTS_DIV     = 0    # in pecentage of the total weekly shifts
 
 
 
