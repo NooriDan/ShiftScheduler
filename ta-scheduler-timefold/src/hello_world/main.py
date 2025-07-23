@@ -100,7 +100,7 @@ def run_app():
         logger.info("=== Rostering the TAs from the demo data ===")
         problem = create_timetable_demo(logger=logger,
                             demo_data_select=args.demo_data_select,
-                            print_initial_timetable=True if args.demo_data_select == "demo_data_weekly_scheduling-random" else False)
+                            print_initial_timetable=True)
     # Solve the problem
     solution = solve_problem(problem=problem, constraint_version=args.constraint_version, logger=logger)
     # Explain the solution (analysis) TODO

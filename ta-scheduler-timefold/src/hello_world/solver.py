@@ -2,10 +2,13 @@ import argparse
 import logging
 import sys, os
 import uuid
+import time
+
+from tqdm import tqdm
 
 from timefold.solver.config import (SolverConfig, ScoreDirectorFactoryConfig,
                                     TerminationConfig, Duration)
-from timefold.solver import SolverFactory, SolutionManager, Solver, SolverManager, SolverStatus
+from timefold.solver import SolverFactory, SolutionManager, Solver, SolverManager, SolverStatus, SolverJob
 
 from hello_world.domain      import Timetable, ShiftAssignment, Shift, TA
 from hello_world.constraints import constraints_provider_dict
@@ -28,17 +31,23 @@ def create_solver_config(constraint_version: str) -> SolverConfig:
         termination_config=TerminationConfig(
             # The solver runs only for 5 seconds on this small dataset.
             # It's recommended to run for at least 5 minutes ("5m") otherwise.
-            spent_limit = Duration(minutes=0, seconds=30),
-            # unimproved_spent_limit= Duration(seconds=30)
+            spent_limit = Duration(minutes=1, seconds=30),
+            unimproved_spent_limit= Duration(seconds=30)
         )
         )
     return solver_config
 
-def solve_problem(problem: Timetable, constraint_version: str, logger: logging.Logger) -> Timetable:
+def solve_problem(problem: Timetable, constraint_version: str, logger: logging.Logger, solving_method: str) -> Timetable:
     """Wrapper for the solve methods"""
-    # solution = solve_problem_blocking(problem=problem, constraint_version=constraint_version, logger=logger)
-    solution = solve_problem_with_manager(problem=problem, constraint_version=constraint_version, logger=logger)
-    return solution
+    match solving_method:
+        case "blocking":
+            return solve_problem_blocking(problem=problem, constraint_version=constraint_version, logger=logger)
+        case "solver_manager":
+            solve_problem_with_manager(problem=problem, constraint_version=constraint_version, logger=logger)
+        case "tqdm":
+            return solve_with_tqdm(problem=problem, constraint_version=constraint_version, logger=logger)
+        case _:
+            return solve_problem_blocking(problem=problem, constraint_version=constraint_version, logger=logger)
 
 def solve_problem_with_manager(problem: Timetable, constraint_version: str, logger: logging.Logger) -> Timetable:
     logger.info("=== Starting to Solve the problem (SolverManager) ===")
@@ -73,6 +82,58 @@ def solve_problem_with_manager(problem: Timetable, constraint_version: str, logg
     print_timetable(time_table=solution, logger=logger)
     
     # 5) Post-process
+    solution = post_process_solution(solution=solution, solver_factory=solver_factory, logger=logger)
+    
+    logger.info("=== Done Solving ===")
+    return solution
+
+def solve_with_tqdm(problem: Timetable, constraint_version: str, logger: logging.Logger) -> Timetable:
+    logger.info("Starting SolverManager…")
+    solver_config = create_solver_config(constraint_version)
+    solver_factory = SolverFactory.create(solver_config)
+    solver_manager = SolverManager.create(solver_factory)
+
+    # A one‐element list to hold the latest best solution via the consumer callback
+    latest_solution = [None]
+
+    def on_best_solution(sol: Timetable):
+        # This is invoked on every new best solution
+        latest_solution[0] = sol
+
+    # Kick off the async job with our callback
+    job: SolverJob[Timetable] = (
+        solver_manager.solve_builder()
+        .with_problem_id(str(uuid.uuid4()))
+        .with_problem(problem)
+        .with_best_solution_consumer(on_best_solution)
+        .run()
+    )
+
+    # Prepare a tqdm bar that just shows a line of text
+    pbar = tqdm(total=0, bar_format="{desc}", desc="[STARTING]", leave=True)
+
+    try:
+        while True:
+            time.sleep(0.5)
+            status = job.get_solver_status()
+            sol = latest_solution[0]
+            score = sol.score if sol is not None else "–"
+
+            # Update the on‐screen description
+            pbar.set_description(f"[{status.name}] score={score}")
+
+            # Break once the solver is no longer running
+            if status is not SolverStatus.SOLVING_ACTIVE:
+                break
+    finally:
+        pbar.close()
+
+    # Retrieve the final solution (blocks only if it isn't done yet)
+    solution: Timetable = job.get_final_best_solution()
+    logger.info("Solver finished: status=%s, score=%s",
+                job.get_solver_status().name, solution.score)
+
+    print_timetable(time_table=solution, logger=logger)
     solution = post_process_solution(solution=solution, solver_factory=solver_factory, logger=logger)
     
     logger.info("=== Done Solving ===")
