@@ -88,7 +88,7 @@ def run_app():
     # Parse command line arguments
     args = get_args()
     # Initialize the logger
-    logger = initialize_logger(args.constraint_version)
+    logger = initialize_logger(args)
     # Create the planning problem
     if args.overwrite:
         logger.info("=== Rostering the TAs from a custom location ===")

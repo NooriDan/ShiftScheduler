@@ -9,6 +9,7 @@ import pandas as pd
 from typing import Dict, List
 from pathlib import Path
 from datetime import timedelta, time, date
+from argparse import Namespace
 
 
 # Custom Imports 
@@ -305,9 +306,10 @@ def id_generator():
         yield str(current)
         current += 1
 
-def initialize_logger(constraint_version: str):
+def initialize_logger(args: Namespace):
     # Construct log directory path based on the constraint version argument
-    log_dir = os.path.join("logs", constraint_version)
+    variant: str = args.demo_data_select if not args.overwrite else f"overwrite"
+    log_dir = os.path.join("logs", args.constraint_version, variant)
     os.makedirs(log_dir, exist_ok=True)
 
     # Use readable timestamp for the filename
@@ -329,7 +331,8 @@ def initialize_logger(constraint_version: str):
     LOGGER.info(f"...")
     LOGGER.info(f"Logger initialized")
     LOGGER.info(f"\t@ {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    LOGGER.info(f"\tConstraint version: {constraint_version}")
+    LOGGER.info(f"\tConstraint version: {args.constraint_version}")
+    LOGGER.info(f"\tData:               {variant}")
     LOGGER.info(f"...")
 
     return LOGGER

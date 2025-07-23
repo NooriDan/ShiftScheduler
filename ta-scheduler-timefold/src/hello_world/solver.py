@@ -174,17 +174,17 @@ def solve_problem_blocking(problem: Timetable, constraint_version: str, logger: 
 
 def post_process_solution(solution: Timetable, solver_factory: SolverFactory, logger: logging.Logger) -> SolutionManager:
     solution_manager = SolutionManager.create(solver_factory=solver_factory)
-    logger.info("=======================================================")
-    logger.info("calling solver.explain to explain the constraints")
-    logger.info("=======================================================")
-    score_explanation = solution_manager.explain(solution=solution)
-    print(score_explanation.summary)
+    # logger.info("=======================================================")
+    # logger.info("calling solver.explain to explain the constraints")
+    # logger.info("=======================================================")
+    # score_explanation = solution_manager.explain(solution=solution)
+    # logger.info(score_explanation.summary)
 
     logger.info("=======================================================")
     logger.info("calling solver.analyze to explain the constraints")
     logger.info("=======================================================")
     score_analysis = solution_manager.analyze(solution=solution)
-    print(score_analysis.summary)
+    logger.info(score_analysis.summary)
 
     # When you have the ScoreAnalysis instance, you can find out which constraints are broken:
     for constraint_ref, constraint_analysis in score_analysis.constraint_map.items():
