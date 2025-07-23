@@ -313,5 +313,5 @@ timefold-quickstarts/
 /ta-scheduling-webapp/src/employee_scheduling/__pycache__/*
 *__pycache__/*
 *.pyc
-ta-scheduler-timefold/logs/default/*
+ta-scheduler-timefold/logs/*
 ta-scheduler-timefold/src/hello_world/__pycache__/*
