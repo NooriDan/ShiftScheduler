@@ -1,5 +1,12 @@
-from timefold.solver.score import (constraint_provider, HardSoftScore, HardMediumSoftScore,
-                                   ConstraintFactory, Constraint, ConstraintCollectors, Joiners)
+from timefold.solver.score import (
+    HardSoftScore, 
+    HardMediumSoftScore,                               
+    constraint_provider,
+    ConstraintFactory, 
+    Constraint, 
+    ConstraintCollectors, 
+    Joiners)
+
 from datetime import time
 from typing import Dict, List, Callable
 
@@ -136,15 +143,19 @@ def penalize_over_assignment_in_a_week(constraint_factory: ConstraintFactory) ->
             .filter(lambda ta, count: count > ta.max_shifts_per_week)
             .penalize(HardMediumSoftScore.ONE_MEDIUM, lambda ta, count: (count - ta.max_shifts_per_week))
             .as_constraint("TA should not to more than the required shifts"))
-    
+
+#
+# HARD: never assign a TA to a shift they marked unavailable
+#  
 def ta_unavailable_shift(constraint_factory: ConstraintFactory) -> Constraint:
     """ Each TA should not be assigned to a shift that they are unavailable for """
-    return (constraint_factory
-            .for_each(ShiftAssignment)
-            .group_by(lambda shift_assignment: [shift.id for shift in shift_assignment.assigned_ta.unavailable], ConstraintCollectors.to_list(lambda assignment: assignment.shift.id))
-            .filter(lambda unavailable, shift_ids: any(id in unavailable for id in shift_ids))
-            .penalize(HardMediumSoftScore.ONE_HARD)
-            .as_constraint("TA unavailable"))
+    return (constraint_factory.for_each(ShiftAssignment)
+            .filter(lambda assignment:
+                assignment.assigned_ta is not None and
+                assignment.shift in assignment.assigned_ta.unavailable
+            )
+            .penalize(HardMediumSoftScore.ONE_HARD, lambda assignment: 1)
+            .as_constraint("TA assigned to unavailable shift"))
 
 # Soft  Constraints
 def ta_undesired_shift (constraint_factory: ConstraintFactory) -> Constraint:

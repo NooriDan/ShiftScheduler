@@ -324,7 +324,16 @@ def initialize_logger(constraint_version: str):
             logging.StreamHandler()  # Also display logs in the console
         ]
     )
-    return logging.getLogger('app')
+    # Create a logger instance
+    LOGGER = logging.getLogger('app')
+
+    LOGGER.info(f"...")
+    LOGGER.info(f"Logger initialized")
+    LOGGER.info(f"\t@ {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    LOGGER.info(f"\tConstraint version: {constraint_version}")
+    LOGGER.info(f"...")
+
+    return LOGGER
 
 def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
 
