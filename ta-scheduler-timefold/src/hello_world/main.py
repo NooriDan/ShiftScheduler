@@ -5,7 +5,7 @@ import sys, os
 from hello_world.domain      import Timetable, ShiftAssignment, Shift, TA
 from hello_world.demo_data   import generate_demo_data, _generate_demo_data_dict
 from hello_world.utils       import print_ta_availability, initialize_logger, DataConstructor
-from hello_world.solver      import solve_problem
+from hello_world.solver      import solve_problem, post_process_solution
 
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Run the TA Rostering Program in Terminal')
@@ -104,7 +104,6 @@ def run_app():
     # Solve the problem
     solution = solve_problem(problem=problem, constraint_version=args.constraint_version, logger=logger)
     # Explain the solution (analysis) TODO
-    
 
 if __name__ == '__main__':
     try:

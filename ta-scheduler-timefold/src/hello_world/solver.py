@@ -41,7 +41,6 @@ def solve_problem(problem: Timetable, constraint_version: str, logger: logging.L
     solver_factory = SolverFactory.create(solver_config)
     
     # Solve the problem
-    solution_manager = SolutionManager.create(solver_factory=solver_factory)
     solver   = solver_factory.build_solver()
     solution = solver.solve(problem)
 
@@ -49,10 +48,21 @@ def solve_problem(problem: Timetable, constraint_version: str, logger: logging.L
     logger.info("************************** Final Timetable **************************")
     print_timetable(time_table=solution, logger=logger)
 
-    logger.info("=======================================================")
-    logger.info("calling solver.explain to analyze the constraints")
-    logger.info("=======================================================")
-    logger.info(solution_manager.explain(solution=solution))
-    
+    solution_manager = post_process_solution(solution=solution, solver_factory=solver_factory, logger=logger)
+
     logger.info("=== Done Solving ===")
     return solution
+
+def post_process_solution(solution: Timetable, solver_factory: SolverFactory, logger: logging.Logger) -> SolutionManager:
+    solution_manager = SolutionManager.create(solver_factory=solver_factory)
+    logger.info("=======================================================")
+    logger.info("calling solver.explain to explain the constraints")
+    logger.info("=======================================================")
+    print(solution_manager.explain(solution=solution).summary)
+    logger.info("=======================================================")
+    logger.info("calling solver.analyze to explain the constraints")
+    logger.info("=======================================================")
+    print(solution_manager.analyze(solution=solution).summary)
+    # logger.info(solution_manager.analyze(solution=solution))
+
+    return solution_manager
