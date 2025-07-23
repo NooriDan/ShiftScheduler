@@ -48,7 +48,11 @@ $ pip install -e .
 +
 [source, shell]
 ----
-$ run-app
+$ run-timefold
+----
+[source, shell]
+----
+$ run-timefold --help
 ----
 
 . Run tests
