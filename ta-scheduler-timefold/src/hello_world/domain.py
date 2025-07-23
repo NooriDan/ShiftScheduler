@@ -47,11 +47,11 @@ class TA():
     
     def get_status_for_shift(self, shift: Shift) -> str:
         if shift in self.desired:
-            return 'Desired'
+            return '** Desired **'
         if shift in self.undesired:
-            return 'Undesired'
+            return '>> Undesired <<'
         if shift in self.unavailable:
-            return 'Unavailable'
+            return 'X Unavailable X'
         return 'Neutral'
     
     def is_available_for_shift(self, shift: Shift) -> bool:
