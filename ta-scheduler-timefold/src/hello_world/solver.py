@@ -37,7 +37,7 @@ def create_solver_config(constraint_version: str) -> SolverConfig:
         )
     return solver_config
 
-def solve_problem(problem: Timetable, constraint_version: str, logger: logging.Logger, solving_method: str) -> Timetable:
+def solve_problem(problem: Timetable, constraint_version: str, logger: logging.Logger, solving_method: str = "solver_manager") -> Timetable:
     """Wrapper for the solve methods"""
     match solving_method:
         case "blocking":
