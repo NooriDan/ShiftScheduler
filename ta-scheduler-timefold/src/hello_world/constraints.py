@@ -13,6 +13,8 @@ from typing import Dict, List, Callable
 # Custom Imports
 from .domain import Shift, TA, ShiftAssignment
 
+# TODO
+#   - fix the name of each constraint... more readable and descriptive
 
 @constraint_provider
 def define_constraints(constraint_factory: ConstraintFactory) -> list[Constraint]:

@@ -1,10 +1,11 @@
 import argparse
 import logging
 import sys, os
+import uuid
 
 from timefold.solver.config import (SolverConfig, ScoreDirectorFactoryConfig,
                                     TerminationConfig, Duration)
-from timefold.solver import SolverFactory, SolutionManager, Solver, SolverStatus
+from timefold.solver import SolverFactory, SolutionManager, Solver, SolverManager, SolverStatus
 
 from hello_world.domain      import Timetable, ShiftAssignment, Shift, TA
 from hello_world.constraints import constraints_provider_dict
@@ -34,6 +35,50 @@ def create_solver_config(constraint_version: str) -> SolverConfig:
     return solver_config
 
 def solve_problem(problem: Timetable, constraint_version: str, logger: logging.Logger) -> Timetable:
+    """Wrapper for the solve methods"""
+    # solution = solve_problem_blocking(problem=problem, constraint_version=constraint_version, logger=logger)
+    solution = solve_problem_with_manager(problem=problem, constraint_version=constraint_version, logger=logger)
+    return solution
+
+def solve_problem_with_manager(problem: Timetable, constraint_version: str, logger: logging.Logger) -> Timetable:
+    logger.info("=== Starting to Solve the problem (SolverManager) ===")
+    
+    # 1) Build SolverConfig and SolverFactory
+    solver_config = create_solver_config(constraint_version)
+    solver_factory = SolverFactory.create(solver_config)
+    solver_manager = SolverManager.create(solver_factory)
+    
+    # 2) Choose a unique problem ID
+    problem_id = str(uuid.uuid4())
+    
+    # 3) Run the solver asynchronously and retrieve the best solution
+    solver_job = solver_manager.solve_builder() \
+        .with_problem_id(problem_id) \
+        .with_problem(problem) \
+        .run()   # <- Run is required here!
+        # more optional setting:
+        # .with_first_initialized_solution_consumer(on_first_solution_changed) \
+        # .with_best_solution_consumer(on_best_solution_changed) \
+        # .with_final_best_solution_consumer(on_final_solution_changed) \
+        # .with_exception_handler(on_exception_handler) \
+        # .with_config_override(config_override) \
+
+    # while solver_job.get_solver_status != SolverStatus.<name-of-status>
+
+    solution: Timetable = solver_job.get_final_best_solution()
+
+     
+    # 4) Visualize final solution
+    logger.info("=== Final timetable ===")
+    print_timetable(time_table=solution, logger=logger)
+    
+    # 5) Post-process
+    solution = post_process_solution(solution=solution, solver_factory=solver_factory, logger=logger)
+    
+    logger.info("=== Done Solving ===")
+    return solution
+
+def solve_problem_blocking(problem: Timetable, constraint_version: str, logger: logging.Logger) -> Timetable:
     logger.info("=== Starting to Solve the proble ===")
     # Create the solver configuration
     solver_config  = create_solver_config(constraint_version)
