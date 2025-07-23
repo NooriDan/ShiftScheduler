@@ -1,23 +1,69 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<solver xmlns="https://timefold.ai/xsd/solver" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="https://timefold.ai/xsd/solver https://timefold.ai/xsd/solver/solver.xsd">
-  <!-- Define the model -->
-  <solutionClass>org.acme.schooltimetabling.domain.Timetable</solutionClass>
-  <entityClass>org.acme.schooltimetabling.domain.Lesson</entityClass>
+<solver xmlns="https://timefold.ai/xsd/solver"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="https://timefold.ai/xsd/solver https://timefold.ai/xsd/solver/solver.xsd">
 
-  <!-- Define the score function -->
-  <scoreDirectorFactory>
-    <constraintProviderClass>org.acme.schooltimetabling.solver.TimetableConstraintProvider</constraintProviderClass>
-  </scoreDirectorFactory>
+    <!-- ########################## -->
+    <!-- Model and Entity Classes  -->
+    <!-- ########################## -->
+    <solutionClass>domain.Timetable</solutionClass>
+    <!-- Only planning entities (with @PlanningEntity) go here -->
+    <entityClass>domain.ShiftAssignment</entityClass>
 
-  <!-- Configure the optimization algorithms (optional) -->
-  <termination>
-    ...
-  </termination>
-  <constructionHeuristic>
-    ...
-  </constructionHeuristic>
-  <localSearch>
-    ...
-  </localSearch>
+    <!-- ########################## -->
+    <!-- Constraint Provider         -->
+    <!-- ########################## -->
+    <scoreDirectorFactory>
+        <!-- Fully in-Python ConstraintProvider -->
+        <constraintProviderClass>constraints.define_constraints</constraintProviderClass>
+        <!-- Enable constraint match tracking if you need explanation() -->
+        <constraintMatchEnabled>true</constraintMatchEnabled>
+    </scoreDirectorFactory>
+
+    <!-- ########################## -->
+    <!-- Construction Heuristic      -->
+    <!-- ########################## -->
+    <constructionHeuristic>
+        <!-- e.g., FIRST_FIT, FIRST_FIT_DECREASING, or CHEAPEST_INSERTION -->
+        <constructionHeuristicType>FIRST_FIT_DECREASING</constructionHeuristicType>
+        <!-- Sort shifts by number of requiredTAs descending for better seeding -->
+        <entityPlacer>
+            <changeMoveSelector>
+                <selectorCacheType>JUST_IN_TIME</selectorCacheType>
+                <sorter>
+                    <sortWeightFactoryClass>heuristic.ShiftDifficultyWeightFactory</sortWeightFactoryClass>
+                </sorter>
+            </changeMoveSelector>
+        </entityPlacer>
+    </constructionHeuristic>
+
+    <!-- ########################## -->
+    <!-- Local Search               -->
+    <!-- ########################## -->
+    <localSearch>
+        <!-- e.g., TABU_SEARCH, SIMULATED_ANNEALING -->
+        <localSearchType>TABU_SEARCH</localSearchType>
+        <!-- Termination for local search only (overrides global) -->
+        <termination>
+            <!-- Stop when no improvement in 30s -->
+            <secondsSpentLimit>30</secondsSpentLimit>
+        </termination>
+        <!-- Tabu settings -->
+        <tabuSearch>
+            <!-- Tabu tenure moves per level -->
+            <tabuSize>7</tabuSize>
+            <aspirationEnabled>true</aspirationEnabled>
+        </tabuSearch>
+    </localSearch>
+
+    <!-- ########################## -->
+    <!-- Global Termination         -->
+    <!-- ########################## -->
+    <termination>
+        <!-- Maximum time allocated to solving, e.g., 2 minutes -->
+        <secondsSpentLimit>120</secondsSpentLimit>
+        <!-- Or stop when a target score is reached -->
+        <!-- <bestScoreLimit>0hard/0medium/0soft</bestScoreLimit> -->
+    </termination>
+
 </solver>

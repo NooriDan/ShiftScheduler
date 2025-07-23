@@ -4,7 +4,9 @@ import sys, os
 import uuid
 import time
 
-from tqdm import tqdm
+from typing     import List
+from pathlib    import Path
+from tqdm       import tqdm
 
 from timefold.solver.config import (SolverConfig, ScoreDirectorFactoryConfig,
                                     TerminationConfig, Duration)
@@ -35,6 +37,17 @@ def create_solver_config(constraint_version: str) -> SolverConfig:
             unimproved_spent_limit= Duration(seconds=30)
         )
         )
+    return solver_config
+
+def create_solver_config_from_xml(constraint_version: str, path_to_solver_config: Path) -> SolverConfig:
+    """ Create the solver configuration based on the constraint version """
+    if constraint_version not in constraints_provider_dict:
+        raise ValueError(f"Invalid constraint version: {constraint_version}. "
+                         f"Available versions: {list(constraints_provider_dict.keys())}")
+    # Get the appropriate constraints provider function
+    constraints_provider_function = constraints_provider_dict[constraint_version]
+    # Create the solver configuration
+    solver_config = SolverConfig.create_from_xml_resource(path=path_to_solver_config)
     return solver_config
 
 def solve_problem(problem: Timetable, constraint_version: str, logger: logging.Logger, solving_method: str = "solver_manager") -> Timetable:
@@ -94,7 +107,7 @@ def solve_with_tqdm(problem: Timetable, constraint_version: str, logger: logging
     solver_manager = SolverManager.create(solver_factory)
 
     # A one‐element list to hold the latest best solution via the consumer callback
-    latest_solution = [None]
+    latest_solution: List[Timetable] = [None]
 
     def on_best_solution(sol: Timetable):
         # This is invoked on every new best solution
