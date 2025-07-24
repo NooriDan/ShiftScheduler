@@ -5,13 +5,9 @@ from    typing     import List, Any, Dict, Tuple
 from    tqdm       import tqdm
 
 # Custom Imports
-from hello_world.domain import Shift, TA, ShiftAssignment, Timetable
+from hello_world.domain import Shift, TA, ShiftAssignment, Timetable, ConstraintParameters
 from hello_world.utils  import id_generator
 
-# Constants for random shift generation
-SEED = 42
-# standard library
-random.seed(SEED)
 
 DAY_START_TIME = time(14, 30)
 DAY_END_TIME   = time(17, 30)
@@ -33,15 +29,16 @@ MIN_TA_SKILL_LEVEL = 1
 MAX_TA_SKILL_LEVEL = 3
 
 MIN_NUM_OF_UNAVAILABLE_SHIFTS_DIV   = 0     # in pecentage of the total weekly shifts
-MAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV   = 0    # in pecentage of the total weekly shifts
+MAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV   = 20    # in pecentage of the total weekly shifts
 
 MIN_NUM_OF_DESIRED_SHIFTS_DIV       = 0     # in pecentage of the total weekly shifts
 MAX_NUM_OF_DESIRED_SHIFTS_DIV       = 40    # in pecentage of the total weekly shifts
 
 MIN_NUM_OF_UNDESIRED_SHIFTS_DIV     = 0     # in pecentage of the total weekly shifts
-MAX_NUM_OF_UNDESIRED_SHIFTS_DIV     = 0    # in pecentage of the total weekly shifts
+MAX_NUM_OF_UNDESIRED_SHIFTS_DIV     = 30    # in pecentage of the total weekly shifts
 
-
+if MAX_NUM_OF_UNDESIRED_SHIFTS_DIV + MAX_NUM_OF_DESIRED_SHIFTS_DIV + MAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV > 100:
+    ValueError("the sum of unavialble desired and undesired percentages exceeds 100%")
 
 def demo_data_weekly_scheduling(name: str, logger: logging.Logger) -> Timetable:
     
@@ -146,11 +143,12 @@ def demo_data_weekly_scheduling(name: str, logger: logging.Logger) -> Timetable:
 def demo_data_random(
       name: str, 
       logger: logging.Logger,
+      constraint_params: ConstraintParameters = ConstraintParameters(),
       days: List[str] = ["Mon", "Tue", "Wed", "Thu", "Fri"],
       shift_series_prefix: str = "L",
       ta_names = ["M. Roghani", "D. Noori", "A. Gholami", "M. Jafari", "A. Athar", "S. Smith", "J. Doe"],
       num_of_weeks: int = 1,
-      allow_different_weekly_availability: bool = False
+      allow_different_weekly_availability: bool = False,
       ) -> Timetable:
     
     # ======================
@@ -201,7 +199,8 @@ def demo_data_random(
         id=name,
         shifts=shifts,
         tas=course_tas,
-        shift_assignments=shift_assignments
+        shift_assignments=shift_assignments,
+        constraint_parameters=constraint_params,
     )
 
 def demo_data_semeseter_scheduling(name: str, logger: logging.Logger) -> Timetable:
@@ -210,15 +209,17 @@ def demo_data_semeseter_scheduling(name: str, logger: logging.Logger) -> Timetab
 def demo_data_semeseter_scheduling_random(
       name: str,
       logger: logging.Logger,
+      constraint_params: ConstraintParameters = ConstraintParameters(),
       days: List[str] = ["Mon", "Tue", "Wed", "Thu", "Fri"],
       shift_series_prefix: str = "L",
       ta_names = ["M. Roghani", "D. Noori", "A. Gholami", "M. Jafari", "A. Athar", "S. Smith", "J. Doe"],
-      num_of_weeks: int = 12
+      num_of_weeks: int = 12,
       ) -> Timetable:
    
    return demo_data_random(
       name=name,
       logger=logger,
+      constraint_params=constraint_params,
       days=days,
       shift_series_prefix=shift_series_prefix,
       ta_names=ta_names,
@@ -234,19 +235,19 @@ _generate_demo_data_dict = {
 
 
 def generate_demo_data(logger: logging.Logger, name: str = "CUSTOM", select: str = "demo_data_weekly_scheduling") -> Timetable:
-   """   Generate demo data based on the provided name and selection.
+    """   Generate demo data based on the provided name and selection.
        If the selection is not found, it will print available options.
        Args:
            name (str): Name of the demo Timetable data.
            select (str): Selection key for the demo data."""
-   if _generate_demo_data_dict.get(select):
-      return _generate_demo_data_dict[select](name=name, logger=logger)
-   else:
-      # provide options for the user
-      print("Available demo data options:")
-      for key in _generate_demo_data_dict.keys():
-         print(f"- {key}")
-      raise ValueError(f"Unknown demo data name: {select}")
+    if _generate_demo_data_dict.get(select):
+        return _generate_demo_data_dict[select](name=name, logger=logger)
+    else:
+        # provide options for the user
+        logger.info("Available demo data options:")
+        for key in _generate_demo_data_dict.keys():
+            logger.info(f"- {key}")
+        raise ValueError(f"Unknown demo data name: {select}")
 
 # ---------------
 # Helper functions for the random data generation

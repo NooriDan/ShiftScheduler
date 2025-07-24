@@ -11,7 +11,7 @@ from datetime import time
 from typing import Dict, List, Callable
 
 # Custom Imports
-from .domain import Shift, TA, ShiftAssignment
+from .domain import Shift, TA, ShiftAssignment, ConstraintParameters
 
 # TODO
 #   - fix the name of each constraint... more readable and descriptive
@@ -162,21 +162,30 @@ def ta_unavailable_shift(constraint_factory: ConstraintFactory) -> Constraint:
 # Soft  Constraints
 def ta_undesired_shift (constraint_factory: ConstraintFactory) -> Constraint:
     """ Penalize if a TA is assigned to a shift that they don't want to work on """
-    return (constraint_factory
-            .for_each(ShiftAssignment)
-            .group_by(lambda shift_assignment: [shift.id for shift in shift_assignment.assigned_ta.undesired], ConstraintCollectors.to_list(lambda assignment: assignment.shift.id))
-            .filter(lambda unavailable, shift_ids: any(id in unavailable for id in shift_ids))
-            .penalize(HardMediumSoftScore.ONE_SOFT, lambda ta, shifts: 20)
-            .as_constraint("TA assigned to undesired"))
+    return (
+        constraint_factory.for_each(ShiftAssignment)
+               .filter(lambda assignment:
+                   assignment.assigned_ta is not None
+                   and assignment.shift in assignment.assigned_ta.desired
+               )
+               .join(ConstraintParameters)
+               .penalize(HardMediumSoftScore.ONE_SOFT, lambda assignment, params: params.undesired_assignment_penalty)
+               .as_constraint("TA assigned to >>undesired<< shift")
+    )
 
-def ta_desired_shift (constraint_factory: ConstraintFactory) -> Constraint:
-    """ Reward if a TA is assigned to a shift that they want to work on """
-    return (constraint_factory
-            .for_each(ShiftAssignment)
-            .group_by(lambda shift_assignment: [shift.id for shift in shift_assignment.assigned_ta.desired], ConstraintCollectors.to_list(lambda assignment: assignment.shift.id))
-            .filter(lambda unavailable, shift_ids: any(id in unavailable for id in shift_ids))
-            .reward(HardMediumSoftScore.ONE_SOFT, lambda ta, shifts: 1)
-            .as_constraint("TA assigned to desired"))
+def ta_desired_shift(factory: ConstraintFactory) -> Constraint:
+    """Reward if a TA is assigned to a shift that they want to work on."""
+    return (
+        factory.for_each(ShiftAssignment)
+               .filter(lambda assignment:
+                   assignment.assigned_ta is not None
+                   and assignment.shift in assignment.assigned_ta.desired
+               )
+               .join(ConstraintParameters)
+               .reward(HardMediumSoftScore.ONE_SOFT, lambda assignment, params: params.desired_assignment_penalty)
+               .as_constraint("TA assigned to *desired* shift")
+    )
+
 
 
 # Constraint provider dictionary for dynamic selection

@@ -4,7 +4,7 @@ import sys, os
 import uuid
 import time
 
-from typing     import List
+from typing     import List, Dict, Callable, Any
 from pathlib    import Path
 from tqdm       import tqdm
 
@@ -16,7 +16,8 @@ from hello_world.domain      import Timetable, ShiftAssignment, Shift, TA
 from hello_world.constraints import constraints_provider_dict
 from hello_world.utils       import print_timetable
 
-def create_solver_config(constraint_version: str) -> SolverConfig:
+
+def create_solver_config(constraint_version: str, random_seed: int = None) -> SolverConfig:
     """ Create the solver configuration based on the constraint version """
     if constraint_version not in constraints_provider_dict:
         raise ValueError(f"Invalid constraint version: {constraint_version}. "
@@ -25,6 +26,7 @@ def create_solver_config(constraint_version: str) -> SolverConfig:
     constraints_provider_function = constraints_provider_dict[constraint_version]
     # Create the solver configuration
     solver_config = SolverConfig(
+        random_seed=random_seed,
         solution_class=Timetable,
         entity_class_list=[ShiftAssignment],
         score_director_factory_config=ScoreDirectorFactoryConfig(
@@ -50,23 +52,23 @@ def create_solver_config_from_xml(constraint_version: str, path_to_solver_config
     solver_config = SolverConfig.create_from_xml_resource(path=path_to_solver_config)
     return solver_config
 
-def solve_problem(problem: Timetable, constraint_version: str, logger: logging.Logger, solving_method: str = "solver_manager") -> Timetable:
+def solve_problem(problem: Timetable, constraint_version: str, logger: logging.Logger, solving_method: str = "solver_manager", random_seed: int = None) -> Timetable:
     """Wrapper for the solve methods"""
     match solving_method:
         case "blocking":
-            return solve_problem_blocking(problem=problem, constraint_version=constraint_version, logger=logger)
+            return solve_problem_blocking(problem=problem, constraint_version=constraint_version, logger=logger, random_seed=random_seed)
         case "solver_manager":
-            solve_problem_with_manager(problem=problem, constraint_version=constraint_version, logger=logger)
+            solve_problem_with_manager(problem=problem, constraint_version=constraint_version, logger=logger, random_seed=random_seed)
         case "tqdm":
-            return solve_with_tqdm(problem=problem, constraint_version=constraint_version, logger=logger)
+            return solve_with_tqdm(problem=problem, constraint_version=constraint_version, logger=logger, random_seed=random_seed)
         case _:
-            return solve_problem_blocking(problem=problem, constraint_version=constraint_version, logger=logger)
+            return solve_problem_blocking(problem=problem, constraint_version=constraint_version, logger=logger, random_seed=random_seed)
 
-def solve_problem_with_manager(problem: Timetable, constraint_version: str, logger: logging.Logger) -> Timetable:
+def solve_problem_with_manager(problem: Timetable, constraint_version: str, logger: logging.Logger,  random_seed: int = None) -> Timetable:
     logger.info("=== Starting to Solve the problem (SolverManager) ===")
     
     # 1) Build SolverConfig and SolverFactory
-    solver_config = create_solver_config(constraint_version)
+    solver_config = create_solver_config(constraint_version=constraint_version, random_seed=random_seed)
     solver_factory = SolverFactory.create(solver_config)
     solver_manager = SolverManager.create(solver_factory)
     
@@ -100,9 +102,9 @@ def solve_problem_with_manager(problem: Timetable, constraint_version: str, logg
     logger.info("=== Done Solving ===")
     return solution
 
-def solve_with_tqdm(problem: Timetable, constraint_version: str, logger: logging.Logger) -> Timetable:
+def solve_with_tqdm(problem: Timetable, constraint_version: str, logger: logging.Logger,  random_seed: int = None) -> Timetable:
     logger.info("Starting SolverManager…")
-    solver_config = create_solver_config(constraint_version)
+    solver_config = create_solver_config(constraint_version=constraint_version, random_seed=random_seed)
     solver_factory = SolverFactory.create(solver_config)
     solver_manager = SolverManager.create(solver_factory)
 
@@ -152,10 +154,10 @@ def solve_with_tqdm(problem: Timetable, constraint_version: str, logger: logging
     logger.info("=== Done Solving ===")
     return solution
 
-def solve_problem_blocking(problem: Timetable, constraint_version: str, logger: logging.Logger) -> Timetable:
+def solve_problem_blocking(problem: Timetable, constraint_version: str, logger: logging.Logger, random_seed: int = None) -> Timetable:
     logger.info("=== Starting to Solve the proble ===")
     # Create the solver configuration
-    solver_config  = create_solver_config(constraint_version)
+    solver_config  = create_solver_config(constraint_version=constraint_version, random_seed=random_seed)
     # Create the solver factory
     solver_factory = SolverFactory.create(solver_config)
     

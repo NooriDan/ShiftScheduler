@@ -1,3 +1,4 @@
+import random
 import argparse
 import logging
 import sys, os
@@ -8,6 +9,8 @@ from hello_world.domain      import Timetable, ShiftAssignment, Shift, TA
 from hello_world.demo_data   import generate_demo_data, _generate_demo_data_dict
 from hello_world.utils       import print_ta_availability, initialize_logger, DataConstructor
 from hello_world.solver      import solve_problem, post_process_solution
+# Constants for random shift generation
+SEED = 42
 
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Run the TA Rostering Program in Terminal')
@@ -45,6 +48,21 @@ def get_args() -> argparse.Namespace:
                         help='Select the demo data to use',
                         default='demo_data_weekly_scheduling-random')
 
+    parser.add_argument('--solving_method', 
+                        type=str, 
+                        choices=["solver_manager", "blocking", "tqdm"],
+                        help='the solver instantiation method',
+                        default='solver_manager')
+    
+    parser.add_argument('--use_config_xml',
+                        action='store_true',
+                        help='uses the solver_config.xml file to configure the solver',
+                        default=False)
+    
+    parser.add_argument('--path_to_config_xml',
+                        type=str, 
+                        help='the relative path to the solver_config.xml file to configure the solver',
+                        default='ta_list.csv')
     
     args = parser.parse_args()
 
@@ -87,6 +105,8 @@ def create_timetable_from_data_folder(logger: logging.Logger,
     return problem
 
 def run_app():
+    # standard library
+    random.seed(SEED)
     # Parse command line arguments
     args = get_args()
     # Initialize the logger
@@ -104,7 +124,11 @@ def run_app():
                             demo_data_select=args.demo_data_select,
                             print_initial_timetable=True)
     # Solve the problem
-    solution = solve_problem(problem=problem, constraint_version=args.constraint_version, logger=logger)
+    solution = solve_problem(problem=problem, 
+                             constraint_version=args.constraint_version, 
+                             random_seed=SEED,
+                             solving_method=args.solving_method,
+                             logger=logger,)
     # Explain the solution (analysis) TODO
 
 if __name__ == '__main__':

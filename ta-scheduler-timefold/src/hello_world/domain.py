@@ -1,6 +1,6 @@
 from timefold.solver.domain import (planning_entity, planning_solution, PlanningId, PlanningVariable,
                                     PlanningEntityCollectionProperty,
-                                    ProblemFactCollectionProperty, ValueRangeProvider,
+                                    ProblemFactCollectionProperty, ProblemFactProperty, ValueRangeProvider, ConstraintWeightOverrides,
                                     PlanningScore)
 from timefold.solver import SolverStatus
 from timefold.solver.score import HardSoftScore, HardMediumSoftScore
@@ -9,6 +9,10 @@ from datetime import time, date
 from typing import Annotated, List
 from pydantic import Field
 
+@dataclass
+class ConstraintParameters:
+    undesired_assignment_penalty:   int = 2
+    desired_assignment_penalty:     int = 1
 
 @dataclass
 class Shift():
@@ -82,6 +86,9 @@ class Timetable():
     tas: Annotated[list[TA],
                      ProblemFactCollectionProperty,
                      ValueRangeProvider]
+    # weight_overrides: ConstraintWeightOverrides
+    constraint_parameters: Annotated[ConstraintParameters, ProblemFactProperty]
+
     # planning entities
     shift_assignments: Annotated[List[ShiftAssignment],
                        PlanningEntityCollectionProperty]
