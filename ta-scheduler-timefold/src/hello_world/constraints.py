@@ -65,8 +65,8 @@ def shift_meet_ta_required_exactly(constraint_factory: ConstraintFactory) -> Con
             # filter out shifts that don't have the required amount of TAs
             .group_by(lambda shift_assignment: shift_assignment.shift, ConstraintCollectors.count())
             .filter(lambda shift, count: count != shift.required_tas)
-            .penalize(HardMediumSoftScore.ONE_HARD)
-            .as_constraint("Required TAs per shift violated"))
+            .penalize(HardMediumSoftScore.ONE_HARD, lambda shift, count: abs(shift.required_tas - count))
+            .as_constraint("Shift does not meet required TAs exactly"))
 
 def ta_duplicate_shift_assignment(constraint_factory: ConstraintFactory) -> Constraint:
     """ Each TA should be assigned to a shift only once """
@@ -74,7 +74,7 @@ def ta_duplicate_shift_assignment(constraint_factory: ConstraintFactory) -> Cons
             .for_each(ShiftAssignment)
             .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.to_list(lambda assignment: assignment.shift.id))
             .filter(lambda ta, shift_ids: len(shift_ids) > len(set(shift_ids)))
-            .penalize(HardMediumSoftScore.ONE_HARD)
+            .penalize(HardMediumSoftScore.ONE_HARD, lambda ta, shift_id: 1 )
             .as_constraint("TA duplicate shift assignment"))
 
 # def ta_meets_shift_requirement(constraint_factory: ConstraintFactory) -> Constraint:
@@ -115,9 +115,9 @@ def legacy_ta_meets_shift_requirement_per_week(factory: ConstraintFactory) -> Co
                         ConstraintCollectors.conditionally(lambda ta, shift: shift is not None,
                                                             ConstraintCollectors.count_bi())
                 )
-                .filter(lambda ta, shift_count:  shift_count < ta.max_shifts_per_week)
-                .penalize(HardMediumSoftScore.ONE_MEDIUM, lambda employee, shift_count: (employee.max_shifts_per_week - shift_count))
-                .as_constraint("TA must have required shifts")
+                .filter(lambda ta, shift_count:  shift_count > ta.max_shifts_per_week or shift_count < ta.min_shifts_per_week)
+                .penalize(HardMediumSoftScore.ONE_MEDIUM, lambda employee, shift_count: abs(employee.max_shifts_per_week - shift_count))
+                .as_constraint("[LEGACY] TA does not meet weekly shift count requirements")
             )
 
 def ta_meets_shift_requirement_over_the_semester(factory: ConstraintFactory) -> Constraint:
@@ -144,7 +144,7 @@ def penalize_over_assignment_in_a_week(constraint_factory: ConstraintFactory) ->
             .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.count())
             .filter(lambda ta, count: count > ta.max_shifts_per_week)
             .penalize(HardMediumSoftScore.ONE_MEDIUM, lambda ta, count: (count - ta.max_shifts_per_week))
-            .as_constraint("TA should not to more than the required shifts"))
+            .as_constraint("TA should not work more than the required shifts per week"))
 
 #
 # HARD: never assign a TA to a shift they marked unavailable
@@ -167,7 +167,7 @@ def ta_undesired_shift (constraint_factory: ConstraintFactory) -> Constraint:
             .group_by(lambda shift_assignment: [shift.id for shift in shift_assignment.assigned_ta.undesired], ConstraintCollectors.to_list(lambda assignment: assignment.shift.id))
             .filter(lambda unavailable, shift_ids: any(id in unavailable for id in shift_ids))
             .penalize(HardMediumSoftScore.ONE_SOFT, lambda ta, shifts: 20)
-            .as_constraint("TA undesired"))
+            .as_constraint("TA assigned to undesired"))
 
 def ta_desired_shift (constraint_factory: ConstraintFactory) -> Constraint:
     """ Reward if a TA is assigned to a shift that they want to work on """
@@ -176,7 +176,7 @@ def ta_desired_shift (constraint_factory: ConstraintFactory) -> Constraint:
             .group_by(lambda shift_assignment: [shift.id for shift in shift_assignment.assigned_ta.desired], ConstraintCollectors.to_list(lambda assignment: assignment.shift.id))
             .filter(lambda unavailable, shift_ids: any(id in unavailable for id in shift_ids))
             .reward(HardMediumSoftScore.ONE_SOFT, lambda ta, shifts: 1)
-            .as_constraint("TA desired"))
+            .as_constraint("TA assigned to desired"))
 
 
 # Constraint provider dictionary for dynamic selection

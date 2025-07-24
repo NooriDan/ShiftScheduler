@@ -69,7 +69,7 @@ class ShiftAssignment():
                         Field(default=None)]
     
     def __str__(self):
-        return f'{self.shift} {self.assigned_ta}'
+        return f'{self.shift.series} is assigned to {self.assigned_ta}'
 
 @planning_solution
 @dataclass

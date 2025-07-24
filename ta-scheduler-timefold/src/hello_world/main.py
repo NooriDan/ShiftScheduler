@@ -2,6 +2,8 @@ import argparse
 import logging
 import sys, os
 
+from copy import deepcopy
+
 from hello_world.domain      import Timetable, ShiftAssignment, Shift, TA
 from hello_world.demo_data   import generate_demo_data, _generate_demo_data_dict
 from hello_world.utils       import print_ta_availability, initialize_logger, DataConstructor
@@ -56,7 +58,7 @@ def create_timetable_demo(logger: logging.Logger, demo_data_select: str = "demo_
     # Visualize the problem
     if print_initial_timetable:
         logger.info("************************** Initial Timetable **************************")
-        print_ta_availability(time_table=problem, logger=logger)
+        print_ta_availability(time_table=deepcopy(problem), logger=logger)
 
     return problem
 
