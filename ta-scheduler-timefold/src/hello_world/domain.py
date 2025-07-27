@@ -12,10 +12,10 @@ from pydantic import Field
 @dataclass
 class ConstraintParameters:
     undesired_assignment_penalty:   int = 20
-    desired_assignment_penalty:     int = 1
+    desired_assignment_reward:      int = 1
 
     def __str__(self):
-        return f"undesired_assignment_penalty={self.undesired_assignment_penalty}, desired_assignment_penalty={self.desired_assignment_penalty}"
+        return f"undesired_assignment_penalty={self.undesired_assignment_penalty}, desired_assignment_reward={self.desired_assignment_reward}"
 
 @dataclass
 class Shift():

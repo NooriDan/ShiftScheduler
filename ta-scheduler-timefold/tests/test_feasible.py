@@ -5,7 +5,7 @@ from timefold.solver.config import (SolverConfig, ScoreDirectorFactoryConfig,
 
 from hello_world.domain import Timetable, ShiftAssignment, Shift, TA
 from hello_world.constraints import define_constraints
-from hello_world.main import generate_demo_data
+from hello_world.main import generate_demo_data_with_default_params
 
 
 def test_feasible():
@@ -25,7 +25,7 @@ def test_feasible():
             )
         ))
     solver = solver_factory.build_solver()
-    solution = solver.solve(generate_demo_data())
+    solution = solver.solve(generate_demo_data_with_default_params())
     assert solution.score.is_feasible
 
 

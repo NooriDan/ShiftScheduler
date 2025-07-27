@@ -6,7 +6,7 @@ import sys, os
 from copy import deepcopy
 
 from hello_world.domain      import Timetable, ShiftAssignment, Shift, TA
-from hello_world.demo_data   import generate_demo_data, _generate_demo_data_dict
+from hello_world.demo_data   import generate_demo_data_with_default_params, _generate_demo_data_dict
 from hello_world.utils       import print_ta_availability, initialize_logger, DataConstructor
 from hello_world.solver      import TimetableSolverBlocking, TimetableSolverWithSolverManager
 # Constants for random shift generation
@@ -72,7 +72,7 @@ def create_timetable_demo(logger: logging.Logger, demo_data_select: str = "demo_
 
     # Load the problem
     logger.info(f"=== Loading the demo data {demo_data_select} ===")
-    problem = generate_demo_data(name="my_demo", select=demo_data_select, logger=logger)
+    problem = generate_demo_data_with_default_params(name="my_demo", select=demo_data_select, logger=logger)
     # Visualize the problem
     if print_initial_timetable:
         logger.info("************************** Initial Timetable **************************")

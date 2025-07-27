@@ -69,30 +69,29 @@ class TimetableSolverBase(ABC):
         self._validate_inputs()
         logger = self.logger
 
-        logger.info("🚀 === Starting to Solve the Problem ===")
+        logger.info("\n🚀 === Starting to Solve the Problem ===")
         
         # 1) Build SolverConfig and SolverFactory
-        logger.info("⚙️  Creating SolverConfig and SolverFactory...")
+        logger.info("\t⚙️  Creating SolverConfig and SolverFactory...")
         self.create_solver_config()
         self._solver_factory = SolverFactory.create(self._solver_config)
         
         # 2) Solve the problem based on the solving method (extended in child classes)
-        logger.info("🧠 === Solving the Problem Body ===")
+        logger.info("\n🧠 === Solving the Problem Body ===")
         solution = self._solve_problem_body(problem=problem)
         logger.info("✅ === Solver Finished Successfully ===")
 
         # 3) Visualize the final solution
-        logger.info("🗓️ === Final Timetable ===")
+        logger.info("\n🗓️ === Final Timetable ===")
         print_timetable(time_table=solution, logger=logger)
         logger.info("🗓️ === /End of Final Timetable ===")
         
         # 4) Post-process (justification, analysis, etc.)
-        logger.info("📊 === Post-processing the Solution ===")
+        logger.info("\n📊 === Post-processing the Solution ===")
         solution_manager = self.post_process_solution(solution=solution)
         logger.info("🏁 === Post-processing Complete ===")
         
         return solution
-
     
     # Post-processing Methods
     def post_process_solution(self, solution: Timetable) -> SolutionManager:
@@ -278,7 +277,7 @@ class TimetableSolverWithSolverManager(TimetableSolverBase):
     def blocking_show_job_status(self, job: SolverJob):
         """Blocks until the job with the given ID is finished and shows its status."""
 
-        self.logger.info("==========================================")
+        self.logger.info("\n==========================================")
         self.logger.info("🛑 Starting blocking: waiting for solver job to finish")
         self.logger.info("-------------------------------------------")
         self.logger.info(f"Job ID: {job.get_problem_id()}")

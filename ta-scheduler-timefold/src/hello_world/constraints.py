@@ -183,7 +183,7 @@ def ta_desired_shift(factory: ConstraintFactory) -> Constraint:
                    and assignment.shift in assignment.assigned_ta.desired
                )
                .join(ConstraintParameters)
-               .reward(HardMediumSoftScore.ONE_SOFT, lambda assignment, params: params.desired_assignment_penalty)
+               .reward(HardMediumSoftScore.ONE_SOFT, lambda assignment, params: params.desired_assignment_reward)
                .indict_with(lambda assignment, params: [assignment])
                .as_constraint("TA assigned to *desired* shift")
     )
