@@ -383,6 +383,9 @@ class RandomTimetableGenerator:
         total_undesired_shifts: int = 0
         total_unavailable_shifts: int = 0
 
+        logger.info("✨ Generating Course TAs ✨")
+        logger.info("🔍 Drawing weekly shift availability and preferences...")
+
         for index in range(num_tas):
             # Generate random TA details
             ta_id                           = next(ids)
@@ -426,15 +429,16 @@ class RandomTimetableGenerator:
             # Log the creation of the TA
             self.helper.log_ta_creation(ta=ta_to_append, logger=logger)
 
-        logger.info(f"===========================")
-        logger.info(f"Generated {len(course_tas)} TAs with a total TA demand of {total_ta_demands} across {num_of_weeks} weeks...")
+        logger.info("📋 ===========================")
+        logger.info(f"👩‍🏫 Generated TAs:\t\t{len(course_tas)}")
+        logger.info(f"📊 Total TA Demand:\t\t{total_ta_demands} shifts across {num_of_weeks} weeks")
         # show the breakdown between the desired, undesired, and unavailable shifts
-        logger.info(f"\tTotal desired shifts:\t\t{total_desired_shifts} ({total_desired_shifts/len(course_tas):.2f} per TA) - unique shifts: {len(set([shift.series for ta in course_tas for shift in ta.desired]))}")
-        logger.info(f"\tTotal undesired shifts:\t\t{total_undesired_shifts} ({total_undesired_shifts/len(course_tas):.2f} per TA) - unique shifts: {len(set([shift.series for ta in course_tas for shift in ta.undesired]))}")
-        logger.info(f"\tTotal unavailable shifts:\t{total_unavailable_shifts} ({total_unavailable_shifts/len(course_tas):.2f} per TA) - unique shifts: {len(set([shift.series for ta in course_tas for shift in ta.unavailable]))}")
-        logger.info(f"\tEach TA has a minimum of {min_shifts_per_week} and a maximum of {max_shifts_per_week} shifts per week.")
-        logger.info(f"Allow different weekly availability? {"yes" if allow_different_weekly_availability else "no"}")
-        logger.info(f"===========================\n")
+        logger.info(f"🟢 Desired Shifts:\t\t{total_desired_shifts:03d} ({total_desired_shifts / len(course_tas):.2f} per TA)\t\t🌟 Unique:\t{len(set(shift.series for ta in course_tas for shift in ta.desired))}")
+        logger.info(f"🟡 Undesired Shifts:\t\t{total_undesired_shifts:03d} ({total_undesired_shifts / len(course_tas):.2f} per TA)\t\t⚠️ Unique:\t{len(set(shift.series for ta in course_tas for shift in ta.undesired))}")
+        logger.info(f"🔴 Unavailable Shifts:\t\t{total_unavailable_shifts:03d} ({total_unavailable_shifts / len(course_tas):.2f} per TA)\t\t🚫 Unique:\t{len(set(shift.series for ta in course_tas for shift in ta.unavailable))}")
+        logger.info(f"⏳ Weekly Shift Limits:\t\tMin: {min_shifts_per_week}, Max: {max_shifts_per_week}")
+        logger.info(f"🔄 Allow Different Weekly Availability:\t\t{'✅ Yes' if allow_different_weekly_availability else '❌ No'}")
+        logger.info("📋 ===========================\n")
 
         return course_tas
 
@@ -483,7 +487,7 @@ class RandomTimetableGenerator:
                     week_id=week_id
                 ))
                 logger.info(
-                    f"📦 [ID: {int(shift_id):02d}] [Week: {int(week_id):02d}] \t"
+                    f"\t📦 [ID: {int(shift_id):02d}] [Week: {int(week_id):02d}] \t"
                     f"{series} on {day} \t{start_time}–{end_time} ⏰ \t"
                     f"Requires: {required_tas} TA(s)"
                 )
@@ -496,7 +500,7 @@ class RandomTimetableGenerator:
         logger.info(f"🧪 Total Shifts Generated: \t{len(self.shifts):03d}")
         logger.info(f"🧮 TA Demand per Week: \t\t{self.ta_demands_weekly:03d}")
         logger.info(f"📈 Total TA Demand: \t\t{self.ta_demands:03d} across {self.num_of_weeks} week(s)")
-        logger.info(f"🎯 Shift TA Requirement Range: {self.randomization_params.MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT}–{self.randomization_params.MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT}")
+        logger.info(f"🎯 Shift TA Requirement Range: \t{self.randomization_params.MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT}–{self.randomization_params.MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT}")
         logger.info("==============================================\n")
 
         return self.shifts

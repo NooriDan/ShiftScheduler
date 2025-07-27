@@ -293,12 +293,14 @@ class TimetableSolverWithSolverManager(TimetableSolverBase):
             now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
-            self.logger.info(f"⏱️ {now_str} - Elapsed time: {elapsed:.1f} seconds")
-            self.logger.info(f"\t⏳ Job status: {status.name} | Best score: {score}")
 
             # Break once the solver is no longer running
             if not (status in [SolverStatus.SOLVING_ACTIVE, SolverStatus.SOLVING_SCHEDULED]):
+                self.logger.info(f"⏱️ {now_str} - job has finished... Elapsed time: {elapsed:.1f} seconds")
                 break
+            
+            self.logger.info(f"⏱️ {now_str} - Elapsed time: {elapsed:.1f} seconds")
+            self.logger.info(f"\t⏳ Job status: {status.name} | Best score: {score}\n")
 
         self.logger.info(f"\n✅ Blocking finished. Final job status: {status.name}")
         self.logger.info("==========================================")
