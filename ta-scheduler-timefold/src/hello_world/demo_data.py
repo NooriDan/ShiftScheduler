@@ -52,36 +52,47 @@ class RandmizationUtil:
 
     # Message Logger
     def log_program_constants(self, randomization_params: ProblemRandmonizationParameters) -> None:
-        logger = self.logger
         """Log the constants used in the demo data generation."""
-        logger.info(f"Constants to be used:")
-        logger.info(f"\tMIN_NUM_SHIFTS_PER_WEEK                 = {randomization_params.MIN_NUM_SHIFTS_PER_WEEK}\t# Minimum number of shifts per week")
-        logger.info(f"\tMAX_NUM_SHIFTS_PER_WEEK                 = {randomization_params.MAX_NUM_SHIFTS_PER_WEEK}\t# Maximum number of shifts per week")
-        logger.info(f"\tMIN_NUM_OF_TAS_REQUIRED_PER_SHIFT       = {randomization_params.MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT}\t# Minimum number of TAs required per shift")
-        logger.info(f"\tMAX_NUM_OF_TAS_REQUIRED_PER_SHIFT       = {randomization_params.MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT}\t# Maximum number of TAs required per shift")
-        logger.info(f"\t------------------------")
-        logger.info(f"\tMIN_TA_SKILL_LEVEL                      = {randomization_params.MIN_TA_SKILL_LEVEL}\t# Minimum skill level for TAs")
-        logger.info(f"\tMAX_TA_SKILL_LEVEL                      = {randomization_params.MAX_TA_SKILL_LEVEL}\t# Maximum skill level for TAs")
-        logger.info(f"\t------------------------")
-        logger.info(f"\tMIN_NUM_OF_UNAVAILABLE_SHIFTS_DIV       = % {randomization_params.MIN_NUM_OF_UNAVAILABLE_SHIFTS_DIV}\t# Minimum pecentage of unavailable shifts in a week for TAs")
-        logger.info(f"\tMAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV       = % {randomization_params.MAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV}\t# Maximum pecentage of unavailable shifts in a week for TAs")
-        logger.info(f"\t------------------------")
-        logger.info(f"\tMIN_NUM_OF_DESIRED_SHIFTS_DIV           = % {randomization_params.MIN_NUM_OF_DESIRED_SHIFTS_DIV}\t# Minimum pecentage of desired shifts in a week for TAs")
-        logger.info(f"\tMAX_NUM_OF_DESIRED_SHIFTS_DIV           = % {randomization_params.MAX_NUM_OF_DESIRED_SHIFTS_DIV}\t# Maximum pecentage of desired shifts in a week for TAs")
-        logger.info(f"\t------------------------")
-        logger.info(f"\tMIN_NUM_OF_UNDESIRED_SHIFTS_DIV         = % {randomization_params.MIN_NUM_OF_UNDESIRED_SHIFTS_DIV}\t# Minimum pecentage of undesired shifts in a week for TAs")
-        logger.info(f"\tMAX_NUM_OF_UNDESIRED_SHIFTS_DIV         = % {randomization_params.MAX_NUM_OF_UNDESIRED_SHIFTS_DIV}\t# Maximum pecentage of undesired shifts in a week for TAs")
-        logger.info(f"\t------------------------\n")
+        logger = self.logger
+
+        logger.info("📌 === Program Constants for Demo Data Generation ===")
+
+        logger.info("📅 Shift Configuration:")
+        logger.info(f"\t🔽 MIN_NUM_SHIFTS_PER_WEEK\t= {randomization_params.MIN_NUM_SHIFTS_PER_WEEK:02d}")
+        logger.info(f"\t🔼 MAX_NUM_SHIFTS_PER_WEEK\t= {randomization_params.MAX_NUM_SHIFTS_PER_WEEK:02d}")
+
+        logger.info("👥 TA Shift Requirements:")
+        logger.info(f"\t🔽 MIN_TAS_REQUIRED_PER_SHIFT\t= {randomization_params.MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT:02d}")
+        logger.info(f"\t🔼 MAX_TAS_REQUIRED_PER_SHIFT\t= {randomization_params.MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT:02d}")
+
+        logger.info("🎯 TA Skill Levels:")
+        logger.info(f"\t🧠 MIN_TA_SKILL_LEVEL\t\t= {randomization_params.MIN_TA_SKILL_LEVEL:02d}")
+        logger.info(f"\t🚀 MAX_TA_SKILL_LEVEL\t\t= {randomization_params.MAX_TA_SKILL_LEVEL:02d}")
+
+        logger.info("⛔ Unavailability (% of shifts/week):")
+        logger.info(f"\t🔽 MIN_UNAVAILABLE_SHIFTS_DIV\t= {randomization_params.MIN_NUM_OF_UNAVAILABLE_SHIFTS_DIV:02d} %\t# Minimum pecentage of unavailable shifts in a week for TAs")
+        logger.info(f"\t🔼 MAX_UNAVAILABLE_SHIFTS_DIV\t= {randomization_params.MAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV:02d} %\t# Maximum pecentage of unavailable shifts in a week for TAs")
+
+        logger.info("❤️ Desired Availability (% of shifts/week):")
+        logger.info(f"\t🔽 MIN_DESIRED_SHIFTS_DIV\t= {randomization_params.MIN_NUM_OF_DESIRED_SHIFTS_DIV:02d} %\t# Minimum pecentage of desired shifts in a week for TAs")
+        logger.info(f"\t🔼 MAX_DESIRED_SHIFTS_DIV\t= {randomization_params.MAX_NUM_OF_DESIRED_SHIFTS_DIV:02d} %\t# Maximum pecentage of desired shifts in a week for TAs")
+
+        logger.info("⚠️  Undesired Availability (% of shifts/week):")
+        logger.info(f"\t🔽 MIN_UNDESIRED_SHIFTS_DIV\t= {randomization_params.MIN_NUM_OF_UNDESIRED_SHIFTS_DIV:02d} %\t# Minimum pecentage of undesired shifts in a week for TAs")
+        logger.info(f"\t🔼 MAX_UNDESIRED_SHIFTS_DIV\t= {randomization_params.MAX_NUM_OF_UNDESIRED_SHIFTS_DIV:02d} %\t# Maximum pecentage of undesired shifts in a week for TAs")
+
+        logger.info("✅ === End of Constants ===\n")
 
     def log_ta_creation(self, ta: TA, logger: logging.Logger) -> None:
         """Log the creation of a TA."""
-        logger.info(f"(ID: {int(ta.id):02d}) {ta.name}")
-        logger.info(f"\t- Skill Level:              {ta.skill_level}")
-        logger.info(f"\t- Required Shifts:          {ta.required_shifts_per_semester}")
-        logger.info(f"\t- Min/Max Shifts per Week:  {ta.min_shifts_per_week} / {ta.max_shifts_per_week}")
-        logger.info(f"\t\t- Unavailable:    {len(ta.unavailable)}")
-        logger.info(f"\t\t- Desired:        {len(ta.desired)}")
-        logger.info(f"\t\t- Undesired:      {len(ta.undesired)}")
+        logger.info(f"👤 TA Created: (ID: {int(ta.id):02d}) {ta.name}")
+        logger.info(f"\t🔧 Skill Level:\t\t{ta.skill_level:02d}")
+        logger.info(f"\t📆 Required Shifts:\t{ta.required_shifts_per_semester:02d}")
+        logger.info(f"\t🗓️  Weekly Shift Bounds:\t{ta.min_shifts_per_week:02d} ⟶ {ta.max_shifts_per_week:02d}")
+
+        logger.info(f"\t\t❌ Unavailable:\t{len(ta.unavailable):02d}")
+        logger.info(f"\t\t✅ Desired:\t{len(ta.desired):02d}")
+        logger.info(f"\t\t⚠️  Undesired:\t{len(ta.undesired):02d}\n")
 
     # List manipulation functions
     def remove_items_from_list(self, selected: List[Any], lst: List[Any]) -> List[Any]:
@@ -431,13 +442,17 @@ class RandomTimetableGenerator:
         """Generate random shifts for the given days and number of weeks."""
         logger = self.logger
         # ======================
-        # Reseting the member variables
+        # 🔄 Resetting Member Variables
         # ======================
         self.shifts                 = []
         self.series_list            = []
         self.ta_demands             = 0
         self.ta_demands_weekly      = 0
         self.num_shifts_per_week    = random.randint(self.randomization_params.MIN_NUM_SHIFTS_PER_WEEK, self.randomization_params.MAX_NUM_SHIFTS_PER_WEEK)  # number of shifts (constant for all weeks)
+        
+        logger.info("🛠️ Generating Shifts...")
+        logger.info(f"\t📅 Shifts per Week: {self.num_shifts_per_week:02d}")
+
         # ======================
         # Generate shifts
         # =====================
@@ -467,16 +482,22 @@ class RandomTimetableGenerator:
                     required_tas=required_tas,
                     week_id=week_id
                 ))
-                # Log the generated shift
-                logger.info(f"[ID: {int(shift_id):02d}] [weedk_id: {int(week_id):02d}] Generated Shift: {series} on {day} from {start_time} to {end_time} requiring {required_tas} TAs")
-        
-        # Log a summary of generated shifts
-        logger.info(f"============================")
-        logger.info(f"The shift series are:\t\t{', '.join(self.series_list)}")
-        logger.info(f"Generated {len(self.shifts)} shifts with a total TA demand of {self.ta_demands} across {self.num_of_weeks} weeks ({self.num_shifts_per_week} shifts per week)...")
-        logger.info(f"Each week has a total TA demand of {self.ta_demands_weekly} TAs.")
-        logger.info(f"Each shift requires between {self.randomization_params.MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT} and {self.randomization_params.MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT} TAs.")
-        logger.info(f"===========================\n")
+                logger.info(
+                    f"📦 [ID: {int(shift_id):02d}] [Week: {int(week_id):02d}] \t"
+                    f"{series} on {day} \t{start_time}–{end_time} ⏰ \t"
+                    f"Requires: {required_tas} TA(s)"
+                )
+
+        # ======================
+        # 📊 Summary
+        # ======================
+        logger.info("==============================================")
+        logger.info(f"📋 Shift Series: \t\t{', '.join(self.series_list)}")
+        logger.info(f"🧪 Total Shifts Generated: \t{len(self.shifts):03d}")
+        logger.info(f"🧮 TA Demand per Week: \t\t{self.ta_demands_weekly:03d}")
+        logger.info(f"📈 Total TA Demand: \t\t{self.ta_demands:03d} across {self.num_of_weeks} week(s)")
+        logger.info(f"🎯 Shift TA Requirement Range: {self.randomization_params.MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT}–{self.randomization_params.MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT}")
+        logger.info("==============================================\n")
 
         return self.shifts
 
