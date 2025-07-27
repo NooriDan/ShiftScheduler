@@ -8,7 +8,7 @@ from copy import deepcopy
 from hello_world.domain      import Timetable, ShiftAssignment, Shift, TA
 from hello_world.demo_data   import generate_demo_data, _generate_demo_data_dict
 from hello_world.utils       import print_ta_availability, initialize_logger, DataConstructor
-from hello_world.solver      import solve_problem, post_process_solution
+from hello_world.solver      import TimetableSolverBlocking, TimetableSolverWithSolverManager
 # Constants for random shift generation
 SEED = 42
 
@@ -62,7 +62,7 @@ def get_args() -> argparse.Namespace:
     parser.add_argument('--path_to_config_xml',
                         type=str, 
                         help='the relative path to the solver_config.xml file to configure the solver',
-                        default='ta_list.csv')
+                        default=None)
     
     args = parser.parse_args()
 
@@ -104,6 +104,27 @@ def create_timetable_from_data_folder(logger: logging.Logger,
 
     return problem
 
+def create_the_problem(logger: logging.Logger, args: argparse.Namespace) -> Timetable:
+    """
+    Create the problem based on the command line arguments.
+    If the overwrite flag is set, it will create a new timetable from the data folder.
+    Otherwise, it will create a timetable from the demo data.
+    """
+    if args.overwrite:
+        logger.info("=== Creating the problem from the data folder ===")
+        problem = create_timetable_from_data_folder(logger=logger,
+                                                    ta_csv_path=args.ta_csv_path,
+                                                    shift_csv_path=args.shift_csv_path,
+                                                    availability_folder=args.availability_folder)
+    else:
+        logger.info("=== Creating the problem from the demo data ===")
+        problem = create_timetable_demo(logger=logger, 
+                                        demo_data_select=args.demo_data_select, 
+                                        print_initial_timetable=True)
+
+    return problem
+
+
 def run_app():
     # standard library
     random.seed(SEED)
@@ -111,24 +132,19 @@ def run_app():
     args = get_args()
     # Initialize the logger
     logger = initialize_logger(args)
+
     # Create the planning problem
-    if args.overwrite:
-        logger.info("=== Rostering the TAs from a custom location ===")
-        problem = create_timetable_from_data_folder(logger=logger, 
-                                        ta_csv_path=args.ta_csv_path, 
-                                        shift_csv_path=args.shift_csv_path, 
-                                        availability_folder=args.availability_folder)
-    else:
-        logger.info("=== Rostering the TAs from the demo data ===")
-        problem = create_timetable_demo(logger=logger,
-                            demo_data_select=args.demo_data_select,
-                            print_initial_timetable=True)
+    problem = create_the_problem(logger=logger, args=args)
+    
     # Solve the problem
-    solution = solve_problem(problem=problem, 
-                             constraint_version=args.constraint_version, 
-                             random_seed=SEED,
-                             solving_method=args.solving_method,
-                             logger=logger,)
+    solver = TimetableSolverWithSolverManager(constraint_version=args.constraint_version,
+                                                random_seed=SEED,
+                                                use_config_xml=args.use_config_xml,
+                                                path_to_config_xml=args.path_to_config_xml,
+                                                logger=logger)
+    
+    solution = solver.solve_problem(problem=problem)
+
     # Explain the solution (analysis) TODO
 
 if __name__ == '__main__':

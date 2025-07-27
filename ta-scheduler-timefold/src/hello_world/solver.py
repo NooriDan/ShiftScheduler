@@ -7,216 +7,279 @@ import time
 from typing     import List, Dict, Callable, Any
 from pathlib    import Path
 from tqdm       import tqdm
+from abc        import ABC, abstractmethod
 
 from timefold.solver.config import (SolverConfig, ScoreDirectorFactoryConfig,
                                     TerminationConfig, Duration)
 from timefold.solver import SolverFactory, SolutionManager, Solver, SolverManager, SolverStatus, SolverJob
 
 from hello_world.domain      import Timetable, ShiftAssignment, Shift, TA
-from hello_world.constraints import constraints_provider_dict
+from hello_world.constraints import constraints_provider_dict               # a dictionary mapping constraint versions to their provider functions
 from hello_world.utils       import print_timetable
 
+LOOP_WAIT_SECONDS           = 5     # seconds to wait between checking the solver job status
+SUPPORTED_SOLVING_METHODS   = ["solver_manager", "blocking", "tqdm"]
 
-def create_solver_config(constraint_version: str, random_seed: int = None) -> SolverConfig:
-    """ Create the solver configuration based on the constraint version """
-    if constraint_version not in constraints_provider_dict:
-        raise ValueError(f"Invalid constraint version: {constraint_version}. "
-                         f"Available versions: {list(constraints_provider_dict.keys())}")
-    # Get the appropriate constraints provider function
-    constraints_provider_function = constraints_provider_dict[constraint_version]
-    # Create the solver configuration
-    solver_config = SolverConfig(
-        random_seed=random_seed,
-        solution_class=Timetable,
-        entity_class_list=[ShiftAssignment],
-        score_director_factory_config=ScoreDirectorFactoryConfig(
-            constraint_provider_function= constraints_provider_function
-        ),
-        termination_config=TerminationConfig(
-            # The solver runs only for 5 seconds on this small dataset.
-            # It's recommended to run for at least 5 minutes ("5m") otherwise.
-            spent_limit = Duration(minutes=1, seconds=30),
-            unimproved_spent_limit= Duration(seconds=30)
+class TimetableSolverBase(ABC):
+    def __init__(self, 
+                 constraint_version: str, 
+                 logger: logging.Logger, 
+                 random_seed: int | None = None,
+                 path_to_config_xml: Path | str | None = None,
+                 use_config_xml: bool = False):
+        """ Initializes the TimetableSolver with the given parameters."""
+        # Store the parameters
+        self.constraint_version = constraint_version
+        self.random_seed        = random_seed
+        self.logger             = logger
+        self.path_to_config_xml = Path(path_to_config_xml) if path_to_config_xml else None
+        self.use_config_xml     = use_config_xml
+
+        # class constants
+        self.default_term_time_budget           : Duration =  Duration(minutes=1, seconds=30)
+        self.default_term_unimproved_early_term : Duration =  Duration(seconds=30)
+
+        # Private attributes to hold the solver configuration and factory
+        self._solver_config     : SolverConfig
+        self._solver_factory    : SolverFactory
+
+        # Validate the inputs
+        self._validate_inputs()
+    
+    # User-facing methods
+    def set_random_seed(self, seed: int):
+        """Sets the random seed for the solver."""
+        self.random_seed = seed
+        if self._solver_config:
+            self._solver_config.random_seed = seed
+        
+    def create_solver_config(self) -> SolverConfig:
+        """ Create the solver configuration based on the constraint version """
+        self._validate_inputs()
+        if self.use_config_xml:
+            self._solver_config =  self._create_solver_conffig_from_xml(path_to_solver_config=self.path_to_solver_config)
+        else:
+            self._solver_config =  self._create_solver_config_default()
+
+        return self._solver_config
+
+    def solve_problem(self, problem: Timetable) -> Timetable:
+        """Wrapper for the solve methods"""
+        self._validate_inputs()
+        logger = self.logger
+        logger.info("=== Starting to Solve the problem ===")
+        # 1) Build SolverConfig and SolverFactory
+        self.create_solver_config()
+        self._solver_factory = SolverFactory.create(self._solver_config)
+        
+        # 2) Solve the problem based on the solving method (extended in child classes)
+        solution = self._solve_problem_body(problem=problem)
+
+        # 3) Visualize the final solution
+        logger.info("=== Final timetable ===")
+        print_timetable(time_table=solution, logger=logger)
+        logger.info("=== /Final timetable ===")
+        
+        # 4) Post-process (justification, analysis, etc.)
+        logger.info("=== Post-processing the solution ===")
+        solution_manager = self.post_process_solution(solution=solution)
+        
+        logger.info("=== Done Solving the problem ===")
+        return solution
+    
+    # Post-processing Methods
+    def post_process_solution(self, solution: Timetable) -> SolutionManager:
+        solution_manager = SolutionManager.create(solver_factory=self._solver_factory)
+        # logger.info("=======================================================")
+        # logger.info("calling solver.explain to explain the constraints")
+        # logger.info("=======================================================")
+        # score_explanation = solution_manager.explain(solution=solution)
+        # logger.info(score_explanation.summary)
+        logger = self.logger
+        logger.info("=======================================================")
+        logger.info("calling solver.analyze to explain the constraints")
+        logger.info("=======================================================")
+        score_analysis = solution_manager.analyze(solution=solution)
+        logger.info(score_analysis.summary)
+
+        # When you have the ScoreAnalysis instance, you can find out which constraints are broken:
+        for constraint_ref, constraint_analysis in score_analysis.constraint_map.items():
+            constraint_id           = constraint_ref.constraint_id
+            score_per_constraint    = constraint_analysis.score
+
+            match_count = constraint_analysis.match_count
+            # If you wish to go further and find out which planning entities and problem facts are responsible for breaking the constraint, 
+            # you can further explore the ConstraintAnalysis instance you received from ScoreAnalysis.constraintMap():
+            for match_analysis in constraint_analysis.matches:
+                score_per_match = match_analysis.score
+                justification = match_analysis.justification
+        # logger.info(solution_manager.analyze(solution=solution))
+
+        return solution_manager
+
+    def visualize_hot_planning_vars(self, solution: Timetable):
+        solution_manager = SolutionManager.create(self._solver_factory)
+        score_explanation = solution_manager.explain(solution)
+        indictment_map = score_explanation.indictment_map
+        for assignment in solution.shift_assignments:
+            indictment = indictment_map.get(assignment)
+            if indictment is None:
+                continue
+            # The score impact of that planning entity
+            total_score = indictment.score
+
+            for constraint_match in indictment.constraint_match_set:
+                # constraint_name = constraint_match.constraint_name
+                score = constraint_match.score
+        
+    # Solver Configuration Methods
+    def _create_solver_config_default(self) -> SolverConfig:
+        """ Create the solver configuration based on the constraint version """
+        
+        # Get the appropriate constraints provider function
+        constraints_provider_function = constraints_provider_dict[self.constraint_version]
+        
+        # Create the solver configuration
+        self._solver_config =  SolverConfig(
+            random_seed=self.random_seed,
+            solution_class=Timetable,
+            entity_class_list=[ShiftAssignment],
+            score_director_factory_config=ScoreDirectorFactoryConfig(
+                constraint_provider_function=constraints_provider_function
+            ),
+            termination_config=TerminationConfig(
+                # The solver runs only for 5 seconds on this small dataset.
+                # It's recommended to run for at least 5 minutes ("5m") otherwise.
+                spent_limit=self.default_term_time_budget,
+                unimproved_spent_limit=self.default_term_unimproved_early_term
+            )
         )
-        )
-    return solver_config
-
-def create_solver_config_from_xml(constraint_version: str, path_to_solver_config: Path) -> SolverConfig:
-    """ Create the solver configuration based on the constraint version """
-    if constraint_version not in constraints_provider_dict:
-        raise ValueError(f"Invalid constraint version: {constraint_version}. "
-                         f"Available versions: {list(constraints_provider_dict.keys())}")
-    # Get the appropriate constraints provider function
-    constraints_provider_function = constraints_provider_dict[constraint_version]
-    # Create the solver configuration
-    solver_config = SolverConfig.create_from_xml_resource(path=path_to_solver_config)
-    return solver_config
-
-def solve_problem(problem: Timetable, constraint_version: str, logger: logging.Logger, solving_method: str = "solver_manager", random_seed: int = None) -> Timetable:
-    """Wrapper for the solve methods"""
-    match solving_method:
-        case "blocking":
-            return solve_problem_blocking(problem=problem, constraint_version=constraint_version, logger=logger, random_seed=random_seed)
-        case "solver_manager":
-            solve_problem_with_manager(problem=problem, constraint_version=constraint_version, logger=logger, random_seed=random_seed)
-        case "tqdm":
-            return solve_with_tqdm(problem=problem, constraint_version=constraint_version, logger=logger, random_seed=random_seed)
-        case _:
-            return solve_problem_blocking(problem=problem, constraint_version=constraint_version, logger=logger, random_seed=random_seed)
-
-def solve_problem_with_manager(problem: Timetable, constraint_version: str, logger: logging.Logger,  random_seed: int = None) -> Timetable:
-    logger.info("=== Starting to Solve the problem (SolverManager) ===")
+        return self._solver_config
     
-    # 1) Build SolverConfig and SolverFactory
-    solver_config = create_solver_config(constraint_version=constraint_version, random_seed=random_seed)
-    solver_factory = SolverFactory.create(solver_config)
-    solver_manager = SolverManager.create(solver_factory)
+    def _create_solver_conffig_from_xml(self, path_to_solver_config: Path | str) -> SolverConfig:
+        # Valudation
+        if path_to_solver_config is not None:
+            self.path_to_solver_config = Path(path_to_solver_config)
+            self._validate_inputs()
+        else:
+            raise ValueError("Path to solver config XML must be provided.")
+        # Get the appropriate constraints provider function
+        constraints_provider_function = constraints_provider_dict[self.constraint_version]
+        # Create the solver configuration
+        solver_config = SolverConfig.create_from_xml_resource(path=self.path_to_solver_config)
+        # specify the domain's classes/functions
+        solver_config.solution_class = Timetable
+        solver_config.entity_class_list = [ShiftAssignment]
+        solver_config.score_director_factory_config = ScoreDirectorFactoryConfig(
+                constraint_provider_function= constraints_provider_function
+            )
+        if self.random_seed is not None:
+            solver_config.random_seed = self.random_seed
+
+        # update local attributes
+        self._solver_config = solver_config
+        return self._solver_config
     
-    # 2) Choose a unique problem ID
-    problem_id = str(uuid.uuid4())
+    # Abstract Methods
+    @abstractmethod
+    def _solve_problem_body(self, problem: Timetable) -> Timetable:
+        """Abstract method. Must be implemented in child classes."""
+        pass
     
-    # 3) Run the solver asynchronously and retrieve the best solution
-    solver_job = solver_manager.solve_builder() \
-        .with_problem_id(problem_id) \
-        .with_problem(problem) \
-        .run()   # <- Run is required here!
-        # more optional setting:
-        # .with_first_initialized_solution_consumer(on_first_solution_changed) \
-        # .with_best_solution_consumer(on_best_solution_changed) \
-        # .with_final_best_solution_consumer(on_final_solution_changed) \
-        # .with_exception_handler(on_exception_handler) \
-        # .with_config_override(config_override) \
+    # Optional Override
+    def _validate_inputs(self):
+        """ Validates the inputs provided to the solver."""
+        # validate constraint_version
+        if self.constraint_version not in constraints_provider_dict:
+            raise ValueError(f"Invalid constraint version: {self.constraint_version}. "
+                             f"Available versions: {list(constraints_provider_dict.keys())}")
+        # validate path_to_config
+        if (self.path_to_config_xml and not Path(self.path_to_config_xml).exists()):
+            raise FileNotFoundError(f"The specified path to the solver config does not exist: {self.path_to_config_xml}")
+        if self.use_config_xml and not self.path_to_config_xml:
+            raise ValueError("When use_config_xml is True, path_to_config must be provided.")
 
-    # while solver_job.get_solver_status != SolverStatus.<name-of-status>
+class TimetableSolverBlocking(TimetableSolverBase):
+    # Absteract methods    
+    def _solve_problem_body(self, problem: Timetable) -> Timetable:
+        logger = self.logger
+        logger.info("Solving with blocking solver...")
+        if not self._solver_config:
+            self.create_solver_config()
+        self._solver_factory = SolverFactory.create(self._solver_config)
+        solver      = self._solver_factory.build_solver()
+        solution    = solver.solve(problem)
+        return solution
 
-    solution: Timetable = solver_job.get_final_best_solution()
+class TimetableSolverWithSolverManager(TimetableSolverBase):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Members only relevant for this subclass
+        self._solver_manager    : SolverManager
+        self._job_id_list       : List[SolverJob]  = []
+        self.latest_solutions_by_job_id_dict   : Dict[str, List[Timetable]] = {}
 
-     
-    # 4) Visualize final solution
-    logger.info("=== Final timetable ===")
-    print_timetable(time_table=solution, logger=logger)
+    # Abstract methods
+    def _solve_problem_body(self, problem: Timetable) -> Timetable:
+        logger = self.logger
+        logger.info("=== Starting to Solve the problem (SolverManager) ===")
+
+        if not self._solver_factory:
+            raise ValueError("SolverFactory is not initialized. Call create_solver_config() first.")
+        
+        # 1) Create the solver manager
+        logger.info("Creating SolverManager…")
+        self._solver_manager = SolverManager.create(self._solver_factory)
+        
+        # 2) Choose a unique problem ID
+        problem_id = str(uuid.uuid4())
+        
+        # 3) Run the solver asynchronously and retrieve the best solution
+        self.latest_solutions_by_job_id_dict[problem_id] = []
+        def on_best_solution_changed(sol: Timetable):
+            # This is invoked on every new best solution
+            self.latest_solutions_by_job_id_dict[problem_id].append(sol)
+
+        solver_job = self._solver_manager.solve_builder() \
+            .with_problem_id(problem_id) \
+            .with_problem(problem) \
+            .with_best_solution_consumer(on_best_solution_changed) \
+            .run()   # <- Run is required here!
+            # more optional setting:
+            # .with_first_initialized_solution_consumer(on_first_solution_changed) \
+            # .with_final_best_solution_consumer(on_final_solution_changed) \
+            # .with_exception_handler(on_exception_handler) \
+            # .with_config_override(config_override) \
+        self._job_id_list.append(solver_job)
+
+        # while solver_job.get_solver_status != SolverStatus.<name-of-status>
+        self.blocking_show_job_status(job=solver_job)
+        
+        # 4) Retrieve the final solution (blocks only if it isn't done yet)
+        logger.info("Retrieving the final solution...")
+        solution: Timetable = solver_job.get_final_best_solution()
+        logger.info("Solver finished: status=%s, score=%s",
+                    solver_job.get_solver_status().name, solution.score)
+        
+        return solution
     
-    # 5) Post-process
-    solution = post_process_solution(solution=solution, solver_factory=solver_factory, logger=logger)
-    
-    logger.info("=== Done Solving ===")
-    return solution
+    def blocking_show_job_status(self, job: SolverJob):
+        """Blocks until the job with the given ID is finished and shows its status."""
+        
+        # Prepare a tqdm bar that just shows a line of text
+        pbar = tqdm(total=0, bar_format="{desc}", desc="[STARTING]", leave=True)
 
-def solve_with_tqdm(problem: Timetable, constraint_version: str, logger: logging.Logger,  random_seed: int = None) -> Timetable:
-    logger.info("Starting SolverManager…")
-    solver_config = create_solver_config(constraint_version=constraint_version, random_seed=random_seed)
-    solver_factory = SolverFactory.create(solver_config)
-    solver_manager = SolverManager.create(solver_factory)
-
-    # A one‐element list to hold the latest best solution via the consumer callback
-    latest_solution: List[Timetable] = [None]
-
-    def on_best_solution(sol: Timetable):
-        # This is invoked on every new best solution
-        latest_solution[0] = sol
-
-    # Kick off the async job with our callback
-    job: SolverJob[Timetable] = (
-        solver_manager.solve_builder()
-        .with_problem_id(str(uuid.uuid4()))
-        .with_problem(problem)
-        .with_best_solution_consumer(on_best_solution)
-        .run()
-    )
-
-    # Prepare a tqdm bar that just shows a line of text
-    pbar = tqdm(total=0, bar_format="{desc}", desc="[STARTING]", leave=True)
-
-    try:
         while True:
             time.sleep(0.5)
-            status = job.get_solver_status()
-            sol = latest_solution[0]
-            score = sol.score if sol is not None else "–"
+            status  = job.get_solver_status()
+            sol     = self.latest_solutions_by_job_id_dict[job.get_problem_id()][-1] if self.latest_solutions_by_job_id_dict[job.get_problem_id()] else None
+            score   = sol.score if sol is not None else "–"
 
             # Update the on‐screen description
             pbar.set_description(f"[{status.name}] score={score}")
 
             # Break once the solver is no longer running
-            if status is not SolverStatus.SOLVING_ACTIVE:
+            if not (status in [SolverStatus.SOLVING_ACTIVE, SolverStatus.SOLVING_SCHEDULED] ):
                 break
-    finally:
+        
         pbar.close()
-
-    # Retrieve the final solution (blocks only if it isn't done yet)
-    solution: Timetable = job.get_final_best_solution()
-    logger.info("Solver finished: status=%s, score=%s",
-                job.get_solver_status().name, solution.score)
-
-    print_timetable(time_table=solution, logger=logger)
-    solution = post_process_solution(solution=solution, solver_factory=solver_factory, logger=logger)
-    
-    logger.info("=== Done Solving ===")
-    return solution
-
-def solve_problem_blocking(problem: Timetable, constraint_version: str, logger: logging.Logger, random_seed: int = None) -> Timetable:
-    logger.info("=== Starting to Solve the proble ===")
-    # Create the solver configuration
-    solver_config  = create_solver_config(constraint_version=constraint_version, random_seed=random_seed)
-    # Create the solver factory
-    solver_factory = SolverFactory.create(solver_config)
-    
-    # Solve the problem
-    solver   = solver_factory.build_solver()
-    solution = solver.solve(problem)
-
-    # Visualize the solution
-    logger.info("************************** Final Timetable **************************")
-    print_timetable(time_table=solution, logger=logger)
-
-    solution_manager = post_process_solution(solution=solution, solver_factory=solver_factory, logger=logger)
-
-    logger.info("=== Done Solving ===")
-    return solution
-
-def post_process_solution(solution: Timetable, solver_factory: SolverFactory, logger: logging.Logger) -> SolutionManager:
-    solution_manager = SolutionManager.create(solver_factory=solver_factory)
-    # logger.info("=======================================================")
-    # logger.info("calling solver.explain to explain the constraints")
-    # logger.info("=======================================================")
-    # score_explanation = solution_manager.explain(solution=solution)
-    # logger.info(score_explanation.summary)
-
-    logger.info("=======================================================")
-    logger.info("calling solver.analyze to explain the constraints")
-    logger.info("=======================================================")
-    score_analysis = solution_manager.analyze(solution=solution)
-    logger.info(score_analysis.summary)
-
-    # When you have the ScoreAnalysis instance, you can find out which constraints are broken:
-    for constraint_ref, constraint_analysis in score_analysis.constraint_map.items():
-        constraint_id           = constraint_ref.constraint_id
-        score_per_constraint    = constraint_analysis.score
-
-        match_count = constraint_analysis.match_count
-        # If you wish to go further and find out which planning entities and problem facts are responsible for breaking the constraint, 
-        # you can further explore the ConstraintAnalysis instance you received from ScoreAnalysis.constraintMap():
-        for match_analysis in constraint_analysis.matches:
-            score_per_match = match_analysis.score
-            justification = match_analysis.justification
-            
-   
-    # logger.info(solution_manager.analyze(solution=solution))
-
-    return solution_manager
-
-def visualize_hot_planning_vars(solution: Timetable, solver_factory: SolverFactory, logger: logging.Logger):
-    solution_manager = SolutionManager.create(solver_factory)
-    score_explanation = solution_manager.explain(solution)
-    indictment_map = score_explanation.indictment_map
-    for assignment in solution.shift_assignments:
-        indictment = indictment_map.get(assignment)
-        if indictment is None:
-            continue
-        # The score impact of that planning entity
-        total_score = indictment.score
-
-        for constraint_match in indictment.constraint_match_set:
-            # constraint_name = constraint_match.constraint_name
-            score = constraint_match.score
-            

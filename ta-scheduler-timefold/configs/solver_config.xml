@@ -6,16 +6,16 @@
     <!-- ########################## -->
     <!-- Model and Entity Classes  -->
     <!-- ########################## -->
-    <solutionClass>domain.Timetable</solutionClass>
+    <solutionClass>hello_world.domain.Timetable</solutionClass>
     <!-- Only planning entities (with @PlanningEntity) go here -->
-    <entityClass>domain.ShiftAssignment</entityClass>
+    <entityClass>hello_world.domain.ShiftAssignment</entityClass>
 
     <!-- ########################## -->
     <!-- Constraint Provider         -->
     <!-- ########################## -->
     <scoreDirectorFactory>
         <!-- Fully in-Python ConstraintProvider -->
-        <constraintProviderClass>constraints.define_constraints</constraintProviderClass>
+        <constraintProviderClass>hello_world.constraints.define_constraints</constraintProviderClass>
         <!-- Enable constraint match tracking if you need explanation() -->
         <constraintMatchEnabled>true</constraintMatchEnabled>
     </scoreDirectorFactory>

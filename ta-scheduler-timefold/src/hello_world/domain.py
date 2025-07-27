@@ -1,7 +1,7 @@
 from timefold.solver.domain import (planning_entity, planning_solution, PlanningId, PlanningVariable,
                                     PlanningEntityCollectionProperty,
                                     ProblemFactCollectionProperty, ProblemFactProperty, ValueRangeProvider, ConstraintWeightOverrides,
-                                    PlanningScore)
+                                    PlanningScore, PlanningPin)
 from timefold.solver import SolverStatus
 from timefold.solver.score import HardSoftScore, HardMediumSoftScore
 from dataclasses import dataclass, field
@@ -11,7 +11,7 @@ from pydantic import Field
 
 @dataclass
 class ConstraintParameters:
-    undesired_assignment_penalty:   int = 2
+    undesired_assignment_penalty:   int = 20
     desired_assignment_penalty:     int = 1
 
 @dataclass
@@ -69,8 +69,9 @@ class ShiftAssignment():
     id: Annotated[str, PlanningId]
     shift: Shift
     assigned_ta: Annotated[TA | None,
-                        PlanningVariable,
+                        PlanningVariable, # allow unassigned: PlanningVariable(allows_unassigned=True) -> Constraint Streams filter out planning entities with a null planning variable by default. Use forEachIncludingUnassigned() to avoid such unwanted behaviour.
                         Field(default=None)]
+    # pinned: Annotated[bool, PlanningPin] # Pin down planning entities with @PlanningPin
     
     def __str__(self):
         return f'{self.shift.series} is assigned to {self.assigned_ta}'

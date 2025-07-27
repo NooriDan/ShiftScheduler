@@ -166,7 +166,7 @@ def ta_undesired_shift (constraint_factory: ConstraintFactory) -> Constraint:
         constraint_factory.for_each(ShiftAssignment)
                .filter(lambda assignment:
                    assignment.assigned_ta is not None
-                   and assignment.shift in assignment.assigned_ta.desired
+                   and assignment.shift in assignment.assigned_ta.undesired
                )
                .join(ConstraintParameters)
                .penalize(HardMediumSoftScore.ONE_SOFT, lambda assignment, params: params.undesired_assignment_penalty)
@@ -193,3 +193,12 @@ constraints_provider_dict: Dict[str, Callable[[ConstraintFactory], List[Constrai
     'default'       : define_constraints,
     'tabriz'        : define_constraints_tabriz_edition
 }
+# TODO: Add constraints for Continuous planning (windowed planning) -> tabriz edition
+
+# NEEDS MODIFICATION BUT THIS IS HOW THIS SHOULD WORK
+# def penalize_unassigned_visits(factory: ConstraintFactory) -> Constraint:
+#     return (factory.for_each_including_unassigned(Visit)
+#                    .filter(lambda visit: visit.vehicle is None)
+#                    .penalize(HardMediumSoftScore.ONE_MEDIUM)
+#                    .as_constraint("Unassigned Visit")
+#     )
