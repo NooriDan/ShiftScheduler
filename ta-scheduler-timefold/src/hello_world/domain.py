@@ -14,6 +14,9 @@ class ConstraintParameters:
     undesired_assignment_penalty:   int = 20
     desired_assignment_penalty:     int = 1
 
+    def __str__(self):
+        return f"undesired_assignment_penalty={self.undesired_assignment_penalty}, desired_assignment_penalty={self.desired_assignment_penalty}"
+
 @dataclass
 class Shift():
     id: Annotated[str, PlanningId]
@@ -74,7 +77,9 @@ class ShiftAssignment():
     # pinned: Annotated[bool, PlanningPin] # Pin down planning entities with @PlanningPin
     
     def __str__(self):
-        return f'{self.shift.series} is assigned to {self.assigned_ta}'
+        return f'assigning {self.shift.series} to {self.assigned_ta}'
+    
+
 
 @planning_solution
 @dataclass

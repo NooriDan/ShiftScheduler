@@ -5,6 +5,7 @@ from timefold.solver.score import (
     ConstraintFactory, 
     Constraint, 
     ConstraintCollectors, 
+    ConstraintJustification,
     Joiners)
 
 from datetime import time
@@ -183,6 +184,7 @@ def ta_desired_shift(factory: ConstraintFactory) -> Constraint:
                )
                .join(ConstraintParameters)
                .reward(HardMediumSoftScore.ONE_SOFT, lambda assignment, params: params.desired_assignment_penalty)
+               .indict_with(lambda assignment, params: [assignment])
                .as_constraint("TA assigned to *desired* shift")
     )
 

@@ -3,6 +3,7 @@ import logging
 import sys, os
 import uuid
 import time
+from datetime import datetime
 
 from typing     import List, Dict, Callable, Any
 from pathlib    import Path
@@ -37,7 +38,7 @@ class TimetableSolverBase(ABC):
 
         # class constants
         self.default_term_time_budget           : Duration =  Duration(minutes=1, seconds=30)
-        self.default_term_unimproved_early_term : Duration =  Duration(seconds=30)
+        self.default_term_unimproved_early_term : Duration =  Duration(seconds=10)
 
         # Private attributes to hold the solver configuration and factory
         self._solver_config     : SolverConfig
@@ -67,35 +68,43 @@ class TimetableSolverBase(ABC):
         """Wrapper for the solve methods"""
         self._validate_inputs()
         logger = self.logger
-        logger.info("=== Starting to Solve the problem ===")
+
+        logger.info("🚀 === Starting to Solve the Problem ===")
+        
         # 1) Build SolverConfig and SolverFactory
+        logger.info("⚙️  Creating SolverConfig and SolverFactory...")
         self.create_solver_config()
         self._solver_factory = SolverFactory.create(self._solver_config)
         
         # 2) Solve the problem based on the solving method (extended in child classes)
+        logger.info("🧠 === Solving the Problem Body ===")
         solution = self._solve_problem_body(problem=problem)
+        logger.info("✅ === Solver Finished Successfully ===")
 
         # 3) Visualize the final solution
-        logger.info("=== Final timetable ===")
+        logger.info("🗓️ === Final Timetable ===")
         print_timetable(time_table=solution, logger=logger)
-        logger.info("=== /Final timetable ===")
+        logger.info("🗓️ === /End of Final Timetable ===")
         
         # 4) Post-process (justification, analysis, etc.)
-        logger.info("=== Post-processing the solution ===")
+        logger.info("📊 === Post-processing the Solution ===")
         solution_manager = self.post_process_solution(solution=solution)
+        logger.info("🏁 === Post-processing Complete ===")
         
-        logger.info("=== Done Solving the problem ===")
         return solution
+
     
     # Post-processing Methods
     def post_process_solution(self, solution: Timetable) -> SolutionManager:
+        logger = self.logger
         solution_manager = SolutionManager.create(solver_factory=self._solver_factory)
+
         # logger.info("=======================================================")
         # logger.info("calling solver.explain to explain the constraints")
         # logger.info("=======================================================")
         # score_explanation = solution_manager.explain(solution=solution)
         # logger.info(score_explanation.summary)
-        logger = self.logger
+
         logger.info("=======================================================")
         logger.info("calling solver.analyze to explain the constraints")
         logger.info("=======================================================")
@@ -222,13 +231,12 @@ class TimetableSolverWithSolverManager(TimetableSolverBase):
     # Abstract methods
     def _solve_problem_body(self, problem: Timetable) -> Timetable:
         logger = self.logger
-        logger.info("=== Starting to Solve the problem (SolverManager) ===")
+        logger.info("=== Creating the SolverManager ===")
 
         if not self._solver_factory:
             raise ValueError("SolverFactory is not initialized. Call create_solver_config() first.")
         
         # 1) Create the solver manager
-        logger.info("Creating SolverManager…")
         self._solver_manager = SolverManager.create(self._solver_factory)
         
         # 2) Choose a unique problem ID
@@ -237,8 +245,12 @@ class TimetableSolverWithSolverManager(TimetableSolverBase):
         # 3) Run the solver asynchronously and retrieve the best solution
         self.latest_solutions_by_job_id_dict[problem_id] = []
         def on_best_solution_changed(sol: Timetable):
+            """Callback triggered when a new best solution is found."""
             # This is invoked on every new best solution
             self.latest_solutions_by_job_id_dict[problem_id].append(sol)
+            timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            logger.info(f"\n💡 New best solution found! {timestamp} 🧠")
+            logger.info(f"\t📈 Updated score: {sol.score}\n")
 
         solver_job = self._solver_manager.solve_builder() \
             .with_problem_id(problem_id) \
@@ -260,26 +272,34 @@ class TimetableSolverWithSolverManager(TimetableSolverBase):
         solution: Timetable = solver_job.get_final_best_solution()
         logger.info("Solver finished: status=%s, score=%s",
                     solver_job.get_solver_status().name, solution.score)
-        
+                
         return solution
     
     def blocking_show_job_status(self, job: SolverJob):
         """Blocks until the job with the given ID is finished and shows its status."""
-        
-        # Prepare a tqdm bar that just shows a line of text
-        pbar = tqdm(total=0, bar_format="{desc}", desc="[STARTING]", leave=True)
+
+        self.logger.info("==========================================")
+        self.logger.info("🛑 Starting blocking: waiting for solver job to finish")
+        self.logger.info("-------------------------------------------")
+        self.logger.info(f"Job ID: {job.get_problem_id()}")
+        start_time = time.time()
 
         while True:
-            time.sleep(0.5)
+            time.sleep(LOOP_WAIT_SECONDS)
             status  = job.get_solver_status()
             sol     = self.latest_solutions_by_job_id_dict[job.get_problem_id()][-1] if self.latest_solutions_by_job_id_dict[job.get_problem_id()] else None
             score   = sol.score if sol is not None else "–"
+            elapsed = time.time() - start_time
 
-            # Update the on‐screen description
-            pbar.set_description(f"[{status.name}] score={score}")
+            now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
+            self.logger.info(f"⏱️ {now_str} - Elapsed time: {elapsed:.1f} seconds")
+            self.logger.info(f"\t⏳ Job status: {status.name} | Best score: {score}")
 
             # Break once the solver is no longer running
-            if not (status in [SolverStatus.SOLVING_ACTIVE, SolverStatus.SOLVING_SCHEDULED] ):
+            if not (status in [SolverStatus.SOLVING_ACTIVE, SolverStatus.SOLVING_SCHEDULED]):
                 break
-        
-        pbar.close()
+
+        self.logger.info(f"\n✅ Blocking finished. Final job status: {status.name}")
+        self.logger.info("==========================================")

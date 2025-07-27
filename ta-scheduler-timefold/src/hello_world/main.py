@@ -77,6 +77,7 @@ def create_timetable_demo(logger: logging.Logger, demo_data_select: str = "demo_
     if print_initial_timetable:
         logger.info("************************** Initial Timetable **************************")
         print_ta_availability(time_table=deepcopy(problem), logger=logger)
+        logger.info("************************** /Initial Timetable **************************")
 
     return problem
 
