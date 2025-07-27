@@ -33,6 +33,10 @@ class Shift():
     def __str__(self):
         return f'{self.series} {self.day_of_week} {self.start_time.strftime("%H:%M")} - week {self.week_id}'
     
+    def is_from_the_same_series_as(self, other: 'Shift') -> bool:
+        """Check if this shift is from the same series as another shift."""
+        return self.series == other.series
+    
 @dataclass    
 class TA():
     id: Annotated[str, PlanningId]
@@ -79,30 +83,31 @@ class ShiftAssignment():
     def __str__(self):
         return f'assigning {self.shift.series} to {self.assigned_ta}'
     
-    def is_valid(self) -> bool:
+    def is_assigned_a_ta(self) -> bool:
         """Check if the shift assignment is valid."""
         return self.assigned_ta is not None and self.shift is not None
     
+    # Helper methods to be used in constraints
     def is_desired(self) -> bool:
         """Check if the shift assignment is desired by the TA."""
-        if not self.is_valid():
+        if not self.is_assigned_a_ta():
             raise ValueError("Shift assignment is not valid. Ensure that both assigned_ta and shift are set.")   
          
         return self.shift in self.assigned_ta.desired
     
     def is_undesired(self) -> bool:
         """Check if the shift assignment is undesired by the TA."""
-        if not self.is_valid():
+        if not self.is_assigned_a_ta():
             raise ValueError("Shift assignment is not valid. Ensure that both assigned_ta and shift are set.") 
         
         return self.shift in self.assigned_ta.undesired
     
     def is_unavailable(self) -> bool:
         """Check if the shift assignment is unavailable for the TA."""
-        if not self.is_valid():
+        if not self.is_assigned_a_ta():
             raise ValueError("Shift assignment is not valid. Ensure that both assigned_ta and shift are set.") 
         
-        return self.assigned_ta is not None and self.shift in self.assigned_ta.unavailable
+        return self.shift in self.assigned_ta.unavailable
     
     def has_the_same_ta(self, other: 'ShiftAssignment') -> bool:
         """Check if this assignment has the same TA as another assignment."""
@@ -111,6 +116,10 @@ class ShiftAssignment():
     def has_the_same_shift(self, other: 'ShiftAssignment') -> bool:
         """Check if this assignment has the same shift as another assignment."""
         return self.shift is not None and other.shift is not None and self.shift.id == other.shift.id
+    
+    def is_from_the_same_series_as(self, other: 'ShiftAssignment') -> bool:
+        """Check if this assignment is from the same series as another assignment."""
+        return self.shift is not None and other.shift is not None and self.shift.is_from_the_same_series_as(other.shift)
     
 
 
