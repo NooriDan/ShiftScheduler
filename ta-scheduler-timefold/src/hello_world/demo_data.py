@@ -368,6 +368,10 @@ class RandomTimetableGenerator:
         #                                                                                     lower_deviation=-1
         #                                                                                     )
 
+        total_desired_shifts: int = 0
+        total_undesired_shifts: int = 0
+        total_unavailable_shifts: int = 0
+
         for index in range(num_tas):
             # Generate random TA details
             ta_id                           = next(ids)
@@ -404,11 +408,20 @@ class RandomTimetableGenerator:
             )
             
             course_tas.append(ta_to_append)
+            # Update the total counts
+            total_desired_shifts    += len(ta_to_append.desired)
+            total_undesired_shifts  += len(ta_to_append.undesired)
+            total_unavailable_shifts += len(ta_to_append.unavailable)
+            # Log the creation of the TA
             self.helper.log_ta_creation(ta=ta_to_append, logger=logger)
 
         logger.info(f"===========================")
         logger.info(f"Generated {len(course_tas)} TAs with a total TA demand of {total_ta_demands} across {num_of_weeks} weeks...")
-        logger.info(f"Each TA has a minimum of {min_shifts_per_week} and a maximum of {max_shifts_per_week} shifts per week.")
+        # show the breakdown between the desired, undesired, and unavailable shifts
+        logger.info(f"\tTotal desired shifts:\t\t{total_desired_shifts} ({total_desired_shifts/len(course_tas):.2f} per TA) - unique shifts: {len(set([shift.series for ta in course_tas for shift in ta.desired]))}")
+        logger.info(f"\tTotal undesired shifts:\t\t{total_undesired_shifts} ({total_undesired_shifts/len(course_tas):.2f} per TA) - unique shifts: {len(set([shift.series for ta in course_tas for shift in ta.undesired]))}")
+        logger.info(f"\tTotal unavailable shifts:\t{total_unavailable_shifts} ({total_unavailable_shifts/len(course_tas):.2f} per TA) - unique shifts: {len(set([shift.series for ta in course_tas for shift in ta.unavailable]))}")
+        logger.info(f"\tEach TA has a minimum of {min_shifts_per_week} and a maximum of {max_shifts_per_week} shifts per week.")
         logger.info(f"Allow different weekly availability? {"yes" if allow_different_weekly_availability else "no"}")
         logger.info(f"===========================\n")
 
