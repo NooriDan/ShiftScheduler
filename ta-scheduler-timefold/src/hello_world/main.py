@@ -68,7 +68,7 @@ def get_args() -> argparse.Namespace:
 
     return args
 
-def create_timetable_demo(logger: logging.Logger, demo_data_select: str = "demo_data_weekly_scheduling-random", print_initial_timetable: bool = False) -> Timetable:
+def create_timetable_demo_default(logger: logging.Logger, demo_data_select: str = "demo_data_weekly_scheduling-random", print_initial_timetable: bool = False) -> Timetable:
 
     # Load the problem
     logger.info(f"=== Loading the demo data {demo_data_select} ===")
@@ -81,9 +81,7 @@ def create_timetable_demo(logger: logging.Logger, demo_data_select: str = "demo_
 
     return problem
 
-def create_timetable_from_data_folder(logger: logging.Logger,
-                         ta_csv_path: str, shift_csv_path: str, availability_folder: str) -> Timetable:
-
+def create_timetable_from_data_folder(logger: logging.Logger, ta_csv_path: str, shift_csv_path: str, availability_folder: str) -> Timetable:
     try:
         data_constructor = DataConstructor(
                                     ta_csv_path= ta_csv_path,
@@ -119,14 +117,13 @@ def create_the_problem(logger: logging.Logger, args: argparse.Namespace) -> Time
                                                     availability_folder=args.availability_folder)
     else:
         logger.info("=== Creating the problem from the demo data ===")
-        problem = create_timetable_demo(logger=logger, 
+        problem = create_timetable_demo_default(logger=logger, 
                                         demo_data_select=args.demo_data_select, 
                                         print_initial_timetable=True)
 
     return problem
 
-
-def run_app():
+def run_demo():
     # standard library
     random.seed(SEED)
     # Parse command line arguments
@@ -151,7 +148,7 @@ def run_app():
 
 if __name__ == '__main__':
     try:
-        run_app()
+        run_demo()
     except Exception as e:
         print(f"An error occurred: {e}")
         sys.exit(1)
