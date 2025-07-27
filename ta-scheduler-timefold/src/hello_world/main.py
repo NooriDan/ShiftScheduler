@@ -10,7 +10,7 @@ from hello_world.demo_data   import generate_demo_data_with_default_params, _gen
 from hello_world.utils       import print_ta_availability, initialize_logger, DataConstructor
 from hello_world.solver      import TimetableSolverBlocking, TimetableSolverWithSolverManager
 # Constants for random shift generation
-SEED = 42
+SEED = random.randint(0, 1000000)
 
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Run the TA Rostering Program in Terminal')
@@ -133,6 +133,7 @@ def run_app():
     args = get_args()
     # Initialize the logger
     logger = initialize_logger(args)
+    logger.info(f"Running the TA Rostering Program with seed: {SEED}")
 
     # Create the planning problem
     problem = create_the_problem(logger=logger, args=args)
