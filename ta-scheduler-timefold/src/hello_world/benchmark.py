@@ -75,119 +75,115 @@ def process_score_analysis(score_analysis: ScoreAnalysis) -> Any:
             justification = match_analysis.justification
     # logger.info(solution_manager.analyze(solution=solution))
 
+class BenchmarkRunner:
+    def __init__(self):
+        self.args   = get_args()
+        self.logger = initialize_logger(self.args)
+        self.config_data = self._load_config()
+        self.benchmark_config = self.config_data["BenchmarkConfig"]
 
-def run_benchmark():
-    # standard library
-    # Parse command line arguments
-    args = get_args()
-    # Initialize the logger
-    logger = initialize_logger(args)
+        self.randomization_params = ProblemRandomizationParameters(
+            **self.config_data["ProblemRandomizationParameters"]
+        )
 
-    # 1. Load config JSON file
-    with open("configs/benchmark_config.json", "r") as f:
-        config_data = json.load(f)
+        self.solver = TimetableSolverWithSolverManager(
+            logger=self.logger,
+            **self.config_data["TimetableSolver"]
+        )
 
-    benchmark_config    = config_data["BenchmarkConfig"]
-    global_seed         = benchmark_config["random_seed"]
+        self.generator = RandomTimetableGenerator(
+            name=self.args.demo_data_select,
+            randomization_params=self.randomization_params,
+            logger=self.logger,
+            **self.config_data["RandomTimetableGenerator"]
+        )
+        self.iterations: List[Dict[str, Any]] = []
+        self.solutions: List[Timetable] = []
+        self.timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        self.results_base_dir = Path(f"results/{self.config_data['TimetableSolver']['constraint_version']}/{self.timestamp}")
+        self.results_base_dir.mkdir(parents=True, exist_ok=True)
+
+    def _load_config(self) -> Dict[str, Any]:
+        with open("configs/benchmark_config.json", "r") as f:
+            return json.load(f)
     
-    logger.info(f"Running the TA Rostering Program with seed: {global_seed}")
+    def run(self):
+        seed = self.benchmark_config["random_seed"]
+        self.logger.info(f"Running the TA Rostering Program with seed: {seed}")
 
-    # create the solver
-    solver = TimetableSolverWithSolverManager(logger=logger, **config_data["TimetableSolver"])
+        for iteration_index in range(self.benchmark_config["num_of_runs"]):
+            self.logger.info(f"Iteration {iteration_index + 1} / {self.benchmark_config['num_of_runs']}")
+            self.logger.info("=================================================================")
 
-    # Create random data generator
-    randomization_params = ProblemRandomizationParameters(**config_data["ProblemRandomizationParameters"])
-    print(f"Randomization Parameters: {randomization_params}")
+            solution, score_analysis, metadata = self._run_iteration()
+            self._add_iteration(iteration_index=iteration_index, solution=solution, score_analysis=score_analysis, metadata=metadata)
 
-    generator = RandomTimetableGenerator(
-        name=args.demo_data_select,
-        randomization_params=randomization_params,
-        logger=logger,
-        **config_data["RandomTimetableGenerator"]
-    )
+            self.logger.info("=================================================================")
+            self.logger.info(f"End of iteration {iteration_index + 1} / {self.benchmark_config['num_of_runs']}\n")
 
-    iterations : List[Dict[str, Any]] = []
-    solutions:   List[Timetable] = []
-    # Create the planning problem
-    for i in range(config_data["BenchmarkConfig"]["num_of_runs"]):
-        logger.info(f"iteration {i+1} / {config_data['BenchmarkConfig']['num_of_runs']}")
-        logger.info("=================================================================")
+        self._save_results()
+        self.logger.info("🏁 Benchmark completed successfully!")
 
-        logger.info("Creating the planning problem...")
-        problem, metadata = generator.gen_demo_data()
+    def _run_iteration(self) -> Tuple[Timetable, ScoreAnalysis, Dict[str, Any]]:
+        self.logger.info("Creating the planning problem...")
+        problem, metadata = self.generator.gen_demo_data()
 
-        logger.info("************************** Initial Timetable **************************")
-        print_ta_availability(time_table=deepcopy(problem), logger=logger)
-        logger.info("************************** /Initial Timetable **************************")
+        self.logger.info("************************** Initial Timetable **************************")
+        print_ta_availability(time_table=deepcopy(problem), logger=self.logger)
+        self.logger.info("************************** /Initial Timetable **************************")
 
-        solution = solver.solve_problem(problem=problem)
+        solution        = self.solver.solve_problem(problem=problem)
+        score_analysis  = self.solver.post_process_solution(solution=solution)
 
-        score_analysis = solver.post_process_solution(solution=solution)
-
-        iterations.append({
-            "iteration" : {
-                "id"        : i,
-                "seed"      : global_seed,
-                "problem_metadata": metadata,
-                "score"     : str(solution.score),
-                "score_analysis": {
-                    "summary"       : score_analysis.summary,
-                    "constraint_map": {
-                        constraint_ref.constraint_id: {
-                            "score"         : str(constraint_analysis.score),
-                            "match_count"   : constraint_analysis.match_count,
-                            # "matches": [
-                            #     {
-                            #         "score": str(match_analysis.score),
-                            #         "justification": str(match_analysis.justification)
-                            #     } for match_analysis in constraint_analysis.matches
-                            # ]
-                        } for constraint_ref, constraint_analysis in score_analysis.constraint_map.items()
+        return solution, score_analysis, metadata
+        
+    def _add_iteration(self, iteration_index: int, solution: Timetable, score_analysis: ScoreAnalysis, metadata: Dict[str, Any]):
+        self.iterations.append({
+            "iteration": {
+                "id": iteration_index,
+                "score": str(solution.score),
+                "iteration_metadata": {
+                    "seed": self.benchmark_config["random_seed"],
+                    "metadata" : metadata,
+                    "score_analysis": {
+                        "summary": score_analysis.summary,
+                        "constraint_map": {
+                            constraint_ref.constraint_id: {
+                                "score": str(analysis.score),
+                                "match_count": analysis.match_count
+                            } for constraint_ref, analysis in score_analysis.constraint_map.items()
+                        }
                     }
                 }
             }
         })
 
-        solutions.append(solution)
+        self.solutions.append(solution)
 
-        logger.info("=================================================================")
-        logger.info(f"end of iteration ... {i+1} / {config_data['BenchmarkConfig']['num_of_runs']}\n")
+    def _save_results(self):
+        solutions_pkl_path = self.results_base_dir / "solutions.pkl"
+        benchmark_json_path = self.results_base_dir / "benchmark_results.json"
 
-    # Generate timestamp
-    timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-    constraint_version = config_data["TimetableSolver"]["constraint_version"]
+        benchmark_results = {
+            "timestamp": self.timestamp,
+            "logger": create_logger_info(self.logger.parent),
+            "benchmark_config": self.benchmark_config,
+            "randomization_params": self.randomization_params.__dict__,
+            "iterations": self.iterations,
+        }
 
-    # Base directory for this run
-    base_results_dir = Path(f"results/{constraint_version}/{timestamp}")
-    base_results_dir.mkdir(parents=True, exist_ok=True)
+        with open(solutions_pkl_path, "wb") as f:
+            pickle.dump(self.solutions, f)
 
-    # Define result file paths
-    solutions_pkl_path = base_results_dir / "solutions.pkl"
-    benchmark_results_json_path = base_results_dir / "benchmark_results.json"
+        with open(benchmark_json_path, "w") as f:
+            json.dump(benchmark_results, f, indent=4)
 
-    # Build results dict
-    benchmark_results : Dict[str, Any] = {
-        "timestamp": timestamp,
-        "logger": create_logger_info(logger.parent),
-        "benchmark_config": benchmark_config,
-        "randomization_params": asdict(randomization_params),
-        "iterations": iterations,
-    }
+        self.logger.info("📦 Benchmark results saved to:")
+        self.logger.info(f"\t📄 JSON: {benchmark_json_path}")
+        self.logger.info(f"\t🧪 PKL : {solutions_pkl_path}")
 
-    # Save solutions (Pickle)
-    with open(solutions_pkl_path, "wb") as f:
-        pickle.dump(solutions, f)
-
-    # Save metadata/results (JSON)
-    with open(benchmark_results_json_path, "w") as f:
-        json.dump(benchmark_results, f, indent=4)
-
-    # Log final message
-    logger.info("📦 Benchmark results saved to:")
-    logger.info(f"\t📄 JSON: {benchmark_results_json_path}")
-    logger.info(f"\t🧪 PKL : {solutions_pkl_path}")
-
-    logger.info("🏁 Benchmark completed successfully!")
+def run_benchmark() -> None:
+    BenchmarkRunner().run()
 
 if __name__ == "__main__":
     # Run the benchmark
