@@ -12,7 +12,8 @@ from abc        import ABC, abstractmethod
 
 from timefold.solver.config import (SolverConfig, ScoreDirectorFactoryConfig,
                                     TerminationConfig, Duration)
-from timefold.solver import SolverFactory, SolutionManager, Solver, SolverManager, SolverStatus, SolverJob
+from timefold.solver        import SolverFactory, SolutionManager, Solver, SolverManager, SolverStatus, SolverJob
+from timefold.solver.score  import ScoreAnalysis
 
 from hello_world.domain      import Timetable, ShiftAssignment, Shift, TA
 from hello_world.constraints import constraints_provider_dict               # a dictionary mapping constraint versions to their provider functions
@@ -88,13 +89,13 @@ class TimetableSolverBase(ABC):
         
         # 4) Post-process (justification, analysis, etc.)
         logger.info("\n📊 === Post-processing the Solution ===")
-        solution_manager = self.post_process_solution(solution=solution)
+        score_analysis = self.post_process_solution(solution=solution)
         logger.info("🏁 === Post-processing Complete ===")
         
         return solution
     
     # Post-processing Methods
-    def post_process_solution(self, solution: Timetable) -> SolutionManager:
+    def post_process_solution(self, solution: Timetable) -> ScoreAnalysis:
         logger = self.logger
         solution_manager = SolutionManager.create(solver_factory=self._solver_factory)
 
@@ -110,20 +111,7 @@ class TimetableSolverBase(ABC):
         score_analysis = solution_manager.analyze(solution=solution)
         logger.info(score_analysis.summary)
 
-        # When you have the ScoreAnalysis instance, you can find out which constraints are broken:
-        for constraint_ref, constraint_analysis in score_analysis.constraint_map.items():
-            constraint_id           = constraint_ref.constraint_id
-            score_per_constraint    = constraint_analysis.score
-
-            match_count = constraint_analysis.match_count
-            # If you wish to go further and find out which planning entities and problem facts are responsible for breaking the constraint, 
-            # you can further explore the ConstraintAnalysis instance you received from ScoreAnalysis.constraintMap():
-            for match_analysis in constraint_analysis.matches:
-                score_per_match = match_analysis.score
-                justification = match_analysis.justification
-        # logger.info(solution_manager.analyze(solution=solution))
-
-        return solution_manager
+        return score_analysis
 
     def visualize_hot_planning_vars(self, solution: Timetable):
         solution_manager = SolutionManager.create(self._solver_factory)

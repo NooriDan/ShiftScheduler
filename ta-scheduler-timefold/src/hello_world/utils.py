@@ -6,7 +6,8 @@ import openpyxl
 import datetime as dt
 import pandas as pd
 
-from typing import Dict, List
+from copy import deepcopy
+from typing import Dict, List, Any
 from pathlib import Path
 from datetime import timedelta, time, date
 from argparse import Namespace
@@ -306,7 +307,7 @@ def id_generator():
         yield str(current)
         current += 1
 
-def initialize_logger(args: Namespace):
+def initialize_logger(args: Namespace, logging_level = logging.INFO) -> logging.Logger:
     # Construct log directory path based on the constraint version argument
     variant: str = args.demo_data_select if not args.overwrite else f"overwrite"
     log_dir = os.path.join("logs", args.constraint_version, variant)
@@ -336,6 +337,38 @@ def initialize_logger(args: Namespace):
     LOGGER.info(f"...")
 
     return LOGGER
+
+def get_handler_info(handler: logging.Handler) -> dict:
+    """Returns a dictionary with information about the logging handler."""
+    if not isinstance(handler, logging.Handler):
+        raise ValueError("Handler must be an instance of logging.Handler")
+    return {
+        "type": type(handler).__name__,
+        "level": logging.getLevelName(handler.level),
+        "formatter": handler.formatter._fmt if handler.formatter else None,
+        "output_file": getattr(handler, "baseFilename", None),  # Only FileHandlers have this
+        "name": getattr(handler, "name", None)
+    }
+
+def get_handler_info_from_logger(logger: logging.Logger) -> List[Dict[str, Any]]:
+    """Returns a list of dictionaries with information about the logging handlers of the given logger."""
+    if not isinstance(logger, logging.Logger):
+        raise ValueError("Logger must be an instance of logging.Logger")
+    
+    return [get_handler_info(handler) for handler in logger.handlers]
+
+def create_logger_info(logger: logging.Logger | None) -> Dict[str, Any]:
+    """Creates a dictionary with information about the logger."""
+    if not isinstance(logger, logging.Logger):
+        raise ValueError("Logger must be an instance of logging.Logger")
+    
+    return {
+        "name": logger.name,
+        "level": logging.getLevelName(logger.level),
+        "effective_level": logging.getLevelName(logger.getEffectiveLevel()),
+        "propagate": logger.propagate,
+        "handlers": get_handler_info_from_logger(logger)
+    }
 
 def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
 
@@ -405,11 +438,12 @@ def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
 
 def print_ta_availability(time_table: Timetable, logger: logging.Logger) -> None:
     """Prints the TA availability in a formatted way."""
+    time_table_in = deepcopy(time_table)  # Ensure we do not modify the original timetable
     LOGGER = logger
     LOGGER.info("=== Starting to print the TA availability ===")
     
-    tas:                    List[TA]                = time_table.tas
-    shift_groups:           List[Shift]             = time_table.shifts
+    tas:                    List[TA]                = time_table_in.tas
+    shift_groups:           List[Shift]             = time_table_in.shifts
     shift_assignments_new:  List[ShiftAssignment]   = []                # a dummy list to hold the cross product of TAs and shifts
                                                                         # this is because we want to re-use the logic of the print_timetable function
     # Create a cross product of TAs and shifts
@@ -419,8 +453,8 @@ def print_ta_availability(time_table: Timetable, logger: logging.Logger) -> None
             if (shift in ta.desired) or (shift in ta.undesired) or (shift in ta.unavailable): # do not add "neutral" shifts
                 shift_assignments_new.append(ShiftAssignment(id=next(ids), shift=shift, assigned_ta=ta))
 
-    time_table.shift_assignments = shift_assignments_new
-    print_timetable(time_table, logger)
+    time_table_in.shift_assignments = shift_assignments_new
+    print_timetable(time_table_in, logger)
 
     LOGGER.info("=== Finished printing the TA availability ===")
 
@@ -442,3 +476,5 @@ class HelperFunctions:
 if __name__ == "__main__":
     logger  = HelperFunctions.initialize_logger()
     # Assuming `time_table` is an instance of `Timetable`
+    logger_info=create_logger_info(logger)
+    print(logger_info)

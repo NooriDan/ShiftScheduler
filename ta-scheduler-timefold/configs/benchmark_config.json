@@ -1,0 +1,57 @@
+{
+    "BenchmarkConfig" : {
+        "num_of_runs" : 1,
+        "random_seed" : 42,
+        "use_config_xml" : false,
+        "path_to_config_xml" : ""
+        },
+
+    "TimetableSolver" : {
+        "constraint_version"    : "default",
+        "random_seed"           : null,
+        "path_to_config_xml"    : "",
+        "use_config_xml"        : false
+        },
+    
+    "ProblemRandomizationParameters" : {
+
+        "MIN_NUM_SHIFTS_PER_WEEK" : 6,
+        "MAX_NUM_SHIFTS_PER_WEEK" : 12,
+
+        "MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT" : 2,
+        "MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT" : 3,
+
+        "MIN_NUM_OF_SHIFT_PER_TA_PER_WEEK" : 0,
+
+        "MIN_TA_SKILL_LEVEL" : 1,
+        "MAX_TA_SKILL_LEVEL" : 3,
+
+        "MIN_NUM_OF_UNAVAILABLE_SHIFTS_DIV"   : 0,
+        "MAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV"   : 20,
+
+        "MIN_NUM_OF_DESIRED_SHIFTS_DIV"       : 0,     
+        "MAX_NUM_OF_DESIRED_SHIFTS_DIV"       : 40,    
+
+        "MIN_NUM_OF_UNDESIRED_SHIFTS_DIV"     : 0,     
+        "MAX_NUM_OF_UNDESIRED_SHIFTS_DIV"     : 30  
+        },
+
+    "RandomTimetableGenerator" : {
+        "num_of_weeks"          : 1,
+        "shift_series_prefix"   : "L",
+        "days"                  : ["Mon", "Tue", "Wed", "Thu", "Fri"],
+        "ta_names"              : ["M. Roghani", "D. Noori", "A. Gholami", "M. Jafari", "A. Athar", "S. Smith", "J. Doe"],       
+        "allow_different_weekly_availability" : false
+        },
+
+    "ConstraintParameters" : {
+        "ta_meets_shift_requirement_over_the_semester" : true,
+        "ta_meets_shift_requirement_per_week"          : true,
+        "ta_undesired_shift"                           : true,
+        "ta_desired_shift"                             : true,
+        "ta_unavailable_shift"                         : true,
+        "ta_skill_level_match"                         : true,
+        "ta_maximum_shifts_per_week"                   : true,
+        "ta_minimum_shifts_per_week"                   : false
+        }
+}

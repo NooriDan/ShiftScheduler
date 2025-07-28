@@ -17,41 +17,47 @@ AFTERNOON_START_TIME =  time(18, 30)
 AFTERNOON_END_TIME   =  time(21, 30)
 
 @dataclass
-class ProblemRandmonizationParameters:
-    """A class to hold the constraint parameters for the Timetable."""
-    MIN_NUM_SHIFTS_PER_WEEK = 6
-    MAX_NUM_SHIFTS_PER_WEEK = 12
+class ProblemRandomizationParameters:
+    """A class to hold the randomization parameters for the Timetable."""
 
-    MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT = 2
-    MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT = 3
+    MIN_NUM_SHIFTS_PER_WEEK: int = 6
+    MAX_NUM_SHIFTS_PER_WEEK: int = 12
 
-    # Constants for random TA generation
-    MIN_NUM_OF_SHIFT_PER_TA_PER_WEEK = 0
-    # MAX_NUM_OF_SHIFT_PER_TA_PER_WEEK = ... # This value will be set dynamically based on the total TA demand and number of TAs (as to not over-constrain the problem)
+    MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT: int = 2
+    MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT: int = 3
 
-    MIN_TA_SKILL_LEVEL = 1
-    MAX_TA_SKILL_LEVEL = 3
+    MIN_NUM_OF_SHIFT_PER_TA_PER_WEEK: int = 0
+    MAX_NUM_OF_SHIFT_PER_TA_PER_WEEK: int | None = field(default=None)  # To be set later dynamically
 
-    MIN_NUM_OF_UNAVAILABLE_SHIFTS_DIV   = 0     # in pecentage of the total weekly shifts
-    MAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV   = 20    # in pecentage of the total weekly shifts
+    MIN_TA_SKILL_LEVEL: int = 1
+    MAX_TA_SKILL_LEVEL: int = 3
 
-    MIN_NUM_OF_DESIRED_SHIFTS_DIV       = 0     # in pecentage of the total weekly shifts
-    MAX_NUM_OF_DESIRED_SHIFTS_DIV       = 40    # in pecentage of the total weekly shifts
+    MIN_NUM_OF_UNAVAILABLE_SHIFTS_DIV: int = 0
+    MAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV: int = 20
 
-    MIN_NUM_OF_UNDESIRED_SHIFTS_DIV     = 0     # in pecentage of the total weekly shifts
-    MAX_NUM_OF_UNDESIRED_SHIFTS_DIV     = 30    # in pecentage of the total weekly shifts
+    MIN_NUM_OF_DESIRED_SHIFTS_DIV: int = 0
+    MAX_NUM_OF_DESIRED_SHIFTS_DIV: int = 40
 
-    if MAX_NUM_OF_UNDESIRED_SHIFTS_DIV + MAX_NUM_OF_DESIRED_SHIFTS_DIV + MAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV > 100:
-        ValueError("the sum of unavialble desired and undesired percentages exceeds 100%")
+    MIN_NUM_OF_UNDESIRED_SHIFTS_DIV: int = 0
+    MAX_NUM_OF_UNDESIRED_SHIFTS_DIV: int = 30
+
+    def __post_init__(self):
+        total_max_div = (
+            self.MAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV +
+            self.MAX_NUM_OF_DESIRED_SHIFTS_DIV +
+            self.MAX_NUM_OF_UNDESIRED_SHIFTS_DIV
+        )
+        if total_max_div > 100:
+            raise ValueError("The sum of unavailable, desired, and undesired shift percentages exceeds 100%.")
+
 
 class RandmizationUtil:
     def __init__(self, logger: logging.Logger):
         """Utility class for randomization functions."""
         self.logger = logger
 
-
     # Message Logger
-    def log_program_constants(self, randomization_params: ProblemRandmonizationParameters) -> None:
+    def log_program_constants(self, randomization_params: ProblemRandomizationParameters) -> None:
         """Log the constants used in the demo data generation."""
         logger = self.logger
 
@@ -169,7 +175,7 @@ class RandomTimetableGenerator:
                 ta_names = ["M. Roghani", "D. Noori", "A. Gholami", "M. Jafari", "A. Athar", "S. Smith", "J. Doe"],
                 num_of_weeks: int = 1,
                 allow_different_weekly_availability: bool = False,
-                randomization_params: ProblemRandmonizationParameters | None = None
+                randomization_params: ProblemRandomizationParameters | None = None
                 ):
         self.name = name
         self.logger = logger
@@ -179,7 +185,7 @@ class RandomTimetableGenerator:
         self.ta_names = ta_names
         self.num_of_weeks = num_of_weeks
         self.allow_different_weekly_availability = allow_different_weekly_availability
-        self.randomization_params = randomization_params if randomization_params else ProblemRandmonizationParameters()
+        self.randomization_params = randomization_params if randomization_params else ProblemRandomizationParameters()
 
         self.helper = RandmizationUtil(logger=logger)
 
@@ -193,7 +199,7 @@ class RandomTimetableGenerator:
         self.course_tas:    List[TA] = []
         self.generated_problem: Timetable | None = None
 
-    def gen_demo_data(self) -> Timetable:
+    def gen_demo_data(self) -> Tuple[Timetable, Dict[str, Dict[str, Any]]]:
         logger = self.logger
         
         # ======================
@@ -218,14 +224,14 @@ class RandomTimetableGenerator:
         # Generate random shifts
         # ======================
         # Generate shifts
-        shifts: List[Shift] = self.generate_shifts()
+        shifts, shift_metadata = self.generate_shifts()
         self.shifts = shifts
 
         # ======================
         # Generate random TAs
         # ======================
         # Generate TAs with random availability
-        course_tas: List[TA] = self.generate_course_tas(
+        course_tas, ta_metadata = self.generate_course_tas(
             ta_names=self.ta_names,
             shifts=shifts,
             allow_different_weekly_availability=self.allow_different_weekly_availability,
@@ -236,7 +242,7 @@ class RandomTimetableGenerator:
         # Generate "dummy" shift assignments - needed for how we set up the planning problem
         # Each shift assignment will require ONE TA, so we will expand the list of shifts by the number of TAs required for each shift
         shift_assignments: List[ShiftAssignment] = self.generate_dummy_shift_assignments()
-        self.shift_assignments = shift_assignments
+        self.shift_assignments                   = shift_assignments
 
         # ======================
         self.generated_problem = Timetable(
@@ -247,8 +253,25 @@ class RandomTimetableGenerator:
             constraint_parameters=self.constraint_params,
         )
 
+        metadata: Dict[str, Dict[str, Any]] = {
+            "shift_metadata": shift_metadata,
+            "ta_metadata": ta_metadata,
+            "problem_metadata": {
+                "name": self.name,
+                "num_of_weeks": self.num_of_weeks,
+                "num_of_shifts": len(self.shifts),
+                "num_of_tas": len(self.course_tas),
+                "allow_different_weekly_availability": self.allow_different_weekly_availability,
+            }
+        }
 
-        return self.generated_problem
+
+        return self.generated_problem, metadata
+
+    def set_seed(self, seed: int) -> None:
+        """Set the random seed for reproducibility."""
+        random.seed(seed)
+        self.logger.info(f"Random seed set to: {seed}")
 
     # ---------------
     # Helper methods for the random data generation
@@ -350,7 +373,7 @@ class RandomTimetableGenerator:
             shifts: List[Shift],
             allow_different_weekly_availability: bool,
             logger: logging.Logger,
-            ) -> List[TA]:
+            ) -> Tuple[List[TA], Dict[str, Any]]:
         """Generate TAs with random availability and log their creation."""
         ids = id_generator()
         course_tas: List[TA] = []
@@ -372,13 +395,6 @@ class RandomTimetableGenerator:
                                                                                             upper_deviation=2, 
                                                                                             lower_deviation=-2
                                                                                             )
-        # tas_shift_count_weekly: List[int]   = draw_num_of_shifts_for_ta_per_semester_given_ta_demand(
-        #                                                                                     ta_demand=ta_demands_weekly, 
-        #                                                                                     num_of_tas=num_tas, 
-        #                                                                                     upper_deviation=1, 
-        #                                                                                     lower_deviation=-1
-        #                                                                                     )
-
         total_desired_shifts: int = 0
         total_undesired_shifts: int = 0
         total_unavailable_shifts: int = 0
@@ -440,9 +456,29 @@ class RandomTimetableGenerator:
         logger.info(f"🔄 Allow Different Weekly Availability:\t\t{'✅ Yes' if allow_different_weekly_availability else '❌ No'}")
         logger.info("📋 ===========================\n")
 
-        return course_tas
+        metadata: Dict[str, Any] = {
+            "name": self.name,
+            "num_of_weeks": num_of_weeks,
+            "num_of_tas": len(course_tas),
+            "total_ta_demand": total_ta_demands,
+            "ta_demand_weekly": ta_demands_weekly,
 
-    def generate_shifts(self) -> List[Shift]:
+            "total_desired_shifts": total_desired_shifts,
+            "total_undesired_shifts": total_undesired_shifts,
+            "total_unavailable_shifts": total_unavailable_shifts,
+
+            "total_desired_shifts_unique": len(set(shift.series for ta in course_tas for shift in ta.desired)),
+            "total_undesired_shifts_unique": len(set(shift.series for ta in course_tas for shift in ta.undesired)),
+            "total_unavailable_shifts_unique": len(set(shift.series for ta in course_tas for shift in ta.unavailable)),
+
+            "allow_different_weekly_availability": allow_different_weekly_availability,
+            "tas_shift_count": tas_shift_count,
+            "ta_names": [ta.name for ta in course_tas],
+        }
+
+        return course_tas, metadata
+
+    def generate_shifts(self) -> Tuple[List[Shift], Dict[str, Any]]:
         """Generate random shifts for the given days and number of weeks."""
         logger = self.logger
         # ======================
@@ -503,7 +539,17 @@ class RandomTimetableGenerator:
         logger.info(f"🎯 Shift TA Requirement Range: \t{self.randomization_params.MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT}–{self.randomization_params.MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT}")
         logger.info("==============================================\n")
 
-        return self.shifts
+        metdata: Dict[str, Any] = {
+            "name": self.name,
+            "num_of_weeks": self.num_of_weeks,
+            "num_of_shifts_per_week": self.num_shifts_per_week,
+            "ta_demand_weekly": self.ta_demands_weekly,
+            "ta_demand_total": self.ta_demands,
+            "series_list": self.series_list,
+            "shifts_count": len(self.shifts),
+            "shift_series_prefix": self.shift_series_prefix,
+        }
+        return self.shifts, metdata
 
     def generate_dummy_shift_assignments(self) -> List[ShiftAssignment]:
         """Expands the list of shifts into a list of shift assignments, each requiring ONE TA. this is needed for how we set up the planning problem."""
@@ -536,7 +582,7 @@ def demo_data_semeseter_scheduling_random(
       shift_series_prefix: str = "L",
       ta_names = ["M. Roghani", "D. Noori", "A. Gholami", "M. Jafari", "A. Athar", "S. Smith", "J. Doe"],
       num_of_weeks: int = 12,
-      randomization_params: ProblemRandmonizationParameters = ProblemRandmonizationParameters()
+      randomization_params: ProblemRandomizationParameters = ProblemRandomizationParameters()
       ) -> Timetable:
    
    return demo_data_random(
@@ -551,19 +597,19 @@ def demo_data_semeseter_scheduling_random(
    )
 
 def demo_data_random(
-      name: str,
-      logger: logging.Logger,
+        name: str,
+        logger: logging.Logger,
         constraint_params: ConstraintParameters = ConstraintParameters(),
         days: List[str] = ["Mon", "Tue", "Wed", "Thu", "Fri"],
         shift_series_prefix: str = "L",
         ta_names = ["M. Roghani", "D. Noori", "A. Gholami", "M. Jafari", "A. Athar", "S. Smith", "J. Doe"],
         num_of_weeks: int = 1,
         allow_different_weekly_availability: bool = False,
-        randomization_params: ProblemRandmonizationParameters = ProblemRandmonizationParameters()
+        randomization_params: ProblemRandomizationParameters = ProblemRandomizationParameters()
       ) -> Timetable:
     """Generate random demo data for the Timetable."""
     generator = RandomTimetableGenerator(name=name, logger=logger)
-    problem = generator.gen_demo_data()
+    problem, _ = generator.gen_demo_data() # discarding the metadata via _
     return problem
 
 def demo_data_weekly_scheduling(name: str, logger: logging.Logger, constraint_params: ConstraintParameters = ConstraintParameters()) -> Timetable:
