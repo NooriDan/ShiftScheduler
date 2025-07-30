@@ -1,0 +1,84 @@
+{
+    "timestamp": "2025-07-30_01-46-42",
+    "logger": {
+        "name": "root",
+        "level": "INFO",
+        "effective_level": "INFO",
+        "propagate": true,
+        "handlers": [
+            {
+                "type": "FileHandler",
+                "level": "NOTSET",
+                "formatter": "%(message)s",
+                "output_file": "/Users/danialnoorizadeh/Code/ShiftScheduler/ta-scheduler-timefold/logs/default/benchmark-weekly/timefold_assignment_matrix_2025-07-30_01-46-42.log",
+                "name": null
+            },
+            {
+                "type": "StreamHandler",
+                "level": "NOTSET",
+                "formatter": "%(message)s",
+                "output_file": null,
+                "name": null
+            }
+        ]
+    },
+    "benchmark_config": {
+        "num_of_runs": 1,
+        "random_seed": 42,
+        "use_config_xml": false,
+        "path_to_config_xml": ""
+    },
+    "generator": {
+        "name": "benchmark-weekly",
+        "constraint_params": {
+            "undesired_assignment_penalty": 20,
+            "desired_assignment_reward": 1
+        },
+        "ta_names": [
+            "M. Roghani",
+            "D. Noori",
+            "A. Gholami",
+            "M. Jafari",
+            "A. Athar",
+            "S. Smith",
+            "J. Doe"
+        ],
+        "config": {
+            "MIN_NUM_SHIFTS_PER_WEEK": 6,
+            "MAX_NUM_SHIFTS_PER_WEEK": 12,
+            "MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT": 1,
+            "MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT": 3,
+            "MIN_NUM_OF_SHIFT_PER_TA_PER_WEEK": 0,
+            "MAX_NUM_OF_SHIFT_PER_TA_PER_WEEK": null,
+            "MIN_TA_SKILL_LEVEL": 1,
+            "MAX_TA_SKILL_LEVEL": 3,
+            "MIN_NUM_OF_UNAVAILABLE_SHIFTS_DIV": 0,
+            "MAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV": 30,
+            "MIN_NUM_OF_DESIRED_SHIFTS_DIV": 0,
+            "MAX_NUM_OF_DESIRED_SHIFTS_DIV": 30,
+            "MIN_NUM_OF_UNDESIRED_SHIFTS_DIV": 0,
+            "MAX_NUM_OF_UNDESIRED_SHIFTS_DIV": 30
+        },
+        "num_of_weeks": 1,
+        "num_shifts_per_week": 11,
+        "ta_demands": 18,
+        "ta_demands_weekly": 18,
+        "allow_different_weekly_availability": false
+    },
+    "iterations": [
+        {
+            "iteration": {
+                "id": 0,
+                "score": "0hard/0medium/6soft",
+                "iteration_metadata": {
+                    "seed": 42,
+                    "metadata": {
+                        "problem": {
+                            "id": "benchmark-weekly",
+                            "shifts": [
+                                {
+                                    "id": "0",
+                                    "series": "L01",
+                                    "day_of_week": "Tue",
+                                    "week_id": 0,
+                                    "start_time": 

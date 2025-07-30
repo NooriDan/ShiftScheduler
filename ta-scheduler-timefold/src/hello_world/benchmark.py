@@ -241,9 +241,13 @@ class BenchmarkRunnerWithDatabase(BenchmarkRunnerBase):
             self.logger.info(f"adding the Iteration {iteration_index + 1} / {num_runs}")
             self.logger.info("=================================================================")
 
-            solution        = scheduling_problem.timetable
+            if self.problem_database.solutions is None:
+                self.logger.info(f"!!! skipping {iteration_index} because the solution is None type")
+                continue
+
+            metadata        = {key : val for key, val in asdict(scheduling_problem).items() if key != "problem"}  # Add metadata if you want to track from generator or elsewhere
+            solution        = self.problem_database.solutions[iteration_index]
             score_analysis  = self.solver.post_process_solution(solution=solution, log_analysis=False)
-            metadata        = {key : val for key, val in asdict(scheduling_problem).items() if key != "timetable"}  # Add metadata if you want to track from generator or elsewhere
 
             self._add_iteration(
                 iteration_index=iteration_index,
@@ -255,7 +259,7 @@ class BenchmarkRunnerWithDatabase(BenchmarkRunnerBase):
             self.logger.info("=================================================================")
             self.logger.info(f"End of iteration {iteration_index + 1} / {num_runs}\n")
 
-        self.problem_database.sort_problems_by_difficulty(decreasing=True)
+        self.problem_database.sort_problems_by_difficulty(increasing=True)
         self._save_results()
         self.logger.info("🏁 Benchmark completed successfully!")
 
@@ -273,7 +277,7 @@ class BenchmarkRunnerWithDatabase(BenchmarkRunnerBase):
 
 @dataclass
 class SchedulingProblem:
-    timetable: Timetable
+    problem: Timetable
 
     best_score_hard:    int
     best_score_medium:  int
@@ -325,7 +329,7 @@ class SchedulingProblem:
 
         ta_to_shift_ratio = num_tas / num_shifts if num_shifts > 0 else 0.0
         ta_to_shift_ratio = round(ta_to_shift_ratio, 2)
-        
+
         # Auto-assign difficulty label if not provided
         hard, medium, soft = score
         if difficulty_label is None:
@@ -341,7 +345,7 @@ class SchedulingProblem:
             difficulty = difficulty_label
 
         return cls(
-            timetable=timetable,
+            problem=timetable,
             best_score_hard=hard,
             best_score_medium=medium,
             best_score_soft=soft,
@@ -368,8 +372,9 @@ class SchedulingProblemDatabase:
     problem_sets        : List[SchedulingProblem]
     constraint_params   : ConstraintParameters
     logger              : logging.Logger
+    solutions           : Optional[List[Timetable]] = None
 
-    def sort_problems_by_difficulty(self, decreasing: bool = True):
+    def sort_problems_by_difficulty(self, increasing: bool = True):
         """Performs in-place sorting on the problem sets by increasing difficulty:
         First by hard score (lowest first), then medium, then soft.
         """
@@ -379,7 +384,7 @@ class SchedulingProblemDatabase:
                 p.best_score_medium,
                 p.best_score_soft      # Least critical
             ),
-            reverse=decreasing
+            reverse=increasing
         )
 
     @classmethod
@@ -412,6 +417,7 @@ class SchedulingProblemDatabase:
     ) -> "SchedulingProblemDatabase":
         
         problems           : List[SchedulingProblem] = []
+        solutions          : List[Timetable]         = []
         for i in range(num_problems):
             logger.info(f"Generating and solving problem {i + 1} / {num_problems}")
 
@@ -435,9 +441,11 @@ class SchedulingProblemDatabase:
             )
 
             problems.append(scheduling_problem)
+            solutions.append(solution)
 
         return cls(
             problem_sets=problems, 
+            solutions=solutions,
             constraint_params=constraint_params, 
             logger=logger
             )

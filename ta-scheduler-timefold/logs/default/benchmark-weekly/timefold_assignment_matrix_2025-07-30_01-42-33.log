@@ -1,0 +1,970 @@
+...
+Logger initialized
+	@ 2025-07-30 01:42:33
+	Constraint version: default
+	Data:               benchmark-weekly
+...
+============================
+[Pre-processing] Generating demo data with timetable name 'benchmark-weekly'
+============================
+📌 === Program Constants for Demo Data Generation ===
+📅 Shift Configuration:
+	🔽 MIN_NUM_SHIFTS_PER_WEEK	= 06
+	🔼 MAX_NUM_SHIFTS_PER_WEEK	= 12
+👥 TA Shift Requirements:
+	🔽 MIN_TAS_REQUIRED_PER_SHIFT	= 01
+	🔼 MAX_TAS_REQUIRED_PER_SHIFT	= 03
+🎯 TA Skill Levels:
+	🧠 MIN_TA_SKILL_LEVEL		= 01
+	🚀 MAX_TA_SKILL_LEVEL		= 03
+⛔ Unavailability (% of shifts/week):
+	🔽 MIN_UNAVAILABLE_SHIFTS_DIV	= 00 %	# Minimum pecentage of unavailable shifts in a week for TAs
+	🔼 MAX_UNAVAILABLE_SHIFTS_DIV	= 30 %	# Maximum pecentage of unavailable shifts in a week for TAs
+❤️ Desired Availability (% of shifts/week):
+	🔽 MIN_DESIRED_SHIFTS_DIV	= 00 %	# Minimum pecentage of desired shifts in a week for TAs
+	🔼 MAX_DESIRED_SHIFTS_DIV	= 30 %	# Maximum pecentage of desired shifts in a week for TAs
+⚠️  Undesired Availability (% of shifts/week):
+	🔽 MIN_UNDESIRED_SHIFTS_DIV	= 00 %	# Minimum pecentage of undesired shifts in a week for TAs
+	🔼 MAX_UNDESIRED_SHIFTS_DIV	= 30 %	# Maximum pecentage of undesired shifts in a week for TAs
+✅ === End of Constants ===
+
+===========================
+Generating random shifts for 1 weeks with prefix 'L'
+============================
+	Available days:		Mon, Tue, Wed, Thu, Fri
+	------------------------
+	Available TA names:	M. Roghani, D. Noori, A. Gholami, M. Jafari, A. Athar, S. Smith, J. Doe
+	------------------------
+
+Running the TA Rostering Program with seed: 42
+Generating and solving problem 1 / 5
+🛠️ Generating Shifts...
+	📅 Shifts per Week: 08
+	📦 [ID: 00] [Week: 00] 	L01 on Thu 	18:30:00–21:30:00 ⏰ 	Requires: 1 TA(s)
+	📦 [ID: 01] [Week: 00] 	L02 on Wed 	14:30:00–17:30:00 ⏰ 	Requires: 3 TA(s)
+	📦 [ID: 02] [Week: 00] 	L03 on Fri 	18:30:00–21:30:00 ⏰ 	Requires: 2 TA(s)
+	📦 [ID: 03] [Week: 00] 	L04 on Thu 	18:30:00–21:30:00 ⏰ 	Requires: 1 TA(s)
+	📦 [ID: 04] [Week: 00] 	L05 on Wed 	18:30:00–21:30:00 ⏰ 	Requires: 3 TA(s)
+	📦 [ID: 05] [Week: 00] 	L06 on Mon 	14:30:00–17:30:00 ⏰ 	Requires: 2 TA(s)
+	📦 [ID: 06] [Week: 00] 	L07 on Thu 	18:30:00–21:30:00 ⏰ 	Requires: 3 TA(s)
+	📦 [ID: 07] [Week: 00] 	L08 on Thu 	18:30:00–21:30:00 ⏰ 	Requires: 3 TA(s)
+==============================================
+📋 Shift Series: 		L01, L02, L03, L04, L05, L06, L07, L08
+🧪 Total Shifts Generated: 	008
+🧮 TA Demand per Week: 		018
+📈 Total TA Demand: 		018 across 1 week(s)
+🎯 Shift TA Requirement Range: 	1–3
+==============================================
+
+✨ Generating Course TAs ✨
+🔍 Drawing weekly shift availability and preferences...
+👤 TA Created: (ID: 00) A. Athar
+	🔧 Skill Level:		03
+	📆 Required Shifts:	04
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	01
+		✅ Desired:	01
+		⚠️  Undesired:	02
+
+👤 TA Created: (ID: 01) D. Noori
+	🔧 Skill Level:		03
+	📆 Required Shifts:	03
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	02
+		✅ Desired:	02
+		⚠️  Undesired:	01
+
+👤 TA Created: (ID: 02) M. Roghani
+	🔧 Skill Level:		01
+	📆 Required Shifts:	00
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	00
+		✅ Desired:	02
+		⚠️  Undesired:	01
+
+👤 TA Created: (ID: 03) S. Smith
+	🔧 Skill Level:		02
+	📆 Required Shifts:	02
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	01
+		✅ Desired:	01
+		⚠️  Undesired:	00
+
+👤 TA Created: (ID: 04) J. Doe
+	🔧 Skill Level:		02
+	📆 Required Shifts:	04
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	00
+		✅ Desired:	02
+		⚠️  Undesired:	02
+
+👤 TA Created: (ID: 05) A. Gholami
+	🔧 Skill Level:		03
+	📆 Required Shifts:	02
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	00
+		✅ Desired:	00
+		⚠️  Undesired:	00
+
+👤 TA Created: (ID: 06) M. Jafari
+	🔧 Skill Level:		03
+	📆 Required Shifts:	03
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	02
+		✅ Desired:	01
+		⚠️  Undesired:	01
+
+📋 ===========================
+👩‍🏫 Generated TAs:		7
+📊 Total TA Demand:		18 shifts across 1 weeks
+🟢 Desired Shifts:		009 (1.29 per TA)		🌟 Unique:	7
+🟡 Undesired Shifts:		007 (1.00 per TA)		⚠️ Unique:	4
+🔴 Unavailable Shifts:		006 (0.86 per TA)		🚫 Unique:	4
+⏳ Weekly Shift Limits:		Min: 0, Max: 3
+🔄 Allow Different Weekly Availability:		❌ No
+📋 ===========================
+
+Generated 18 shift assignments for 8 shifts...
+
+🚀 === Starting to Solve the Problem ===
+calling create_solver() method
+	⚙️  Creating SolverConfig and SolverFactory...
+✅ === SolverConfig and SolverFactory Created Successfully ===
+=== Creating the SolverManager ===
+Requesting the SolverManager to create a SolverJob...
+	✅ SolverJob created 092a82f7-2d0f-42b4-8d90-68ac5662b0dd id
+
+
+==========================================
+🛑 Starting blocking: waiting for solver job to finish
+-------------------------------------------
+Job ID: 092a82f7-2d0f-42b4-8d90-68ac5662b0dd
+Solving started: time spent (24), best score (-18init/0hard/0medium/0soft), environment mode (REPRODUCIBLE), move thread count (NONE), random (JDK with seed 20).
+Problem scale: entity count (18), variable count (18), approximate value count (7), approximate problem scale (1.628414 × 10^15).
+Construction Heuristic phase (0) ended: time spent (69), best score (0hard/0medium/-12soft), move evaluation speed (3073/sec), step total (18).
+
+💡 New best solution found! 2025-07-30 01:42:35 🧠
+	📈 Updated score: 0hard/0medium/-12soft
+
+
+💡 New best solution found! 2025-07-30 01:42:35 🧠
+	📈 Updated score: 0hard/0medium/9soft
+
+⏱️ 2025-07-30 01:42:40 - Elapsed time: 5.0 seconds
+	⏳ Job status: SOLVING_ACTIVE | Best score: 0hard/0medium/9soft
+
+⏱️ 2025-07-30 01:42:45 - Elapsed time: 10.0 seconds
+	⏳ Job status: SOLVING_ACTIVE | Best score: 0hard/0medium/9soft
+
+Local Search phase (1) ended: time spent (10076), best score (0hard/0medium/9soft), move evaluation speed (56192/sec), step total (97456).
+Solving ended: time spent (10076), best score (0hard/0medium/9soft), move evaluation speed (55814/sec), phase total (2), environment mode (REPRODUCIBLE), move thread count (NONE).
+⏱️ 2025-07-30 01:42:50 - job has finished... Elapsed time: 15.0 seconds
+
+✅ Blocking finished. Final job status: NOT_SOLVING - total time spent: 0:00:10.076000
+==========================================
+Retrieving the final solution...
+Solver finished: status=NOT_SOLVING, score=0hard/0medium/9soft
+✅ === Solver Finished Successfully ===
+
+🗓️ === Final Timetable ===
+Score: 0hard/0medium/9soft
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|                      |A. Athar (ID: 0)      |D. Noori (ID: 1)      |M. Roghani (ID: 2)    |S. Smith (ID: 3)      |J. Doe (ID: 4)        |A. Gholami (ID: 5)    |M. Jafari (ID: 6)     |
+|                      |requires              |requires              |requires              |requires              |requires              |requires              |requires              |
+|                      |  budget:      4      |  budget:      3      |  budget:      0      |  budget:      2      |  budget:      4      |  budget:      2      |  budget:      3      |
+|                      |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |
+|                      |  max_weekly: 3       |  max_weekly: 3       |  max_weekly: 3       |  max_weekly: 3       |  max_weekly: 3       |  max_weekly: 3       |  max_weekly: 3       |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L01 Thu 18:30 - week 0|A. Athar              |                      |                      |                      |                      |                      |                      |
+|requires 1 TAs        |Neutral               |                      |                      |                      |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L02 Wed 14:30 - week 0|                      |                      |                      |S. Smith              |                      |A. Gholami            |M. Jafari             |
+|requires 3 TAs        |                      |                      |                      |** Desired **         |                      |Neutral               |** Desired **         |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L03 Fri 18:30 - week 0|                      |D. Noori              |                      |                      |J. Doe                |                      |                      |
+|requires 2 TAs        |                      |Neutral               |                      |                      |** Desired **         |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L04 Thu 18:30 - week 0|A. Athar              |                      |                      |                      |                      |                      |                      |
+|requires 1 TAs        |** Desired **         |                      |                      |                      |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L05 Wed 18:30 - week 0|                      |                      |M. Roghani            |                      |                      |A. Gholami            |M. Jafari             |
+|requires 3 TAs        |                      |                      |** Desired **         |                      |                      |Neutral               |Neutral               |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L06 Mon 14:30 - week 0|                      |D. Noori              |M. Roghani            |                      |                      |                      |                      |
+|requires 2 TAs        |                      |** Desired **         |** Desired **         |                      |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L07 Thu 18:30 - week 0|                      |                      |M. Roghani            |S. Smith              |J. Doe                |                      |                      |
+|requires 3 TAs        |                      |                      |Neutral               |Neutral               |** Desired **         |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L08 Thu 18:30 - week 0|                      |D. Noori              |                      |S. Smith              |                      |                      |M. Jafari             |
+|requires 3 TAs        |                      |** Desired **         |                      |Neutral               |                      |                      |Neutral               |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+🗓️ === /End of Final Timetable ===
+
+📊 === Post-processing the Solution ===
+=======================================================
+calling solver.analyze to explain the constraints
+=======================================================
+Explanation of score (0hard/0medium/9soft):
+    Constraint matches:
+        0: constraint (TA assigned to >>undesired<< shift) has no matches.
+        0: constraint (TA works more than the required shifts per week) has no matches.
+        0: constraint ([LEGACY] TA does not meet weekly shift count requirements) has no matches.
+        0: constraint (Shift does not meet required TAs exactly) has no matches.
+        0: constraint (TA assigned to unavailable shift) has no matches.
+        0: constraint (TA duplicate shift assignment) has no matches.
+        9soft: constraint (TA assigned to *desired* shift) has 9 matches:
+            1soft: justified with ([assigning L02 to S. Smith, undesired_assignment_penalty=20, desired_assignment_reward=1])
+            1soft: justified with ([assigning L05 to M. Roghani, undesired_assignment_penalty=20, desired_assignment_reward=1])
+            1soft: justified with ([assigning L04 to A. Athar, undesired_assignment_penalty=20, desired_assignment_reward=1])
+            ...
+
+🏁 === Post-processing Complete ===
+Generating and solving problem 2 / 5
+🛠️ Generating Shifts...
+	📅 Shifts per Week: 06
+	📦 [ID: 00] [Week: 00] 	L01 on Mon 	14:30:00–17:30:00 ⏰ 	Requires: 1 TA(s)
+	📦 [ID: 01] [Week: 00] 	L02 on Thu 	18:30:00–21:30:00 ⏰ 	Requires: 2 TA(s)
+	📦 [ID: 02] [Week: 00] 	L03 on Mon 	18:30:00–21:30:00 ⏰ 	Requires: 3 TA(s)
+	📦 [ID: 03] [Week: 00] 	L04 on Tue 	18:30:00–21:30:00 ⏰ 	Requires: 1 TA(s)
+	📦 [ID: 04] [Week: 00] 	L05 on Mon 	14:30:00–17:30:00 ⏰ 	Requires: 3 TA(s)
+	📦 [ID: 05] [Week: 00] 	L06 on Mon 	18:30:00–21:30:00 ⏰ 	Requires: 1 TA(s)
+==============================================
+📋 Shift Series: 		L01, L02, L03, L04, L05, L06
+🧪 Total Shifts Generated: 	006
+🧮 TA Demand per Week: 		011
+📈 Total TA Demand: 		011 across 1 week(s)
+🎯 Shift TA Requirement Range: 	1–3
+==============================================
+
+✨ Generating Course TAs ✨
+🔍 Drawing weekly shift availability and preferences...
+👤 TA Created: (ID: 00) M. Jafari
+	🔧 Skill Level:		03
+	📆 Required Shifts:	03
+	🗓️  Weekly Shift Bounds:	00 ⟶ 02
+		❌ Unavailable:	00
+		✅ Desired:	00
+		⚠️  Undesired:	01
+
+👤 TA Created: (ID: 01) D. Noori
+	🔧 Skill Level:		03
+	📆 Required Shifts:	03
+	🗓️  Weekly Shift Bounds:	00 ⟶ 02
+		❌ Unavailable:	01
+		✅ Desired:	00
+		⚠️  Undesired:	01
+
+👤 TA Created: (ID: 02) A. Athar
+	🔧 Skill Level:		01
+	📆 Required Shifts:	00
+	🗓️  Weekly Shift Bounds:	00 ⟶ 02
+		❌ Unavailable:	00
+		✅ Desired:	01
+		⚠️  Undesired:	00
+
+👤 TA Created: (ID: 03) S. Smith
+	🔧 Skill Level:		01
+	📆 Required Shifts:	01
+	🗓️  Weekly Shift Bounds:	00 ⟶ 02
+		❌ Unavailable:	00
+		✅ Desired:	01
+		⚠️  Undesired:	00
+
+👤 TA Created: (ID: 04) A. Gholami
+	🔧 Skill Level:		02
+	📆 Required Shifts:	02
+	🗓️  Weekly Shift Bounds:	00 ⟶ 02
+		❌ Unavailable:	00
+		✅ Desired:	00
+		⚠️  Undesired:	00
+
+👤 TA Created: (ID: 05) M. Roghani
+	🔧 Skill Level:		01
+	📆 Required Shifts:	02
+	🗓️  Weekly Shift Bounds:	00 ⟶ 02
+		❌ Unavailable:	01
+		✅ Desired:	00
+		⚠️  Undesired:	01
+
+👤 TA Created: (ID: 06) J. Doe
+	🔧 Skill Level:		02
+	📆 Required Shifts:	00
+	🗓️  Weekly Shift Bounds:	00 ⟶ 02
+		❌ Unavailable:	00
+		✅ Desired:	00
+		⚠️  Undesired:	01
+
+📋 ===========================
+👩‍🏫 Generated TAs:		7
+📊 Total TA Demand:		11 shifts across 1 weeks
+🟢 Desired Shifts:		002 (0.29 per TA)		🌟 Unique:	2
+🟡 Undesired Shifts:		004 (0.57 per TA)		⚠️ Unique:	4
+🔴 Unavailable Shifts:		002 (0.29 per TA)		🚫 Unique:	2
+⏳ Weekly Shift Limits:		Min: 0, Max: 2
+🔄 Allow Different Weekly Availability:		❌ No
+📋 ===========================
+
+Generated 11 shift assignments for 6 shifts...
+
+🚀 === Starting to Solve the Problem ===
+Requesting the SolverManager to create a SolverJob...
+	✅ SolverJob created 67c14313-dffb-426a-851e-5acf96f60501 id
+
+
+==========================================
+🛑 Starting blocking: waiting for solver job to finish
+-------------------------------------------
+Job ID: 67c14313-dffb-426a-851e-5acf96f60501
+Solving started: time spent (2), best score (-11init/0hard/0medium/0soft), environment mode (REPRODUCIBLE), move thread count (NONE), random (JDK with seed 20).
+Problem scale: entity count (11), variable count (11), approximate value count (7), approximate problem scale (1,977,326,743).
+Construction Heuristic phase (0) ended: time spent (6), best score (0hard/0medium/1soft), move evaluation speed (19250/sec), step total (11).
+
+💡 New best solution found! 2025-07-30 01:42:50 🧠
+	📈 Updated score: 0hard/0medium/1soft
+
+
+💡 New best solution found! 2025-07-30 01:42:50 🧠
+	📈 Updated score: 0hard/0medium/2soft
+
+⏱️ 2025-07-30 01:42:55 - Elapsed time: 5.0 seconds
+	⏳ Job status: SOLVING_ACTIVE | Best score: 0hard/0medium/2soft
+
+Local Search phase (1) ended: time spent (10010), best score (0hard/0medium/2soft), move evaluation speed (74841/sec), step total (291170).
+⏱️ 2025-07-30 01:43:00 - Elapsed time: 10.0 seconds
+Solving ended: time spent (10010), best score (0hard/0medium/2soft), move evaluation speed (74796/sec), phase total (2), environment mode (REPRODUCIBLE), move thread count (NONE).
+	⏳ Job status: SOLVING_ACTIVE | Best score: 0hard/0medium/2soft
+
+⏱️ 2025-07-30 01:43:05 - job has finished... Elapsed time: 15.0 seconds
+
+✅ Blocking finished. Final job status: NOT_SOLVING - total time spent: 0:00:10.010000
+==========================================
+Retrieving the final solution...
+Solver finished: status=NOT_SOLVING, score=0hard/0medium/2soft
+✅ === Solver Finished Successfully ===
+
+🗓️ === Final Timetable ===
+Score: 0hard/0medium/2soft
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|                      |M. Jafari (ID: 0)     |D. Noori (ID: 1)      |A. Athar (ID: 2)      |S. Smith (ID: 3)      |A. Gholami (ID: 4)    |M. Roghani (ID: 5)    |J. Doe (ID: 6)        |
+|                      |requires              |requires              |requires              |requires              |requires              |requires              |requires              |
+|                      |  budget:      3      |  budget:      3      |  budget:      0      |  budget:      1      |  budget:      2      |  budget:      2      |  budget:      0      |
+|                      |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |
+|                      |  max_weekly: 2       |  max_weekly: 2       |  max_weekly: 2       |  max_weekly: 2       |  max_weekly: 2       |  max_weekly: 2       |  max_weekly: 2       |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L01 Mon 14:30 - week 0|M. Jafari             |                      |                      |                      |                      |                      |                      |
+|requires 1 TAs        |Neutral               |                      |                      |                      |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L02 Thu 18:30 - week 0|M. Jafari             |                      |                      |                      |A. Gholami            |                      |                      |
+|requires 2 TAs        |Neutral               |                      |                      |                      |Neutral               |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L03 Mon 18:30 - week 0|                      |                      |A. Athar              |S. Smith              |                      |M. Roghani            |                      |
+|requires 3 TAs        |                      |                      |Neutral               |Neutral               |                      |Neutral               |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L04 Tue 18:30 - week 0|                      |                      |                      |                      |                      |M. Roghani            |                      |
+|requires 1 TAs        |                      |                      |                      |                      |                      |Neutral               |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L05 Mon 14:30 - week 0|                      |                      |                      |S. Smith              |A. Gholami            |                      |J. Doe                |
+|requires 3 TAs        |                      |                      |                      |** Desired **         |Neutral               |                      |Neutral               |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L06 Mon 18:30 - week 0|                      |                      |A. Athar              |                      |                      |                      |                      |
+|requires 1 TAs        |                      |                      |** Desired **         |                      |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+🗓️ === /End of Final Timetable ===
+
+📊 === Post-processing the Solution ===
+=======================================================
+calling solver.analyze to explain the constraints
+=======================================================
+Explanation of score (0hard/0medium/2soft):
+    Constraint matches:
+        0: constraint (TA assigned to >>undesired<< shift) has no matches.
+        0: constraint (TA works more than the required shifts per week) has no matches.
+        0: constraint ([LEGACY] TA does not meet weekly shift count requirements) has no matches.
+        0: constraint (Shift does not meet required TAs exactly) has no matches.
+        0: constraint (TA assigned to unavailable shift) has no matches.
+        0: constraint (TA duplicate shift assignment) has no matches.
+        2soft: constraint (TA assigned to *desired* shift) has 2 matches:
+            1soft: justified with ([assigning L06 to A. Athar, undesired_assignment_penalty=20, desired_assignment_reward=1])
+            1soft: justified with ([assigning L05 to S. Smith, undesired_assignment_penalty=20, desired_assignment_reward=1])
+
+🏁 === Post-processing Complete ===
+Generating and solving problem 3 / 5
+🛠️ Generating Shifts...
+	📅 Shifts per Week: 10
+	📦 [ID: 00] [Week: 00] 	L01 on Thu 	14:30:00–17:30:00 ⏰ 	Requires: 2 TA(s)
+	📦 [ID: 01] [Week: 00] 	L02 on Tue 	18:30:00–21:30:00 ⏰ 	Requires: 1 TA(s)
+	📦 [ID: 02] [Week: 00] 	L03 on Thu 	18:30:00–21:30:00 ⏰ 	Requires: 1 TA(s)
+	📦 [ID: 03] [Week: 00] 	L04 on Wed 	18:30:00–21:30:00 ⏰ 	Requires: 2 TA(s)
+	📦 [ID: 04] [Week: 00] 	L05 on Wed 	14:30:00–17:30:00 ⏰ 	Requires: 3 TA(s)
+	📦 [ID: 05] [Week: 00] 	L06 on Wed 	14:30:00–17:30:00 ⏰ 	Requires: 2 TA(s)
+	📦 [ID: 06] [Week: 00] 	L07 on Wed 	18:30:00–21:30:00 ⏰ 	Requires: 1 TA(s)
+	📦 [ID: 07] [Week: 00] 	L08 on Thu 	18:30:00–21:30:00 ⏰ 	Requires: 1 TA(s)
+	📦 [ID: 08] [Week: 00] 	L09 on Fri 	14:30:00–17:30:00 ⏰ 	Requires: 3 TA(s)
+	📦 [ID: 09] [Week: 00] 	L10 on Thu 	18:30:00–21:30:00 ⏰ 	Requires: 1 TA(s)
+==============================================
+📋 Shift Series: 		L01, L02, L03, L04, L05, L06, L07, L08, L09, L10
+🧪 Total Shifts Generated: 	010
+🧮 TA Demand per Week: 		017
+📈 Total TA Demand: 		017 across 1 week(s)
+🎯 Shift TA Requirement Range: 	1–3
+==============================================
+
+✨ Generating Course TAs ✨
+🔍 Drawing weekly shift availability and preferences...
+👤 TA Created: (ID: 00) S. Smith
+	🔧 Skill Level:		01
+	📆 Required Shifts:	02
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	01
+		✅ Desired:	00
+		⚠️  Undesired:	01
+
+👤 TA Created: (ID: 01) A. Gholami
+	🔧 Skill Level:		01
+	📆 Required Shifts:	05
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	00
+		✅ Desired:	02
+		⚠️  Undesired:	00
+
+👤 TA Created: (ID: 02) A. Athar
+	🔧 Skill Level:		03
+	📆 Required Shifts:	03
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	02
+		✅ Desired:	00
+		⚠️  Undesired:	01
+
+👤 TA Created: (ID: 03) D. Noori
+	🔧 Skill Level:		02
+	📆 Required Shifts:	01
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	01
+		✅ Desired:	03
+		⚠️  Undesired:	00
+
+👤 TA Created: (ID: 04) M. Roghani
+	🔧 Skill Level:		03
+	📆 Required Shifts:	04
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	00
+		✅ Desired:	02
+		⚠️  Undesired:	00
+
+👤 TA Created: (ID: 05) J. Doe
+	🔧 Skill Level:		01
+	📆 Required Shifts:	01
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	02
+		✅ Desired:	03
+		⚠️  Undesired:	01
+
+👤 TA Created: (ID: 06) M. Jafari
+	🔧 Skill Level:		01
+	📆 Required Shifts:	01
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	03
+		✅ Desired:	03
+		⚠️  Undesired:	00
+
+📋 ===========================
+👩‍🏫 Generated TAs:		7
+📊 Total TA Demand:		17 shifts across 1 weeks
+🟢 Desired Shifts:		013 (1.86 per TA)		🌟 Unique:	9
+🟡 Undesired Shifts:		003 (0.43 per TA)		⚠️ Unique:	3
+🔴 Unavailable Shifts:		009 (1.29 per TA)		🚫 Unique:	7
+⏳ Weekly Shift Limits:		Min: 0, Max: 3
+🔄 Allow Different Weekly Availability:		❌ No
+📋 ===========================
+
+Generated 17 shift assignments for 10 shifts...
+
+🚀 === Starting to Solve the Problem ===
+Requesting the SolverManager to create a SolverJob...
+	✅ SolverJob created d397e669-6d2f-4ff1-8716-7cc5a076d3b6 id
+
+
+==========================================
+🛑 Starting blocking: waiting for solver job to finish
+-------------------------------------------
+Job ID: d397e669-6d2f-4ff1-8716-7cc5a076d3b6
+Solving started: time spent (3), best score (-17init/0hard/0medium/0soft), environment mode (REPRODUCIBLE), move thread count (NONE), random (JDK with seed 20).
+Problem scale: entity count (17), variable count (17), approximate value count (7), approximate problem scale (2.326305 × 10^14).
+Construction Heuristic phase (0) ended: time spent (7), best score (0hard/0medium/11soft), move evaluation speed (29750/sec), step total (17).
+
+💡 New best solution found! 2025-07-30 01:43:05 🧠
+	📈 Updated score: 0hard/0medium/11soft
+
+⏱️ 2025-07-30 01:43:10 - Elapsed time: 5.0 seconds
+	⏳ Job status: SOLVING_ACTIVE | Best score: 0hard/0medium/11soft
+
+⏱️ 2025-07-30 01:43:15 - Elapsed time: 10.0 seconds
+	⏳ Job status: SOLVING_ACTIVE | Best score: 0hard/0medium/11soft
+
+Local Search phase (1) ended: time spent (10009), best score (0hard/0medium/11soft), move evaluation speed (57480/sec), step total (74275).
+Solving ended: time spent (10010), best score (0hard/0medium/11soft), move evaluation speed (57434/sec), phase total (2), environment mode (REPRODUCIBLE), move thread count (NONE).
+⏱️ 2025-07-30 01:43:20 - job has finished... Elapsed time: 15.0 seconds
+
+✅ Blocking finished. Final job status: NOT_SOLVING - total time spent: 0:00:10.010000
+==========================================
+Retrieving the final solution...
+Solver finished: status=NOT_SOLVING, score=0hard/0medium/11soft
+✅ === Solver Finished Successfully ===
+
+🗓️ === Final Timetable ===
+Score: 0hard/0medium/11soft
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|                      |S. Smith (ID: 0)      |A. Gholami (ID: 1)    |A. Athar (ID: 2)      |D. Noori (ID: 3)      |M. Roghani (ID: 4)    |J. Doe (ID: 5)        |M. Jafari (ID: 6)     |
+|                      |requires              |requires              |requires              |requires              |requires              |requires              |requires              |
+|                      |  budget:      2      |  budget:      5      |  budget:      3      |  budget:      1      |  budget:      4      |  budget:      1      |  budget:      1      |
+|                      |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |
+|                      |  max_weekly: 3       |  max_weekly: 3       |  max_weekly: 3       |  max_weekly: 3       |  max_weekly: 3       |  max_weekly: 3       |  max_weekly: 3       |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L01 Thu 14:30 - week 0|                      |A. Gholami            |                      |D. Noori              |                      |                      |                      |
+|requires 2 TAs        |                      |Neutral               |                      |** Desired **         |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L02 Tue 18:30 - week 0|                      |A. Gholami            |                      |                      |                      |                      |                      |
+|requires 1 TAs        |                      |** Desired **         |                      |                      |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L03 Thu 18:30 - week 0|                      |A. Gholami            |                      |                      |                      |                      |                      |
+|requires 1 TAs        |                      |** Desired **         |                      |                      |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L04 Wed 18:30 - week 0|S. Smith              |                      |                      |D. Noori              |                      |                      |                      |
+|requires 2 TAs        |Neutral               |                      |                      |** Desired **         |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L05 Wed 14:30 - week 0|S. Smith              |                      |                      |                      |                      |J. Doe                |M. Jafari             |
+|requires 3 TAs        |Neutral               |                      |                      |                      |                      |** Desired **         |** Desired **         |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L06 Wed 14:30 - week 0|S. Smith              |                      |                      |                      |                      |                      |M. Jafari             |
+|requires 2 TAs        |Neutral               |                      |                      |                      |                      |                      |** Desired **         |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L07 Wed 18:30 - week 0|                      |                      |A. Athar              |                      |                      |                      |                      |
+|requires 1 TAs        |                      |                      |Neutral               |                      |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L08 Thu 18:30 - week 0|                      |                      |                      |D. Noori              |                      |                      |                      |
+|requires 1 TAs        |                      |                      |                      |** Desired **         |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L09 Fri 14:30 - week 0|                      |                      |A. Athar              |                      |M. Roghani            |J. Doe                |                      |
+|requires 3 TAs        |                      |                      |Neutral               |                      |** Desired **         |** Desired **         |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L10 Thu 18:30 - week 0|                      |                      |                      |                      |                      |J. Doe                |                      |
+|requires 1 TAs        |                      |                      |                      |                      |                      |** Desired **         |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+🗓️ === /End of Final Timetable ===
+
+📊 === Post-processing the Solution ===
+=======================================================
+calling solver.analyze to explain the constraints
+=======================================================
+Explanation of score (0hard/0medium/11soft):
+    Constraint matches:
+        0: constraint (TA assigned to >>undesired<< shift) has no matches.
+        0: constraint (TA works more than the required shifts per week) has no matches.
+        0: constraint ([LEGACY] TA does not meet weekly shift count requirements) has no matches.
+        0: constraint (Shift does not meet required TAs exactly) has no matches.
+        0: constraint (TA assigned to unavailable shift) has no matches.
+        0: constraint (TA duplicate shift assignment) has no matches.
+        11soft: constraint (TA assigned to *desired* shift) has 11 matches:
+            1soft: justified with ([assigning L05 to J. Doe, undesired_assignment_penalty=20, desired_assignment_reward=1])
+            1soft: justified with ([assigning L04 to D. Noori, undesired_assignment_penalty=20, desired_assignment_reward=1])
+            1soft: justified with ([assigning L10 to J. Doe, undesired_assignment_penalty=20, desired_assignment_reward=1])
+            ...
+
+🏁 === Post-processing Complete ===
+Generating and solving problem 4 / 5
+🛠️ Generating Shifts...
+	📅 Shifts per Week: 07
+	📦 [ID: 00] [Week: 00] 	L01 on Thu 	14:30:00–17:30:00 ⏰ 	Requires: 2 TA(s)
+	📦 [ID: 01] [Week: 00] 	L02 on Wed 	18:30:00–21:30:00 ⏰ 	Requires: 1 TA(s)
+	📦 [ID: 02] [Week: 00] 	L03 on Thu 	14:30:00–17:30:00 ⏰ 	Requires: 3 TA(s)
+	📦 [ID: 03] [Week: 00] 	L04 on Thu 	18:30:00–21:30:00 ⏰ 	Requires: 3 TA(s)
+	📦 [ID: 04] [Week: 00] 	L05 on Mon 	14:30:00–17:30:00 ⏰ 	Requires: 2 TA(s)
+	📦 [ID: 05] [Week: 00] 	L06 on Fri 	18:30:00–21:30:00 ⏰ 	Requires: 1 TA(s)
+	📦 [ID: 06] [Week: 00] 	L07 on Thu 	18:30:00–21:30:00 ⏰ 	Requires: 2 TA(s)
+==============================================
+📋 Shift Series: 		L01, L02, L03, L04, L05, L06, L07
+🧪 Total Shifts Generated: 	007
+🧮 TA Demand per Week: 		014
+📈 Total TA Demand: 		014 across 1 week(s)
+🎯 Shift TA Requirement Range: 	1–3
+==============================================
+
+✨ Generating Course TAs ✨
+🔍 Drawing weekly shift availability and preferences...
+👤 TA Created: (ID: 00) M. Roghani
+	🔧 Skill Level:		03
+	📆 Required Shifts:	00
+	🗓️  Weekly Shift Bounds:	00 ⟶ 02
+		❌ Unavailable:	00
+		✅ Desired:	00
+		⚠️  Undesired:	00
+
+👤 TA Created: (ID: 01) D. Noori
+	🔧 Skill Level:		02
+	📆 Required Shifts:	01
+	🗓️  Weekly Shift Bounds:	00 ⟶ 02
+		❌ Unavailable:	02
+		✅ Desired:	02
+		⚠️  Undesired:	01
+
+👤 TA Created: (ID: 02) A. Athar
+	🔧 Skill Level:		02
+	📆 Required Shifts:	04
+	🗓️  Weekly Shift Bounds:	00 ⟶ 02
+		❌ Unavailable:	01
+		✅ Desired:	02
+		⚠️  Undesired:	02
+
+👤 TA Created: (ID: 03) A. Gholami
+	🔧 Skill Level:		02
+	📆 Required Shifts:	00
+	🗓️  Weekly Shift Bounds:	00 ⟶ 02
+		❌ Unavailable:	02
+		✅ Desired:	01
+		⚠️  Undesired:	02
+
+👤 TA Created: (ID: 04) M. Jafari
+	🔧 Skill Level:		03
+	📆 Required Shifts:	04
+	🗓️  Weekly Shift Bounds:	00 ⟶ 02
+		❌ Unavailable:	00
+		✅ Desired:	01
+		⚠️  Undesired:	02
+
+👤 TA Created: (ID: 05) S. Smith
+	🔧 Skill Level:		01
+	📆 Required Shifts:	05
+	🗓️  Weekly Shift Bounds:	00 ⟶ 02
+		❌ Unavailable:	01
+		✅ Desired:	01
+		⚠️  Undesired:	01
+
+👤 TA Created: (ID: 06) J. Doe
+	🔧 Skill Level:		03
+	📆 Required Shifts:	00
+	🗓️  Weekly Shift Bounds:	00 ⟶ 02
+		❌ Unavailable:	00
+		✅ Desired:	00
+		⚠️  Undesired:	00
+
+📋 ===========================
+👩‍🏫 Generated TAs:		7
+📊 Total TA Demand:		14 shifts across 1 weeks
+🟢 Desired Shifts:		007 (1.00 per TA)		🌟 Unique:	5
+🟡 Undesired Shifts:		008 (1.14 per TA)		⚠️ Unique:	3
+🔴 Unavailable Shifts:		006 (0.86 per TA)		🚫 Unique:	5
+⏳ Weekly Shift Limits:		Min: 0, Max: 2
+🔄 Allow Different Weekly Availability:		❌ No
+📋 ===========================
+
+Generated 14 shift assignments for 7 shifts...
+
+🚀 === Starting to Solve the Problem ===
+Requesting the SolverManager to create a SolverJob...
+	✅ SolverJob created e71759e5-f734-4698-8d8e-8078c8b8cbad id
+
+
+==========================================
+🛑 Starting blocking: waiting for solver job to finish
+-------------------------------------------
+Job ID: e71759e5-f734-4698-8d8e-8078c8b8cbad
+Solving started: time spent (7), best score (-14init/0hard/0medium/0soft), environment mode (REPRODUCIBLE), move thread count (NONE), random (JDK with seed 20).
+Problem scale: entity count (14), variable count (14), approximate value count (7), approximate problem scale (6.782231 × 10^11).
+Construction Heuristic phase (0) ended: time spent (11), best score (0hard/0medium/-15soft), move evaluation speed (98000/sec), step total (14).
+
+💡 New best solution found! 2025-07-30 01:43:20 🧠
+	📈 Updated score: 0hard/0medium/-15soft
+
+⏱️ 2025-07-30 01:43:25 - Elapsed time: 5.0 seconds
+	⏳ Job status: SOLVING_ACTIVE | Best score: 0hard/0medium/-15soft
+
+⏱️ 2025-07-30 01:43:30 - Elapsed time: 10.0 seconds
+	⏳ Job status: SOLVING_ACTIVE | Best score: 0hard/0medium/-15soft
+
+Local Search phase (1) ended: time spent (10012), best score (0hard/0medium/-15soft), move evaluation speed (64419/sec), step total (68684).
+Solving ended: time spent (10013), best score (0hard/0medium/-15soft), move evaluation speed (64346/sec), phase total (2), environment mode (REPRODUCIBLE), move thread count (NONE).
+⏱️ 2025-07-30 01:43:35 - job has finished... Elapsed time: 15.0 seconds
+
+✅ Blocking finished. Final job status: NOT_SOLVING - total time spent: 0:00:10.013000
+==========================================
+Retrieving the final solution...
+Solver finished: status=NOT_SOLVING, score=0hard/0medium/-15soft
+✅ === Solver Finished Successfully ===
+
+🗓️ === Final Timetable ===
+Score: 0hard/0medium/-15soft
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|                      |M. Roghani (ID: 0)    |D. Noori (ID: 1)      |A. Athar (ID: 2)      |A. Gholami (ID: 3)    |M. Jafari (ID: 4)     |S. Smith (ID: 5)      |J. Doe (ID: 6)        |
+|                      |requires              |requires              |requires              |requires              |requires              |requires              |requires              |
+|                      |  budget:      0      |  budget:      1      |  budget:      4      |  budget:      0      |  budget:      4      |  budget:      5      |  budget:      0      |
+|                      |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |
+|                      |  max_weekly: 2       |  max_weekly: 2       |  max_weekly: 2       |  max_weekly: 2       |  max_weekly: 2       |  max_weekly: 2       |  max_weekly: 2       |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L01 Thu 14:30 - week 0|M. Roghani            |D. Noori              |                      |                      |                      |                      |                      |
+|requires 2 TAs        |Neutral               |** Desired **         |                      |                      |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L02 Wed 18:30 - week 0|                      |D. Noori              |                      |                      |                      |                      |                      |
+|requires 1 TAs        |                      |** Desired **         |                      |                      |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L03 Thu 14:30 - week 0|M. Roghani            |                      |A. Athar              |                      |                      |                      |J. Doe                |
+|requires 3 TAs        |Neutral               |                      |>> Undesired <<       |                      |                      |                      |Neutral               |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L04 Thu 18:30 - week 0|                      |                      |A. Athar              |                      |M. Jafari             |S. Smith              |                      |
+|requires 3 TAs        |                      |                      |** Desired **         |                      |Neutral               |Neutral               |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L05 Mon 14:30 - week 0|                      |                      |                      |A. Gholami            |M. Jafari             |                      |                      |
+|requires 2 TAs        |                      |                      |                      |Neutral               |Neutral               |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L06 Fri 18:30 - week 0|                      |                      |                      |A. Gholami            |                      |                      |                      |
+|requires 1 TAs        |                      |                      |                      |** Desired **         |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L07 Thu 18:30 - week 0|                      |                      |                      |                      |                      |S. Smith              |J. Doe                |
+|requires 2 TAs        |                      |                      |                      |                      |                      |** Desired **         |Neutral               |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+🗓️ === /End of Final Timetable ===
+
+📊 === Post-processing the Solution ===
+=======================================================
+calling solver.analyze to explain the constraints
+=======================================================
+Explanation of score (0hard/0medium/-15soft):
+    Constraint matches:
+        -20soft: constraint (TA assigned to >>undesired<< shift) has 1 matches:
+            -20soft: justified with ([assigning L03 to A. Athar, undesired_assignment_penalty=20, desired_assignment_reward=1])
+        0: constraint (TA works more than the required shifts per week) has no matches.
+        0: constraint ([LEGACY] TA does not meet weekly shift count requirements) has no matches.
+        0: constraint (Shift does not meet required TAs exactly) has no matches.
+        0: constraint (TA assigned to unavailable shift) has no matches.
+        0: constraint (TA duplicate shift assignment) has no matches.
+        5soft: constraint (TA assigned to *desired* shift) has 5 matches:
+            1soft: justified with ([assigning L07 to S. Smith, undesired_assignment_penalty=20, desired_assignment_reward=1])
+            1soft: justified with ([assigning L06 to A. Gholami, undesired_assignment_penalty=20, desired_assignment_reward=1])
+            1soft: justified with ([assigning L02 to D. Noori, undesired_assignment_penalty=20, desired_assignment_reward=1])
+            ...
+
+🏁 === Post-processing Complete ===
+Generating and solving problem 5 / 5
+🛠️ Generating Shifts...
+	📅 Shifts per Week: 09
+	📦 [ID: 00] [Week: 00] 	L01 on Thu 	14:30:00–17:30:00 ⏰ 	Requires: 3 TA(s)
+	📦 [ID: 01] [Week: 00] 	L02 on Mon 	14:30:00–17:30:00 ⏰ 	Requires: 3 TA(s)
+	📦 [ID: 02] [Week: 00] 	L03 on Thu 	18:30:00–21:30:00 ⏰ 	Requires: 3 TA(s)
+	📦 [ID: 03] [Week: 00] 	L04 on Mon 	18:30:00–21:30:00 ⏰ 	Requires: 3 TA(s)
+	📦 [ID: 04] [Week: 00] 	L05 on Fri 	18:30:00–21:30:00 ⏰ 	Requires: 3 TA(s)
+	📦 [ID: 05] [Week: 00] 	L06 on Fri 	14:30:00–17:30:00 ⏰ 	Requires: 1 TA(s)
+	📦 [ID: 06] [Week: 00] 	L07 on Wed 	18:30:00–21:30:00 ⏰ 	Requires: 1 TA(s)
+	📦 [ID: 07] [Week: 00] 	L08 on Thu 	14:30:00–17:30:00 ⏰ 	Requires: 1 TA(s)
+	📦 [ID: 08] [Week: 00] 	L09 on Wed 	18:30:00–21:30:00 ⏰ 	Requires: 1 TA(s)
+==============================================
+📋 Shift Series: 		L01, L02, L03, L04, L05, L06, L07, L08, L09
+🧪 Total Shifts Generated: 	009
+🧮 TA Demand per Week: 		019
+📈 Total TA Demand: 		019 across 1 week(s)
+🎯 Shift TA Requirement Range: 	1–3
+==============================================
+
+✨ Generating Course TAs ✨
+🔍 Drawing weekly shift availability and preferences...
+👤 TA Created: (ID: 00) S. Smith
+	🔧 Skill Level:		03
+	📆 Required Shifts:	03
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	01
+		✅ Desired:	01
+		⚠️  Undesired:	02
+
+👤 TA Created: (ID: 01) J. Doe
+	🔧 Skill Level:		02
+	📆 Required Shifts:	03
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	02
+		✅ Desired:	02
+		⚠️  Undesired:	02
+
+👤 TA Created: (ID: 02) A. Athar
+	🔧 Skill Level:		01
+	📆 Required Shifts:	01
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	00
+		✅ Desired:	00
+		⚠️  Undesired:	01
+
+👤 TA Created: (ID: 03) M. Jafari
+	🔧 Skill Level:		02
+	📆 Required Shifts:	05
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	01
+		✅ Desired:	00
+		⚠️  Undesired:	02
+
+👤 TA Created: (ID: 04) D. Noori
+	🔧 Skill Level:		02
+	📆 Required Shifts:	02
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	00
+		✅ Desired:	02
+		⚠️  Undesired:	01
+
+👤 TA Created: (ID: 05) M. Roghani
+	🔧 Skill Level:		03
+	📆 Required Shifts:	04
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	02
+		✅ Desired:	00
+		⚠️  Undesired:	01
+
+👤 TA Created: (ID: 06) A. Gholami
+	🔧 Skill Level:		03
+	📆 Required Shifts:	01
+	🗓️  Weekly Shift Bounds:	00 ⟶ 03
+		❌ Unavailable:	02
+		✅ Desired:	02
+		⚠️  Undesired:	01
+
+📋 ===========================
+👩‍🏫 Generated TAs:		7
+📊 Total TA Demand:		19 shifts across 1 weeks
+🟢 Desired Shifts:		007 (1.00 per TA)		🌟 Unique:	6
+🟡 Undesired Shifts:		010 (1.43 per TA)		⚠️ Unique:	5
+🔴 Unavailable Shifts:		008 (1.14 per TA)		🚫 Unique:	6
+⏳ Weekly Shift Limits:		Min: 0, Max: 3
+🔄 Allow Different Weekly Availability:		❌ No
+📋 ===========================
+
+Generated 19 shift assignments for 9 shifts...
+
+🚀 === Starting to Solve the Problem ===
+Requesting the SolverManager to create a SolverJob...
+	✅ SolverJob created e3c65fb3-eb9d-43ab-a879-db0c5f82d40a id
+
+
+==========================================
+🛑 Starting blocking: waiting for solver job to finish
+-------------------------------------------
+Job ID: e3c65fb3-eb9d-43ab-a879-db0c5f82d40a
+Solving started: time spent (1), best score (-19init/0hard/0medium/0soft), environment mode (REPRODUCIBLE), move thread count (NONE), random (JDK with seed 20).
+Problem scale: entity count (19), variable count (19), approximate value count (7), approximate problem scale (1.13989 × 10^16).
+Construction Heuristic phase (0) ended: time spent (9), best score (0hard/0medium/-15soft), move evaluation speed (16625/sec), step total (19).
+
+💡 New best solution found! 2025-07-30 01:43:35 🧠
+	📈 Updated score: 0hard/0medium/-15soft
+
+
+💡 New best solution found! 2025-07-30 01:43:35 🧠
+	📈 Updated score: 0hard/0medium/-13soft
+
+⏱️ 2025-07-30 01:43:40 - Elapsed time: 5.0 seconds
+	⏳ Job status: SOLVING_ACTIVE | Best score: 0hard/0medium/-13soft
+
+Local Search phase (1) ended: time spent (10012), best score (0hard/0medium/-13soft), move evaluation speed (58336/sec), step total (94308).
+⏱️ 2025-07-30 01:43:45 - Elapsed time: 10.0 seconds
+	⏳ Job status: SOLVING_ACTIVE | Best score: 0hard/0medium/-13soft
+
+Solving ended: time spent (10026), best score (0hard/0medium/-13soft), move evaluation speed (58209/sec), phase total (2), environment mode (REPRODUCIBLE), move thread count (NONE).
+⏱️ 2025-07-30 01:43:50 - job has finished... Elapsed time: 15.0 seconds
+
+✅ Blocking finished. Final job status: NOT_SOLVING - total time spent: 0:00:10.026000
+==========================================
+Retrieving the final solution...
+Solver finished: status=NOT_SOLVING, score=0hard/0medium/-13soft
+✅ === Solver Finished Successfully ===
+
+🗓️ === Final Timetable ===
+Score: 0hard/0medium/-13soft
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|                      |S. Smith (ID: 0)      |J. Doe (ID: 1)        |A. Athar (ID: 2)      |M. Jafari (ID: 3)     |D. Noori (ID: 4)      |M. Roghani (ID: 5)    |A. Gholami (ID: 6)    |
+|                      |requires              |requires              |requires              |requires              |requires              |requires              |requires              |
+|                      |  budget:      3      |  budget:      3      |  budget:      1      |  budget:      5      |  budget:      2      |  budget:      4      |  budget:      1      |
+|                      |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |
+|                      |  max_weekly: 3       |  max_weekly: 3       |  max_weekly: 3       |  max_weekly: 3       |  max_weekly: 3       |  max_weekly: 3       |  max_weekly: 3       |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L01 Thu 14:30 - week 0|S. Smith              |J. Doe                |A. Athar              |                      |                      |                      |                      |
+|requires 3 TAs        |Neutral               |** Desired **         |Neutral               |                      |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L02 Mon 14:30 - week 0|S. Smith              |J. Doe                |                      |                      |                      |                      |A. Gholami            |
+|requires 3 TAs        |Neutral               |** Desired **         |                      |                      |                      |                      |Neutral               |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L03 Thu 18:30 - week 0|                      |                      |A. Athar              |M. Jafari             |D. Noori              |                      |                      |
+|requires 3 TAs        |                      |                      |Neutral               |>> Undesired <<       |Neutral               |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L04 Mon 18:30 - week 0|S. Smith              |J. Doe                |A. Athar              |                      |                      |                      |                      |
+|requires 3 TAs        |** Desired **         |Neutral               |Neutral               |                      |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L05 Fri 18:30 - week 0|                      |                      |                      |M. Jafari             |D. Noori              |                      |A. Gholami            |
+|requires 3 TAs        |                      |                      |                      |Neutral               |** Desired **         |                      |** Desired **         |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L06 Fri 14:30 - week 0|                      |                      |                      |                      |D. Noori              |                      |                      |
+|requires 1 TAs        |                      |                      |                      |                      |** Desired **         |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L07 Wed 18:30 - week 0|                      |                      |                      |                      |                      |                      |A. Gholami            |
+|requires 1 TAs        |                      |                      |                      |                      |                      |                      |** Desired **         |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L08 Thu 14:30 - week 0|                      |                      |                      |M. Jafari             |                      |                      |                      |
+|requires 1 TAs        |                      |                      |                      |Neutral               |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L09 Wed 18:30 - week 0|                      |                      |                      |                      |                      |M. Roghani            |                      |
+|requires 1 TAs        |                      |                      |                      |                      |                      |Neutral               |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+🗓️ === /End of Final Timetable ===
+
+📊 === Post-processing the Solution ===
+=======================================================
+calling solver.analyze to explain the constraints
+=======================================================
+Explanation of score (0hard/0medium/-13soft):
+    Constraint matches:
+        -20soft: constraint (TA assigned to >>undesired<< shift) has 1 matches:
+            -20soft: justified with ([assigning L03 to M. Jafari, undesired_assignment_penalty=20, desired_assignment_reward=1])
+        0: constraint (TA works more than the required shifts per week) has no matches.
+        0: constraint ([LEGACY] TA does not meet weekly shift count requirements) has no matches.
+        0: constraint (Shift does not meet required TAs exactly) has no matches.
+        0: constraint (TA assigned to unavailable shift) has no matches.
+        0: constraint (TA duplicate shift assignment) has no matches.
+        7soft: constraint (TA assigned to *desired* shift) has 7 matches:
+            1soft: justified with ([assigning L06 to D. Noori, undesired_assignment_penalty=20, desired_assignment_reward=1])
+            1soft: justified with ([assigning L07 to A. Gholami, undesired_assignment_penalty=20, desired_assignment_reward=1])
+            1soft: justified with ([assigning L02 to J. Doe, undesired_assignment_penalty=20, desired_assignment_reward=1])
+            ...
+
+🏁 === Post-processing Complete ===
+adding the Iteration 1 / 5
+=================================================================
+
+📊 === Post-processing the Solution ===
+🏁 === Post-processing Complete ===
+=================================================================
+End of iteration 1 / 5
+
+adding the Iteration 2 / 5
+=================================================================
+
+📊 === Post-processing the Solution ===
+🏁 === Post-processing Complete ===
+=================================================================
+End of iteration 2 / 5
+
+adding the Iteration 3 / 5
+=================================================================
+
+📊 === Post-processing the Solution ===
+🏁 === Post-processing Complete ===
+=================================================================
+End of iteration 3 / 5
+
+adding the Iteration 4 / 5
+=================================================================
+
+📊 === Post-processing the Solution ===
+🏁 === Post-processing Complete ===
+=================================================================
+End of iteration 4 / 5
+
+adding the Iteration 5 / 5
+=================================================================
+
+📊 === Post-processing the Solution ===
+🏁 === Post-processing Complete ===
+=================================================================
+End of iteration 5 / 5
+

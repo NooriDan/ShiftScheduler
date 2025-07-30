@@ -1,6 +1,6 @@
 {
     "BenchmarkConfig" : {
-        "num_of_runs" : 5,
+        "num_of_runs" : 1,
         "random_seed" : 42,
         "use_config_xml" : false,
         "path_to_config_xml" : ""
