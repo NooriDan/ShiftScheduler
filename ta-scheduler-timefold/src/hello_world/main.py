@@ -144,6 +144,8 @@ def run_demo():
     
     solution = solver.solve_problem(problem=problem)
 
+    solver.post_process_solution(solution=solution)
+
     # Explain the solution (analysis) TODO
 
 if __name__ == '__main__':

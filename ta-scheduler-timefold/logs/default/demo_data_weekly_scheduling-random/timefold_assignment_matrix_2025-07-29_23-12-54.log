@@ -1,0 +1,174 @@
+...
+Logger initialized
+	@ 2025-07-29 23:12:54
+	Constraint version: default
+	Data:               demo_data_weekly_scheduling-random
+...
+Running the TA Rostering Program with seed: 771398
+=== Creating the problem from the demo data ===
+=== Loading the demo data demo_data_weekly_scheduling-random ===
+============================
+[Pre-processing] Generating demo data with timetable name 'my_demo'
+============================
+📌 === Program Constants for Demo Data Generation ===
+📅 Shift Configuration:
+	🔽 MIN_NUM_SHIFTS_PER_WEEK	= 06
+	🔼 MAX_NUM_SHIFTS_PER_WEEK	= 12
+👥 TA Shift Requirements:
+	🔽 MIN_TAS_REQUIRED_PER_SHIFT	= 02
+	🔼 MAX_TAS_REQUIRED_PER_SHIFT	= 03
+🎯 TA Skill Levels:
+	🧠 MIN_TA_SKILL_LEVEL		= 01
+	🚀 MAX_TA_SKILL_LEVEL		= 03
+⛔ Unavailability (% of shifts/week):
+	🔽 MIN_UNAVAILABLE_SHIFTS_DIV	= 00 %	# Minimum pecentage of unavailable shifts in a week for TAs
+	🔼 MAX_UNAVAILABLE_SHIFTS_DIV	= 20 %	# Maximum pecentage of unavailable shifts in a week for TAs
+❤️ Desired Availability (% of shifts/week):
+	🔽 MIN_DESIRED_SHIFTS_DIV	= 00 %	# Minimum pecentage of desired shifts in a week for TAs
+	🔼 MAX_DESIRED_SHIFTS_DIV	= 40 %	# Maximum pecentage of desired shifts in a week for TAs
+⚠️  Undesired Availability (% of shifts/week):
+	🔽 MIN_UNDESIRED_SHIFTS_DIV	= 00 %	# Minimum pecentage of undesired shifts in a week for TAs
+	🔼 MAX_UNDESIRED_SHIFTS_DIV	= 30 %	# Maximum pecentage of undesired shifts in a week for TAs
+✅ === End of Constants ===
+
+===========================
+Generating random shifts for 1 weeks with prefix 'L'
+============================
+	Available days:		Mon, Tue, Wed, Thu, Fri
+	------------------------
+	Available TA names:	M. Roghani, D. Noori, A. Gholami, M. Jafari, A. Athar, S. Smith, J. Doe
+	------------------------
+
+🛠️ Generating Shifts...
+	📅 Shifts per Week: 10
+	📦 [ID: 00] [Week: 00] 	L01 on Mon 	18:30:00–21:30:00 ⏰ 	Requires: 3 TA(s)
+	📦 [ID: 01] [Week: 00] 	L02 on Wed 	14:30:00–17:30:00 ⏰ 	Requires: 2 TA(s)
+	📦 [ID: 02] [Week: 00] 	L03 on Thu 	14:30:00–17:30:00 ⏰ 	Requires: 2 TA(s)
+	📦 [ID: 03] [Week: 00] 	L04 on Fri 	14:30:00–17:30:00 ⏰ 	Requires: 2 TA(s)
+	📦 [ID: 04] [Week: 00] 	L05 on Mon 	14:30:00–17:30:00 ⏰ 	Requires: 3 TA(s)
+	📦 [ID: 05] [Week: 00] 	L06 on Fri 	14:30:00–17:30:00 ⏰ 	Requires: 3 TA(s)
+	📦 [ID: 06] [Week: 00] 	L07 on Tue 	14:30:00–17:30:00 ⏰ 	Requires: 2 TA(s)
+	📦 [ID: 07] [Week: 00] 	L08 on Wed 	14:30:00–17:30:00 ⏰ 	Requires: 3 TA(s)
+	📦 [ID: 08] [Week: 00] 	L09 on Mon 	14:30:00–17:30:00 ⏰ 	Requires: 2 TA(s)
+	📦 [ID: 09] [Week: 00] 	L10 on Mon 	14:30:00–17:30:00 ⏰ 	Requires: 3 TA(s)
+==============================================
+📋 Shift Series: 		L01, L02, L03, L04, L05, L06, L07, L08, L09, L10
+🧪 Total Shifts Generated: 	010
+🧮 TA Demand per Week: 		025
+📈 Total TA Demand: 		025 across 1 week(s)
+🎯 Shift TA Requirement Range: 	2–3
+==============================================
+
+✨ Generating Course TAs ✨
+🔍 Drawing weekly shift availability and preferences...
+👤 TA Created: (ID: 00) A. Gholami
+	🔧 Skill Level:		02
+	📆 Required Shifts:	05
+	🗓️  Weekly Shift Bounds:	00 ⟶ 04
+		❌ Unavailable:	00
+		✅ Desired:	04
+		⚠️  Undesired:	00
+
+👤 TA Created: (ID: 01) M. Jafari
+	🔧 Skill Level:		02
+	📆 Required Shifts:	05
+	🗓️  Weekly Shift Bounds:	00 ⟶ 04
+		❌ Unavailable:	01
+		✅ Desired:	02
+		⚠️  Undesired:	02
+
+👤 TA Created: (ID: 02) M. Roghani
+	🔧 Skill Level:		01
+	📆 Required Shifts:	05
+	🗓️  Weekly Shift Bounds:	00 ⟶ 04
+		❌ Unavailable:	01
+		✅ Desired:	04
+		⚠️  Undesired:	02
+
+👤 TA Created: (ID: 03) J. Doe
+	🔧 Skill Level:		03
+	📆 Required Shifts:	05
+	🗓️  Weekly Shift Bounds:	00 ⟶ 04
+		❌ Unavailable:	02
+		✅ Desired:	00
+		⚠️  Undesired:	02
+
+👤 TA Created: (ID: 04) S. Smith
+	🔧 Skill Level:		03
+	📆 Required Shifts:	02
+	🗓️  Weekly Shift Bounds:	00 ⟶ 04
+		❌ Unavailable:	01
+		✅ Desired:	01
+		⚠️  Undesired:	01
+
+👤 TA Created: (ID: 05) A. Athar
+	🔧 Skill Level:		01
+	📆 Required Shifts:	01
+	🗓️  Weekly Shift Bounds:	00 ⟶ 04
+		❌ Unavailable:	01
+		✅ Desired:	01
+		⚠️  Undesired:	00
+
+👤 TA Created: (ID: 06) D. Noori
+	🔧 Skill Level:		02
+	📆 Required Shifts:	02
+	🗓️  Weekly Shift Bounds:	00 ⟶ 04
+		❌ Unavailable:	01
+		✅ Desired:	00
+		⚠️  Undesired:	02
+
+📋 ===========================
+👩‍🏫 Generated TAs:		7
+📊 Total TA Demand:		25 shifts across 1 weeks
+🟢 Desired Shifts:		012 (1.71 per TA)		🌟 Unique:	6
+🟡 Undesired Shifts:		009 (1.29 per TA)		⚠️ Unique:	7
+🔴 Unavailable Shifts:		007 (1.00 per TA)		🚫 Unique:	5
+⏳ Weekly Shift Limits:		Min: 0, Max: 4
+🔄 Allow Different Weekly Availability:		❌ No
+📋 ===========================
+
+Generated 25 shift assignments for 10 shifts...
+************************** Initial Timetable **************************
+=== Starting to print the TA availability ===
+Score: None
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|                      |A. Gholami (ID: 0)    |M. Jafari (ID: 1)     |M. Roghani (ID: 2)    |J. Doe (ID: 3)        |S. Smith (ID: 4)      |A. Athar (ID: 5)      |D. Noori (ID: 6)      |
+|                      |requires              |requires              |requires              |requires              |requires              |requires              |requires              |
+|                      |  budget:      5      |  budget:      5      |  budget:      5      |  budget:      5      |  budget:      2      |  budget:      1      |  budget:      2      |
+|                      |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |  min_weekly: 0       |
+|                      |  max_weekly: 4       |  max_weekly: 4       |  max_weekly: 4       |  max_weekly: 4       |  max_weekly: 4       |  max_weekly: 4       |  max_weekly: 4       |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L01 Mon 18:30 - week 0|A. Gholami            |                      |                      |J. Doe                |                      |                      |D. Noori              |
+|requires 3 TAs        |** Desired **         |                      |                      |>> Undesired <<       |                      |                      |X Unavailable X       |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L02 Wed 14:30 - week 0|                      |                      |M. Roghani            |                      |S. Smith              |A. Athar              |                      |
+|requires 2 TAs        |                      |                      |** Desired **         |                      |>> Undesired <<       |X Unavailable X       |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L03 Thu 14:30 - week 0|                      |M. Jafari             |M. Roghani            |                      |S. Smith              |                      |D. Noori              |
+|requires 2 TAs        |                      |X Unavailable X       |X Unavailable X       |                      |X Unavailable X       |                      |>> Undesired <<       |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L04 Fri 14:30 - week 0|                      |M. Jafari             |M. Roghani            |                      |                      |                      |                      |
+|requires 2 TAs        |                      |>> Undesired <<       |>> Undesired <<       |                      |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L05 Mon 14:30 - week 0|A. Gholami            |                      |M. Roghani            |                      |                      |                      |                      |
+|requires 3 TAs        |** Desired **         |                      |** Desired **         |                      |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L06 Fri 14:30 - week 0|                      |M. Jafari             |M. Roghani            |                      |                      |                      |                      |
+|requires 3 TAs        |                      |** Desired **         |** Desired **         |                      |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L07 Tue 14:30 - week 0|A. Gholami            |M. Jafari             |                      |                      |                      |A. Athar              |                      |
+|requires 2 TAs        |** Desired **         |>> Undesired <<       |                      |                      |                      |** Desired **         |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L08 Wed 14:30 - week 0|                      |                      |M. Roghani            |J. Doe                |                      |                      |                      |
+|requires 3 TAs        |                      |                      |>> Undesired <<       |>> Undesired <<       |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L09 Mon 14:30 - week 0|                      |                      |                      |J. Doe                |                      |                      |                      |
+|requires 2 TAs        |                      |                      |                      |X Unavailable X       |                      |                      |                      |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+|L10 Mon 14:30 - week 0|A. Gholami            |M. Jafari             |M. Roghani            |J. Doe                |S. Smith              |                      |D. Noori              |
+|requires 3 TAs        |** Desired **         |** Desired **         |** Desired **         |X Unavailable X       |** Desired **         |                      |>> Undesired <<       |
++----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+----------------------+
+=== Finished printing the TA availability ===
+************************** /Initial Timetable **************************
+
+🚀 === Starting to Solve the Problem ===

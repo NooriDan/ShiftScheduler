@@ -62,7 +62,6 @@ def get_args() -> argparse.Namespace:
     return args
 
 def process_score_analysis(score_analysis: ScoreAnalysis) -> Any:
-
     # When you have the ScoreAnalysis instance, you can find out which constraints are broken:
     for constraint_ref, constraint_analysis in score_analysis.constraint_map.items():
         constraint_id           = constraint_ref.constraint_id
