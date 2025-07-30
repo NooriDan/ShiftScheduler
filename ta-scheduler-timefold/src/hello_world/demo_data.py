@@ -172,7 +172,7 @@ class RandomTimetableGenerator:
                 constraint_params: ConstraintParameters | None = None,
                 days: List[str] = ["Mon", "Tue", "Wed", "Thu", "Fri"],
                 shift_series_prefix: str = "L",
-                ta_names = ["M. Roghani", "D. Noori", "A. Gholami", "M. Jafari", "A. Athar", "S. Smith", "J. Doe"],
+                ta_names : List[str] = ["M. Roghani", "D. Noori", "A. Gholami", "M. Jafari", "A. Athar", "S. Smith", "J. Doe"],
                 num_of_weeks: int = 1,
                 allow_different_weekly_availability: bool = False,
                 randomization_params: ProblemRandomizationParameters | None = None
@@ -198,13 +198,14 @@ class RandomTimetableGenerator:
         self.shift_assignments:  List[ShiftAssignment] = []
         self.course_tas:    List[TA] = []
         self.generated_problem: Timetable | None = None
+        # Initialization log
+        self.print_generator_config()
 
-    def gen_demo_data(self) -> Tuple[Timetable, Dict[str, Dict[str, Any]]]:
-        logger = self.logger
-        
+    def print_generator_config(self):
         # ======================
         # Pre-processing
         # ======================
+        logger = self.logger
         shift_series_prefix = self.shift_series_prefix.upper()   # Ensure the prefix is uppercase
         logger.info(f"============================")
         logger.info(f"[Pre-processing] Generating demo data with timetable name '{self.name}'")
@@ -220,6 +221,8 @@ class RandomTimetableGenerator:
         logger.info(f"\tAvailable TA names:\t{', '.join(self.ta_names)}")
         logger.info(f"\t------------------------\n")
 
+    def gen_demo_data(self) -> Tuple[Timetable, Dict[str, Dict[str, Any]]]:
+        logger = self.logger
         # ======================
         # Generate random shifts
         # ======================

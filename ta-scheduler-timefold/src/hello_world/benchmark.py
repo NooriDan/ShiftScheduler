@@ -6,14 +6,15 @@ import datetime
 import sys, os
 import json
 
-from dataclasses import dataclass
-from pathlib import Path
-from copy import deepcopy
-from typing import List, Dict, Any, Tuple, Optional, Type
-from dataclasses import asdict
+from dataclasses    import dataclass, asdict
+from pathlib        import Path
+from copy           import deepcopy
+from typing         import List, Dict, Any, Tuple, Optional, Type
+from abc            import ABC, abstractmethod
+from datetime       import timedelta
+from io             import TextIOWrapper
 
 from timefold.solver.score  import ScoreAnalysis
-
 
 from hello_world.domain      import Timetable, ShiftAssignment, Shift, TA, ConstraintParameters
 from hello_world.demo_data   import RandomTimetableGenerator, ProblemRandomizationParameters
@@ -75,15 +76,23 @@ def process_score_analysis(score_analysis: ScoreAnalysis) -> Any:
             justification = match_analysis.justification
     # logger.info(solution_manager.analyze(solution=solution))
 
-class BenchmarkRunner:
-    def __init__(self):
+@dataclass
+class BenchmarkConfig:
+    num_of_runs         : int
+    random_seed         : int
+    use_config_xml      : bool
+    path_to_config_xml  : str | Path
+
+class BenchmarkRunnerBase(ABC):
+    def __init__(self, path_to_benchmark_config: str | Path = "configs/benchmark_config.json"):
+        self.path_to_benchmark_config = path_to_benchmark_config
         self.args   = get_args()
         self.logger = initialize_logger(self.args)
         self.config_data = self._load_config()
-        self.benchmark_config = self.config_data["BenchmarkConfig"]
 
-        self.randomization_params = ProblemRandomizationParameters(
-            **self.config_data["ProblemRandomizationParameters"]
+        # Create objects with the config data
+        self.benchmark_config  = BenchmarkConfig( 
+            **self.config_data["BenchmarkConfig"]
         )
 
         self.solver = TimetableSolverWithSolverManager(
@@ -93,76 +102,40 @@ class BenchmarkRunner:
 
         self.generator = RandomTimetableGenerator(
             name=self.args.demo_data_select,
-            randomization_params=self.randomization_params,
             logger=self.logger,
+            randomization_params=ProblemRandomizationParameters(**self.config_data["randomization_params"]),
             **self.config_data["RandomTimetableGenerator"]
         )
 
-        self.problem_database: Optional[SchedulingProblemDatabase] = None  # Init empty
+        # Benchmark Obserbations
+        self.iterations:        List[Dict[str, Any]]    = []
+        self.solutions:         List[Timetable]         = []
 
-        self.iterations: List[Dict[str, Any]] = []
-        self.solutions: List[Timetable] = []
-        self.timestamp = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        self.results_base_dir = Path(f"results/{self.config_data['TimetableSolver']['constraint_version']}/{self.timestamp}")
+        # Save Path
+        self.timestamp          = datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        self.results_base_dir   = Path(f"results/{self.config_data['TimetableSolver']['constraint_version']}/{self.timestamp}")
         self.results_base_dir.mkdir(parents=True, exist_ok=True)
 
     def _load_config(self) -> Dict[str, Any]:
-        with open("configs/benchmark_config.json", "r") as f:
+        with open(self.path_to_benchmark_config, "r") as f:
             return json.load(f)
     
     def run(self):
-        seed = self.benchmark_config["random_seed"]
+        seed = self.benchmark_config.random_seed
         self.logger.info(f"Running the TA Rostering Program with seed: {seed}")
 
-        for iteration_index in range(self.benchmark_config["num_of_runs"]):
-            self.logger.info(f"Iteration {iteration_index + 1} / {self.benchmark_config['num_of_runs']}")
+        for iteration_index in range(self.benchmark_config.num_of_runs):
+            self.logger.info(f"Iteration {iteration_index + 1} / {self.benchmark_config.num_of_runs}")
             self.logger.info("=================================================================")
 
             solution, score_analysis, metadata = self._run_iteration()
             self._add_iteration(iteration_index=iteration_index, solution=solution, score_analysis=score_analysis, metadata=metadata)
 
             self.logger.info("=================================================================")
-            self.logger.info(f"End of iteration {iteration_index + 1} / {self.benchmark_config['num_of_runs']}\n")
+            self.logger.info(f"End of iteration {iteration_index + 1} / {self.benchmark_config.num_of_runs}\n")
 
         self._save_results()
         self.logger.info("🏁 Benchmark completed successfully!")
-
-    def run_with_problem_database(self):
-        seed = self.benchmark_config["random_seed"]
-        self.logger.info(f"Running the TA Rostering Program with seed: {seed}")
-
-        num_runs = self.benchmark_config["num_of_runs"]
-
-        # Generate and solve all problems upfront
-        self.problem_database = SchedulingProblemDatabase.generate_and_solve_problems(
-            generator=self.generator,
-            solver=self.solver,
-            constraint_params=self.solver.constraint_params,
-            num_problems=num_runs,
-            logger=self.logger
-        )
-
-        for iteration_index, scheduling_problem in enumerate(self.problem_database.problem_sets):
-            self.logger.info(f"Iteration {iteration_index + 1} / {num_runs}")
-            self.logger.info("=================================================================")
-
-            solution = scheduling_problem.timetable
-            score_analysis = self.solver.post_process_solution(solution=solution)
-            metadata = {}  # Add metadata if you want to track from generator or elsewhere
-
-            self._add_iteration(
-                iteration_index=iteration_index,
-                solution=solution,
-                score_analysis=score_analysis,
-                metadata=metadata
-            )
-
-            self.logger.info("=================================================================")
-            self.logger.info(f"End of iteration {iteration_index + 1} / {num_runs}\n")
-
-        self._save_results()
-        self.logger.info("🏁 Benchmark completed successfully!")
-
 
     def _run_iteration(self) -> Tuple[Timetable, ScoreAnalysis, Dict[str, Any]]:
         self.logger.info("Creating the planning problem...")
@@ -183,7 +156,7 @@ class BenchmarkRunner:
                 "id": iteration_index,
                 "score": str(solution.score),
                 "iteration_metadata": {
-                    "seed": self.benchmark_config["random_seed"],
+                    "seed": self.benchmark_config.random_seed,
                     "metadata" : metadata,
                     "score_analysis": {
                         "summary": score_analysis.summary,
@@ -201,59 +174,136 @@ class BenchmarkRunner:
         self.solutions.append(solution)
 
     def _save_results(self):
-        solutions_pkl_path = self.results_base_dir / "solutions.pkl"
-        benchmark_json_path = self.results_base_dir / "benchmark_results.json"
 
-        benchmark_results = {
-            "timestamp": self.timestamp,
-            "logger": create_logger_info(self.logger.parent),
-            "benchmark_config": self.benchmark_config,
-            "randomization_params": self.randomization_params.__dict__,
-            "iterations": self.iterations,
-        }
-
-        with open(solutions_pkl_path, "wb") as f:
-            pickle.dump(self.solutions, f)
-
-        with open(benchmark_json_path, "w") as f:
-            json.dump(benchmark_results, f, indent=4)
+        solutions_pkl_path  = self.dump_objects_to_pickle()
+        benchmark_json_path = self.dump_benchmark_results_to_json()
 
         self.logger.info("📦 Benchmark results saved to:")
         self.logger.info(f"\t📄 JSON: {benchmark_json_path}")
         self.logger.info(f"\t🧪 PKL : {solutions_pkl_path}")
+
+    # The following is extended in the parent class
+    def dump_objects_to_pickle(self) -> Path:
+        solutions_pkl_path = self.results_base_dir / "solutions.pkl"
+        with open(solutions_pkl_path, "wb") as f:
+            pickle.dump(self.solutions, f)
+        return solutions_pkl_path
+    
+    def dump_benchmark_results_to_json(self) -> Path:
+        benchmark_results = {
+            "timestamp"             : self.timestamp,
+            "logger"                : create_logger_info(self.logger.parent),
+            "benchmark_config"      : self.benchmark_config.__dict__,
+            "generator"             : {
+                "name"                      : self.generator.name,
+                "constraint_params"         : self.generator.constraint_params.__dict__,
+                "ta_names"                  : self.generator.ta_names,
+                "config"                    : self.generator.randomization_params.__dict__,
+                "num_of_weeks"              : self.generator.num_of_weeks,
+                "num_shifts_per_week"       : self.generator.num_shifts_per_week,
+                "ta_demands"                : self.generator.ta_demands,
+                "ta_demands_weekly"         : self.generator.ta_demands_weekly,
+                "allow_different_weekly_availability": self.generator.allow_different_weekly_availability,
+                } ,
+            "iterations"            : self.iterations, # this is where the timetable is and solver results are stored.
+        }
+
+        benchmark_json_path = self.results_base_dir / "benchmark_results.json"
+        with open(benchmark_json_path, "w") as f:
+            json.dump(benchmark_results, f, indent=4)
+        
+        return benchmark_json_path
+
+
+class BenchmarkRunnerWithDatabase(BenchmarkRunnerBase):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Members only relevant for this subclass
+        self.problem_database:  Optional[SchedulingProblemDatabase] = None  # Init empty
+
+    def run(self):
+        "run_with_problem_database"
+        seed = self.benchmark_config.random_seed
+        self.logger.info(f"Running the TA Rostering Program with seed: {seed}")
+
+        num_runs = self.benchmark_config.num_of_runs
+
+        # Generate and solve all problems upfront
+        self.problem_database = SchedulingProblemDatabase.generate_and_solve_problems(
+            generator=self.generator,
+            solver=self.solver,
+            constraint_params=self.generator.constraint_params,
+            num_problems=num_runs,
+            logger=self.logger
+        )
+
+        for iteration_index, scheduling_problem in enumerate(self.problem_database.problem_sets):
+            self.logger.info(f"adding the Iteration {iteration_index + 1} / {num_runs}")
+            self.logger.info("=================================================================")
+
+            solution        = scheduling_problem.timetable
+            score_analysis  = self.solver.post_process_solution(solution=solution, log_analysis=False)
+            metadata        = {key : val for key, val in asdict(scheduling_problem).items() if key != "timetable"}  # Add metadata if you want to track from generator or elsewhere
+
+            self._add_iteration(
+                iteration_index=iteration_index,
+                solution=solution,
+                score_analysis=score_analysis,
+                metadata=metadata
+            )
+
+            self.logger.info("=================================================================")
+            self.logger.info(f"End of iteration {iteration_index + 1} / {num_runs}\n")
+
+        self.problem_database.sort_problems_by_difficulty(decreasing=True)
+        self._save_results()
+        self.logger.info("🏁 Benchmark completed successfully!")
+
+    # Overwrites the parent's method
+    def dump_objects_to_pickle(self):
+        if self.problem_database is None:
+            raise ValueError("need to create a problem_database by calling run() or load() method")  
+        solutions_pkl_path = self.results_base_dir / "baseline.pkl"
+        with open(solutions_pkl_path, "wb") as f:
+            pickle.dump({
+            "problem_database"  : self.problem_database.problem_sets,
+            "solutions"         : self.solutions
+            }, f)
+        return solutions_pkl_path        
+
 @dataclass
 class SchedulingProblem:
     timetable: Timetable
 
-    best_score_hard: int
-    best_score_medium: int
-    best_score_soft: int
+    best_score_hard:    int
+    best_score_medium:  int
+    best_score_soft:    int
 
-    num_of_tas: int
-    num_of_shifts: int
-    num_of_weeks: int
+    num_of_tas:         int
+    num_of_shifts:      int
+    num_of_weeks:       int
 
-    num_of_desired_shifts: int
-    num_of_unique_desired_shifts: int
+    num_of_desired_shifts:              int
+    num_of_unique_desired_shifts:       int
 
-    num_of_undesired_shifts: int
-    num_of_unique_undesired_shifts: int
+    num_of_undesired_shifts:            int
+    num_of_unique_undesired_shifts:     int
 
-    num_of_unavailable_shifts: int
-    num_of_unique_unavailable_shifts: int
+    num_of_unavailable_shifts:          int
+    num_of_unique_unavailable_shifts:   int
 
-    avg_desired_shifts_per_ta: float = 0.0
-    ta_to_shift_ratio: float = 0.0
-    solve_time_seconds: float = 0.0
-    difficulty_label: str = "unknown"
+    avg_desired_shifts_per_ta:  float = 0.0
+    ta_to_shift_ratio:          float = 0.0
+    solve_time_seconds:         int = 0
+    difficulty_label:           str = "unknown"
 
     @classmethod
     def from_timetable(
-        cls: Type["SchedulingProblem"],
-        timetable: Timetable,
-        score: Tuple[int, int, int] = (0, 0, 0),
-        solve_time_seconds: float = 0.0,
-        difficulty_label: Optional[str] = None,
+        cls:        Type["SchedulingProblem"],
+        timetable:  Timetable,
+        score:      Tuple[int, int, int] = (0, 0, 0),
+        solve_time_seconds: int = 0,
+        difficulty_label:   Optional[str] = None,
     ) -> "SchedulingProblem":
         tas = timetable.tas
         shifts = timetable.shifts
@@ -262,17 +312,20 @@ class SchedulingProblem:
         num_shifts = len(shifts)
         num_weeks = len(set(shift.week_id for shift in shifts))
 
-        all_desired = [shift for ta in tas for shift in ta.desired]
-        all_undesired = [shift for ta in tas for shift in ta.undesired]
-        all_unavailable = [shift for ta in tas for shift in ta.unavailable]
+        all_desired     = [shift.id for ta in tas for shift in ta.desired]
+        all_undesired   = [shift.id for ta in tas for shift in ta.undesired]
+        all_unavailable = [shift.id for ta in tas for shift in ta.unavailable]
 
-        unique_desired = set(all_desired)
-        unique_undesired = set(all_undesired)
-        unique_unavailable = set(all_unavailable)
+        unique_desired      = set(all_desired)
+        unique_undesired    = set(all_undesired)
+        unique_unavailable  = set(all_unavailable)
 
         avg_desired_per_ta = len(all_desired) / num_tas if num_tas > 0 else 0.0
-        ta_to_shift_ratio = num_tas / num_shifts if num_shifts > 0 else 0.0
+        avg_desired_per_ta = round(avg_desired_per_ta, 2)
 
+        ta_to_shift_ratio = num_tas / num_shifts if num_shifts > 0 else 0.0
+        ta_to_shift_ratio = round(ta_to_shift_ratio, 2)
+        
         # Auto-assign difficulty label if not provided
         hard, medium, soft = score
         if difficulty_label is None:
@@ -314,6 +367,7 @@ class SchedulingProblem:
 class SchedulingProblemDatabase:
     problem_sets        : List[SchedulingProblem]
     constraint_params   : ConstraintParameters
+    logger              : logging.Logger
 
     def sort_problems_by_difficulty(self, decreasing: bool = True):
         """Performs in-place sorting on the problem sets by increasing difficulty:
@@ -334,18 +388,18 @@ class SchedulingProblemDatabase:
         generator: "RandomTimetableGenerator",
         constraint_params: ConstraintParameters,
         num_problems: int,
-        logger: Optional[logging.Logger] = None,
+        logger: logging.Logger,
         ) -> "SchedulingProblemDatabase":
-        problems = []
+
+        problems : List[SchedulingProblem] = []
 
         for i in range(num_problems):
-            if logger:
-                logger.info(f"Generating random problem {i + 1} / {num_problems}")
-            timetable, _metadata = generator.gen_demo_data()
+            logger.info(f"Generating random problem {i + 1} / {num_problems}")
+            timetable, generation_metadata = generator.gen_demo_data()
             scheduling_problem = SchedulingProblem.from_timetable(timetable)
             problems.append(scheduling_problem)
 
-        return cls(problem_sets=problems, constraint_params=constraint_params)
+        return cls(problem_sets=problems, constraint_params=constraint_params, logger=logger)
     
     @classmethod
     def generate_and_solve_problems(
@@ -354,37 +408,40 @@ class SchedulingProblemDatabase:
         solver: "TimetableSolverWithSolverManager",
         constraint_params: ConstraintParameters,
         num_problems: int,
-        logger: Optional[logging.Logger] = None,
+        logger: logging.Logger,
     ) -> "SchedulingProblemDatabase":
-        problems = []
-
+        
+        problems           : List[SchedulingProblem] = []
         for i in range(num_problems):
-            if logger:
-                logger.info(f"Generating and solving problem {i + 1} / {num_problems}")
+            logger.info(f"Generating and solving problem {i + 1} / {num_problems}")
 
-            timetable, _metadata = generator.gen_demo_data()
+            timetable, generation_metadata = generator.gen_demo_data()
 
             # Solve the problem to get solution and score
             solution       = solver.solve_problem(problem=timetable)
             score_analysis = solver.post_process_solution(solution=solution)
 
             # Extract scores as integers (adapt as needed)
-            hard_score = int(solution.score.hard_score)
-            medium_score = int(solution.score.medium_score)
-            soft_score = int(solution.score.soft_score)
+            hard_score      = int(solution.score.hard_score)
+            medium_score    = int(solution.score.medium_score)
+            soft_score      = int(solution.score.soft_score)
 
             # Create SchedulingProblem with score and solve time (if available)
             scheduling_problem = SchedulingProblem.from_timetable(
                 timetable=timetable,
                 score=(hard_score, medium_score, soft_score),
-                solve_time_seconds=solution.solve_time if hasattr(solution, "solve_time") else 0.0,
+                solve_time_seconds=solver.get_solver_job(index=-1).get_solving_duration().seconds,
                 difficulty_label=None
             )
 
             problems.append(scheduling_problem)
 
-        return cls(problem_sets=problems, constraint_params=constraint_params)
-    
+        return cls(
+            problem_sets=problems, 
+            constraint_params=constraint_params, 
+            logger=logger
+            )
+
     def save_as_pickle(self, path: Path):
         """
         Save the full SchedulingProblemDatabase as a pickle file.
@@ -406,7 +463,8 @@ class SchedulingProblemDatabase:
 
         
 def run_benchmark() -> None:
-    BenchmarkRunner().run()
+    # BenchmarkRunnerBase().run()
+    BenchmarkRunnerWithDatabase().run()
 
 if __name__ == "__main__":
     # Run the benchmark

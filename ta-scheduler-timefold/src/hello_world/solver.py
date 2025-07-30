@@ -5,7 +5,7 @@ import uuid
 import time
 from datetime import datetime
 
-from typing     import List, Dict, Callable, Any, Tuple
+from typing     import List, Dict, Callable, Any, Tuple, Optional
 from pathlib    import Path
 from tqdm       import tqdm
 from abc        import ABC, abstractmethod
@@ -44,8 +44,8 @@ class TimetableSolverBase(ABC):
         self.default_term_unimproved_early_term : Duration =  Duration(seconds=10)
 
         # attributes to hold the solver configuration and factory
-        self.solver_config     : SolverConfig  = None
-        self.solver_factory    : SolverFactory = None
+        self.solver_config     : Optional[SolverConfig]  = None
+        self.solver_factory    : Optional[SolverFactory] = None
 
         # Validate the inputs
         self._validate_inputs()
@@ -78,7 +78,7 @@ class TimetableSolverBase(ABC):
         return solution
     
     # Post-processing Methods
-    def post_process_solution(self, solution: Timetable) -> ScoreAnalysis:
+    def post_process_solution(self, solution: Timetable, log_analysis: bool = True) -> ScoreAnalysis:
         # Post-process (justification, analysis, etc.)
         logger = self.logger
         logger.info("\n📊 === Post-processing the Solution ===")
@@ -89,15 +89,16 @@ class TimetableSolverBase(ABC):
         # logger.info("=======================================================")
         # score_explanation = solution_manager.explain(solution=solution)
         # logger.info(score_explanation.summary)
-
-        logger.info("=======================================================")
-        logger.info("calling solver.analyze to explain the constraints")
-        logger.info("=======================================================")
+        if log_analysis:
+            logger.info("=======================================================")
+            logger.info("calling solver.analyze to explain the constraints")
+            logger.info("=======================================================")
         score_analysis = solution_manager.analyze(solution=solution)
-        logger.info(score_analysis.summary)
 
+        if log_analysis:
+            logger.info(score_analysis.summary)
+            
         logger.info("🏁 === Post-processing Complete ===")
-
         return score_analysis
 
     def visualize_hot_planning_vars(self, solution: Timetable):

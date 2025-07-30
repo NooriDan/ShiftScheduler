@@ -1,0 +1,370 @@
+{
+    "timestamp": "2025-07-30_01-23-33",
+    "logger": {
+        "name": "root",
+        "level": "INFO",
+        "effective_level": "INFO",
+        "propagate": true,
+        "handlers": [
+            {
+                "type": "FileHandler",
+                "level": "NOTSET",
+                "formatter": "%(message)s",
+                "output_file": "/Users/danialnoorizadeh/Code/ShiftScheduler/ta-scheduler-timefold/logs/default/benchmark-weekly/timefold_assignment_matrix_2025-07-30_01-23-33.log",
+                "name": null
+            },
+            {
+                "type": "StreamHandler",
+                "level": "NOTSET",
+                "formatter": "%(message)s",
+                "output_file": null,
+                "name": null
+            }
+        ]
+    },
+    "benchmark_config": {
+        "num_of_runs": 5,
+        "random_seed": 42,
+        "use_config_xml": false,
+        "path_to_config_xml": ""
+    },
+    "generator": {
+        "name": "benchmark-weekly",
+        "constraint_params": {
+            "undesired_assignment_penalty": 20,
+            "desired_assignment_reward": 1
+        },
+        "ta_names": [
+            "M. Roghani",
+            "D. Noori",
+            "A. Gholami",
+            "M. Jafari",
+            "A. Athar",
+            "S. Smith",
+            "J. Doe"
+        ],
+        "config": {
+            "MIN_NUM_SHIFTS_PER_WEEK": 6,
+            "MAX_NUM_SHIFTS_PER_WEEK": 12,
+            "MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT": 1,
+            "MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT": 3,
+            "MIN_NUM_OF_SHIFT_PER_TA_PER_WEEK": 0,
+            "MAX_NUM_OF_SHIFT_PER_TA_PER_WEEK": null,
+            "MIN_TA_SKILL_LEVEL": 1,
+            "MAX_TA_SKILL_LEVEL": 3,
+            "MIN_NUM_OF_UNAVAILABLE_SHIFTS_DIV": 0,
+            "MAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV": 30,
+            "MIN_NUM_OF_DESIRED_SHIFTS_DIV": 0,
+            "MAX_NUM_OF_DESIRED_SHIFTS_DIV": 30,
+            "MIN_NUM_OF_UNDESIRED_SHIFTS_DIV": 0,
+            "MAX_NUM_OF_UNDESIRED_SHIFTS_DIV": 30
+        },
+        "num_of_weeks": 1,
+        "num_shifts_per_week": 9,
+        "ta_demands": 20,
+        "ta_demands_weekly": 20,
+        "allow_different_weekly_availability": false
+    },
+    "iterations": [
+        {
+            "iteration": {
+                "id": 0,
+                "score": "None",
+                "iteration_metadata": {
+                    "seed": 42,
+                    "metadata": {
+                        "best_score_hard": 0,
+                        "best_score_medium": 0,
+                        "best_score_soft": -15,
+                        "num_of_tas": 7,
+                        "num_of_shifts": 10,
+                        "num_of_weeks": 1,
+                        "num_of_desired_shifts": 6,
+                        "num_of_unique_desired_shifts": 5,
+                        "num_of_undesired_shifts": 13,
+                        "num_of_unique_undesired_shifts": 6,
+                        "num_of_unavailable_shifts": 14,
+                        "num_of_unique_unavailable_shifts": 8,
+                        "avg_desired_shifts_per_ta": 0.86,
+                        "ta_to_shift_ratio": 0.7,
+                        "solve_time_seconds": 10,
+                        "difficulty_label": "soft"
+                    },
+                    "score_analysis": {
+                        "summary": "Explanation of score (-21init/0hard/0medium/0soft):\n    Constraint matches:\n        0: constraint (TA assigned to *desired* shift) has no matches.\n        0: constraint (TA assigned to >>undesired<< shift) has no matches.\n        0: constraint (TA works more than the required shifts per week) has no matches.\n        0: constraint ([LEGACY] TA does not meet weekly shift count requirements) has no matches.\n        0: constraint (Shift does not meet required TAs exactly) has no matches.\n        0: constraint (TA assigned to unavailable shift) has no matches.\n        0: constraint (TA duplicate shift assignment) has no matches.\n",
+                        "constraint_map": {
+                            "hello_world.domain/TA assigned to *desired* shift": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA assigned to >>undesired<< shift": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA works more than the required shifts per week": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/[LEGACY] TA does not meet weekly shift count requirements": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/Shift does not meet required TAs exactly": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA assigned to unavailable shift": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA duplicate shift assignment": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "iteration": {
+                "id": 1,
+                "score": "None",
+                "iteration_metadata": {
+                    "seed": 42,
+                    "metadata": {
+                        "best_score_hard": 0,
+                        "best_score_medium": 0,
+                        "best_score_soft": 6,
+                        "num_of_tas": 7,
+                        "num_of_shifts": 9,
+                        "num_of_weeks": 1,
+                        "num_of_desired_shifts": 6,
+                        "num_of_unique_desired_shifts": 6,
+                        "num_of_undesired_shifts": 11,
+                        "num_of_unique_undesired_shifts": 7,
+                        "num_of_unavailable_shifts": 8,
+                        "num_of_unique_unavailable_shifts": 6,
+                        "avg_desired_shifts_per_ta": 0.86,
+                        "ta_to_shift_ratio": 0.78,
+                        "solve_time_seconds": 10,
+                        "difficulty_label": "easy"
+                    },
+                    "score_analysis": {
+                        "summary": "Explanation of score (-20init/0hard/0medium/0soft):\n    Constraint matches:\n        0: constraint (TA assigned to *desired* shift) has no matches.\n        0: constraint (TA assigned to >>undesired<< shift) has no matches.\n        0: constraint (TA works more than the required shifts per week) has no matches.\n        0: constraint ([LEGACY] TA does not meet weekly shift count requirements) has no matches.\n        0: constraint (Shift does not meet required TAs exactly) has no matches.\n        0: constraint (TA assigned to unavailable shift) has no matches.\n        0: constraint (TA duplicate shift assignment) has no matches.\n",
+                        "constraint_map": {
+                            "hello_world.domain/TA assigned to *desired* shift": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA assigned to >>undesired<< shift": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA works more than the required shifts per week": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/[LEGACY] TA does not meet weekly shift count requirements": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/Shift does not meet required TAs exactly": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA assigned to unavailable shift": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA duplicate shift assignment": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "iteration": {
+                "id": 2,
+                "score": "None",
+                "iteration_metadata": {
+                    "seed": 42,
+                    "metadata": {
+                        "best_score_hard": 0,
+                        "best_score_medium": 0,
+                        "best_score_soft": 7,
+                        "num_of_tas": 7,
+                        "num_of_shifts": 12,
+                        "num_of_weeks": 1,
+                        "num_of_desired_shifts": 10,
+                        "num_of_unique_desired_shifts": 6,
+                        "num_of_undesired_shifts": 6,
+                        "num_of_unique_undesired_shifts": 6,
+                        "num_of_unavailable_shifts": 10,
+                        "num_of_unique_unavailable_shifts": 6,
+                        "avg_desired_shifts_per_ta": 1.43,
+                        "ta_to_shift_ratio": 0.58,
+                        "solve_time_seconds": 10,
+                        "difficulty_label": "easy"
+                    },
+                    "score_analysis": {
+                        "summary": "Explanation of score (-22init/0hard/0medium/0soft):\n    Constraint matches:\n        0: constraint (TA assigned to *desired* shift) has no matches.\n        0: constraint (TA assigned to >>undesired<< shift) has no matches.\n        0: constraint (TA works more than the required shifts per week) has no matches.\n        0: constraint ([LEGACY] TA does not meet weekly shift count requirements) has no matches.\n        0: constraint (Shift does not meet required TAs exactly) has no matches.\n        0: constraint (TA assigned to unavailable shift) has no matches.\n        0: constraint (TA duplicate shift assignment) has no matches.\n",
+                        "constraint_map": {
+                            "hello_world.domain/TA assigned to *desired* shift": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA assigned to >>undesired<< shift": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA works more than the required shifts per week": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/[LEGACY] TA does not meet weekly shift count requirements": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/Shift does not meet required TAs exactly": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA assigned to unavailable shift": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA duplicate shift assignment": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "iteration": {
+                "id": 3,
+                "score": "None",
+                "iteration_metadata": {
+                    "seed": 42,
+                    "metadata": {
+                        "best_score_hard": 0,
+                        "best_score_medium": 0,
+                        "best_score_soft": 8,
+                        "num_of_tas": 7,
+                        "num_of_shifts": 10,
+                        "num_of_weeks": 1,
+                        "num_of_desired_shifts": 12,
+                        "num_of_unique_desired_shifts": 8,
+                        "num_of_undesired_shifts": 11,
+                        "num_of_unique_undesired_shifts": 9,
+                        "num_of_unavailable_shifts": 12,
+                        "num_of_unique_unavailable_shifts": 7,
+                        "avg_desired_shifts_per_ta": 1.71,
+                        "ta_to_shift_ratio": 0.7,
+                        "solve_time_seconds": 10,
+                        "difficulty_label": "easy"
+                    },
+                    "score_analysis": {
+                        "summary": "Explanation of score (-16init/0hard/0medium/0soft):\n    Constraint matches:\n        0: constraint (TA assigned to *desired* shift) has no matches.\n        0: constraint (TA assigned to >>undesired<< shift) has no matches.\n        0: constraint (TA works more than the required shifts per week) has no matches.\n        0: constraint ([LEGACY] TA does not meet weekly shift count requirements) has no matches.\n        0: constraint (Shift does not meet required TAs exactly) has no matches.\n        0: constraint (TA assigned to unavailable shift) has no matches.\n        0: constraint (TA duplicate shift assignment) has no matches.\n",
+                        "constraint_map": {
+                            "hello_world.domain/TA assigned to *desired* shift": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA assigned to >>undesired<< shift": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA works more than the required shifts per week": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/[LEGACY] TA does not meet weekly shift count requirements": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/Shift does not meet required TAs exactly": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA assigned to unavailable shift": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA duplicate shift assignment": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "iteration": {
+                "id": 4,
+                "score": "None",
+                "iteration_metadata": {
+                    "seed": 42,
+                    "metadata": {
+                        "best_score_hard": 0,
+                        "best_score_medium": 0,
+                        "best_score_soft": 7,
+                        "num_of_tas": 7,
+                        "num_of_shifts": 9,
+                        "num_of_weeks": 1,
+                        "num_of_desired_shifts": 7,
+                        "num_of_unique_desired_shifts": 6,
+                        "num_of_undesired_shifts": 7,
+                        "num_of_unique_undesired_shifts": 6,
+                        "num_of_unavailable_shifts": 2,
+                        "num_of_unique_unavailable_shifts": 2,
+                        "avg_desired_shifts_per_ta": 1.0,
+                        "ta_to_shift_ratio": 0.78,
+                        "solve_time_seconds": 10,
+                        "difficulty_label": "easy"
+                    },
+                    "score_analysis": {
+                        "summary": "Explanation of score (-20init/0hard/0medium/0soft):\n    Constraint matches:\n        0: constraint (TA assigned to *desired* shift) has no matches.\n        0: constraint (TA assigned to >>undesired<< shift) has no matches.\n        0: constraint (TA works more than the required shifts per week) has no matches.\n        0: constraint ([LEGACY] TA does not meet weekly shift count requirements) has no matches.\n        0: constraint (Shift does not meet required TAs exactly) has no matches.\n        0: constraint (TA assigned to unavailable shift) has no matches.\n        0: constraint (TA duplicate shift assignment) has no matches.\n",
+                        "constraint_map": {
+                            "hello_world.domain/TA assigned to *desired* shift": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA assigned to >>undesired<< shift": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA works more than the required shifts per week": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/[LEGACY] TA does not meet weekly shift count requirements": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/Shift does not meet required TAs exactly": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA assigned to unavailable shift": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            },
+                            "hello_world.domain/TA duplicate shift assignment": {
+                                "score": "0hard/0medium/0soft",
+                                "match_count": 0
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    ]
+}
