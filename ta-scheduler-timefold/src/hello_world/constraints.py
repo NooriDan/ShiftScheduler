@@ -52,7 +52,8 @@ class TimetableConstraintGenBase(ABC):
         pass
 
     # Optional: You can add more methods or overwrite the existing ones to customize the constraint creation process
-    def shift_meet_ta_required_exactly(self) -> Constraint:
+    # Hard Constraints
+    def penalize_shift_not_meeting_ta_required_exactly(self) -> Constraint:
         """ Each shift should have exactly the required number of TAs """
         return (self.constraint_factory
                 .for_each(ShiftAssignment)
@@ -62,7 +63,25 @@ class TimetableConstraintGenBase(ABC):
                 .penalize(HardMediumSoftScore.ONE_HARD, lambda shift, count: abs(shift.required_tas - count))
                 .as_constraint("Shift does not meet required TAs exactly"))
 
-    def ta_duplicate_shift_assignment(self) -> Constraint:
+    # def penalize_ta_not_meeting_shift_requirement_exactly(self) -> Constraint:
+    #     """ Each TA should be assigned to exactly their required number of shifts """
+    #     factory = self.constraint_factory
+    #     return (factory.for_each(TA)
+    #                 .join(ShiftAssignment, Joiners.equal(lambda ta: ta, lambda shift: shift.assigned_ta))
+    #                 .concat(
+    #                         factory.for_each(TA)
+    #                                 .if_not_exists(ShiftAssignment, Joiners.equal(lambda ta: ta, lambda shift: shift.assigned_ta))
+    #                 )
+    #                 .group_by(lambda ta, shift: ta,
+    #                         ConstraintCollectors.conditionally(lambda ta, shift: shift is not None,
+    #                                                             ConstraintCollectors.count_bi())
+    #                 )
+    #                 .filter(lambda ta, shift_count:  shift_count > ta.max_shifts_per_week or shift_count < ta.min_shifts_per_week)
+    #                 .penalize(HardMediumSoftScore.ONE_HARD, lambda ta, count: 100)
+    #                 .as_constraint("TA must have required shifts")
+    #             )
+
+    def penalize_duplicate_shift_assignment(self) -> Constraint:
         """ Each TA should be assigned to a shift only once """
         return (self.constraint_factory
                 .for_each(ShiftAssignment)
@@ -70,6 +89,7 @@ class TimetableConstraintGenBase(ABC):
                 .filter(lambda ta, shift_ids: len(shift_ids) > len(set(shift_ids)))
                 .penalize(HardMediumSoftScore.ONE_HARD, lambda ta, shift_id: 1 )
                 .as_constraint("TA duplicate shift assignment"))
+    
     # Medium Constraints
     def penalize_over_assignment_in_a_week(self) -> Constraint:
         """ Each TA should assigned to more than their required number of shifts should be penalized (Soft) """
@@ -86,8 +106,26 @@ class TimetableConstraintGenBase(ABC):
                 .penalize(HardMediumSoftScore.ONE_MEDIUM, lambda week_id, assigned_ta, count_of_assignments: (count_of_assignments - assigned_ta.max_shifts_per_week))
                 .as_constraint("TA works more than the required shifts per week"))
 
+    def penalize_ta_not_meeting_shift_requirement_per_week(self) -> Constraint:
+        """ [legacy - assumes weekly scheduling] Each TA should be assigned to at least their required number of shifts """
+        factory = self.constraint_factory
+        return (factory.for_each(TA)
+                    .join(ShiftAssignment, Joiners.equal(lambda ta: ta, lambda shift: shift.assigned_ta))
+                    .concat(
+                        factory.for_each(TA)
+                        .if_not_exists(ShiftAssignment, Joiners.equal(lambda ta: ta, lambda shift: shift.assigned_ta))
+                    )
+                    .group_by(lambda ta, shift: ta,
+                            ConstraintCollectors.conditionally(lambda ta, shift: shift is not None,
+                                                                ConstraintCollectors.count_bi())
+                    )
+                    .filter(lambda ta, shift_count:  shift_count > ta.max_shifts_per_week or shift_count < ta.min_shifts_per_week)
+                    .penalize(HardMediumSoftScore.ONE_MEDIUM, lambda employee, shift_count: abs(employee.max_shifts_per_week - shift_count))
+                    .as_constraint("[LEGACY] TA does not meet weekly shift count requirements")
+                )
+    
     # HARD: never assign a TA to a shift they marked unavailable
-    def ta_unavailable_shift(self) -> Constraint:
+    def penalize_ta_assignment_to_unavailable_shift(self) -> Constraint:
         """ Each TA should not be assigned to a shift that they are unavailable for """
         constraint_factory = self.constraint_factory
         
@@ -100,7 +138,7 @@ class TimetableConstraintGenBase(ABC):
                 .as_constraint("TA assigned to unavailable shift"))
 
     # Soft  Constraints
-    def ta_undesired_shift (self) -> Constraint:
+    def penalize_ta_assignment_to_undesired_shift (self) -> Constraint:
         """ Penalize if a TA is assigned to a shift that they don't want to work on """
         constraint_factory = self.constraint_factory
         return (
@@ -114,7 +152,7 @@ class TimetableConstraintGenBase(ABC):
                 .as_constraint("TA assigned to >>undesired<< shift")
         )
 
-    def ta_desired_shift(self) -> Constraint:
+    def reward_ta_assignment_to_desired_shift(self) -> Constraint:
         """Reward if a TA is assigned to a shift that they want to work on."""
         factory = self.constraint_factory
         return (
@@ -135,66 +173,20 @@ class TimetableConstraintGenBasic(TimetableConstraintGenBase):
         """Create a list of constraints using the provided ConstraintFactory."""
         return [
         # Hard constraints
-        self.shift_meet_ta_required_exactly(),
-        self.ta_duplicate_shift_assignment(),
-        # ta_meets_shift_requirement_exactly(),
-        self.ta_unavailable_shift(),
+        self.penalize_shift_not_meeting_ta_required_exactly(),
+        self.penalize_duplicate_shift_assignment(),
+        self.penalize_ta_assignment_to_unavailable_shift(),
 
         # Medium Constraints
-        self.legacy_ta_meets_shift_requirement_per_week(),
+        self.penalize_ta_not_meeting_shift_requirement_per_week(),
         self.penalize_over_assignment_in_a_week(),  
 
         # Soft constraints
-        self.ta_undesired_shift(),
-        self.ta_desired_shift(), 
+        self.penalize_ta_assignment_to_undesired_shift(),
+        self.reward_ta_assignment_to_desired_shift(), 
         ]
 
     # Optional: You can add more methods to customize the constraint creation process
-    def ta_meets_shift_requirement(self) -> Constraint:
-        """ Each TA should be assigned to at least their required number of shifts """
-        constraint_factory = self.constraint_factory
-        return (constraint_factory
-                .for_each(ShiftAssignment)
-                .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.count())
-                .filter(lambda ta, count: count < ta.min_shifts_per_week or count > ta.max_shifts_per_week)
-                .penalize(HardMediumSoftScore.ONE_HARD)
-                .as_constraint("TA must have required shifts"))
-
-    def legacy_ta_meets_shift_requirement_exactly(self) -> Constraint:
-        """ Each TA should be assigned to exactly their required number of shifts """
-        factory = self.constraint_factory
-        return (factory.for_each(TA)
-                    .join(ShiftAssignment, Joiners.equal(lambda ta: ta, lambda shift: shift.assigned_ta))
-                    .concat(
-                            factory.for_each(TA)
-                                    .if_not_exists(ShiftAssignment, Joiners.equal(lambda ta: ta, lambda shift: shift.assigned_ta))
-                    )
-                    .group_by(lambda ta, shift: ta,
-                            ConstraintCollectors.conditionally(lambda ta, shift: shift is not None,
-                                                                ConstraintCollectors.count_bi())
-                    )
-                    .filter(lambda ta, shift_count:  shift_count > ta.max_shifts_per_week or shift_count < ta.min_shifts_per_week)
-                    .penalize(HardMediumSoftScore.ONE_HARD, lambda ta, count: 100)
-                    .as_constraint("TA must have required shifts")
-                )
-
-    def legacy_ta_meets_shift_requirement_per_week(self) -> Constraint:
-        """ [legacy - assumes weekly scheduling] Each TA should be assigned to at least their required number of shifts """
-        factory = self.constraint_factory
-        return (factory.for_each(TA)
-                    .join(ShiftAssignment, Joiners.equal(lambda ta: ta, lambda shift: shift.assigned_ta))
-                    .concat(
-                            factory.for_each(TA)
-                                    .if_not_exists(ShiftAssignment, Joiners.equal(lambda ta: ta, lambda shift: shift.assigned_ta))
-                    )
-                    .group_by(lambda ta, shift: ta,
-                            ConstraintCollectors.conditionally(lambda ta, shift: shift is not None,
-                                                                ConstraintCollectors.count_bi())
-                    )
-                    .filter(lambda ta, shift_count:  shift_count > ta.max_shifts_per_week or shift_count < ta.min_shifts_per_week)
-                    .penalize(HardMediumSoftScore.ONE_MEDIUM, lambda employee, shift_count: abs(employee.max_shifts_per_week - shift_count))
-                    .as_constraint("[LEGACY] TA does not meet weekly shift count requirements")
-                )
 
 class TimetableConstraintGenTabrizEdition(TimetableConstraintGenBase):
     # Overwriting the mandatory parent class
@@ -202,9 +194,9 @@ class TimetableConstraintGenTabrizEdition(TimetableConstraintGenBase):
         """Create a list of constraints using the provided ConstraintFactory."""
         return [
             # Hard constraints
-            self.shift_meet_ta_required_exactly(),
-            self.ta_duplicate_shift_assignment(),
-            self.ta_unavailable_shift(),
+            self.penalize_shift_not_meeting_ta_required_exactly(),
+            self.penalize_duplicate_shift_assignment(),
+            self.penalize_ta_assignment_to_unavailable_shift(),
 
             # Medium (1) Constraints
             self.ta_meets_shift_requirement_over_the_semester(),
@@ -216,8 +208,8 @@ class TimetableConstraintGenTabrizEdition(TimetableConstraintGenBase):
             # self.reward_assignment_to_consecutive_shifts(),
 
             # Soft (2) constraints
-            self.ta_undesired_shift(),
-            self.ta_desired_shift(), 
+            self.penalize_ta_assignment_to_undesired_shift(),
+            self.reward_ta_assignment_to_desired_shift(), 
         ]
     # Optional: You can add more methods to customize the constraint creation process
     def ta_meets_shift_requirement_over_the_semester(self) -> Constraint:
@@ -248,3 +240,14 @@ class TimetableConstraintGenTabrizEdition(TimetableConstraintGenBase):
 #                    .penalize(HardMediumSoftScore.ONE_MEDIUM)
 #                    .as_constraint("Unassigned Visit")
 #     )
+
+
+# def ta_meets_shift_requirement(self) -> Constraint:
+#     """ Each TA should be assigned to at least their required number of shifts """
+#     constraint_factory = self.constraint_factory
+#     return (constraint_factory
+#             .for_each(ShiftAssignment)
+#             .group_by(lambda shift_assignment: shift_assignment.assigned_ta, ConstraintCollectors.count())
+#             .filter(lambda ta, count: count < ta.min_shifts_per_week or count > ta.max_shifts_per_week)
+#             .penalize(HardMediumSoftScore.ONE_HARD,  lambda ta, shift_count: max(shift_count - ta.max_shifts_per_week, ta.min_shifts_per_week - shift_count))
+#             .as_constraint("TA must have required shifts"))
