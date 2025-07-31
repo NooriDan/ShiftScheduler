@@ -9,6 +9,7 @@ from hello_world.domain      import Timetable, ShiftAssignment, Shift, TA
 from hello_world.demo_data   import generate_demo_data_with_default_params, _generate_demo_data_dict
 from hello_world.utils       import print_ta_availability, initialize_logger, DataConstructor
 from hello_world.solver      import TimetableSolverBlocking, TimetableSolverWithSolverManager
+from hello_world.constraints import constraints_provider_dict
 # Constants for random shift generation
 SEED = random.randint(0, 1000000)
 
@@ -37,7 +38,7 @@ def get_args() -> argparse.Namespace:
     
     parser.add_argument('--constraint_version',
                         type=str,
-                        choices=['default', 'tabriz'],
+                        choices=list(constraints_provider_dict.keys()),
                         help='Choose the constraint version to use',
                         default='default')
     

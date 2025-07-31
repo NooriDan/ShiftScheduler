@@ -611,7 +611,16 @@ def demo_data_random(
         randomization_params: ProblemRandomizationParameters = ProblemRandomizationParameters()
       ) -> Timetable:
     """Generate random demo data for the Timetable."""
-    generator = RandomTimetableGenerator(name=name, logger=logger)
+    generator = RandomTimetableGenerator(
+        name=name, 
+        logger=logger,
+        constraint_params=constraint_params,
+        days=days,
+        shift_series_prefix=shift_series_prefix,
+        ta_names=ta_names,
+        num_of_weeks=num_of_weeks,
+        allow_different_weekly_availability=allow_different_weekly_availability,
+        randomization_params=randomization_params)
     problem, _ = generator.gen_demo_data() # discarding the metadata via _
     return problem
 

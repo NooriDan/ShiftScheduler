@@ -6,6 +6,7 @@ import openpyxl
 import datetime as dt
 import pandas as pd
 
+from itertools import groupby
 from copy import deepcopy
 from typing import Dict, List, Any
 from pathlib import Path
@@ -370,7 +371,7 @@ def create_logger_info(logger: logging.Logger | None) -> Dict[str, Any]:
         "handlers": get_handler_info_from_logger(logger)
     }
 
-def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
+def legacy_print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
 
     LOGGER = logger
     LOGGER.info(f"Score: {time_table.score}")
@@ -434,7 +435,81 @@ def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
         for shift in unassigned_shifts:
             LOGGER.info(f'{shift.shift} - {shift.assigned_ta}')
 
-    # LOGGER.info("=== Finished printing the timetable ===")
+    LOGGER.info("=== Finished printing the timetable ===")
+
+def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
+    LOGGER = logger
+    LOGGER.info(f"Score: {time_table.score}")
+
+    tas = time_table.tas
+    # 1) Sort shifts by week_id
+    shift_groups = sorted(time_table.shifts, key=lambda s: s.week_id)
+    # 2) Build a lookup for assignments
+    shift_assignments = time_table.shift_assignments
+    assignment_map = {
+        (asg.assigned_ta.name, asg.shift.series, asg.shift.start_time): asg
+        for asg in shift_assignments
+        if asg.assigned_ta is not None
+    }
+
+    # Table formatting
+    PADDING = 10
+    MIN_WIDTH = 22
+    column_width = max(max(len(ta.name) for ta in tas) + PADDING, MIN_WIDTH)
+    row_fmt = ("|{:<" + str(column_width) + "}") * (len(tas) + 1) + "|"
+    sep_fmt = "+" + ((("-" * column_width) + "+") * (len(tas) + 1))
+
+    # Header rows
+    LOGGER.info(sep_fmt)
+    LOGGER.info(row_fmt.format('', *[f"{ta.name} (ID: {ta.id})" for ta in tas]))
+    LOGGER.info(row_fmt.format('', *["requires" for _ in tas]))
+    LOGGER.info(row_fmt.format('', *[f"  budget: {ta.required_shifts_per_semester}" for ta in tas]))
+    LOGGER.info(row_fmt.format('', *[f"  minWk:  {ta.min_shifts_per_week}"         for ta in tas]))
+    LOGGER.info(row_fmt.format('', *[f"  maxWk:  {ta.max_shifts_per_week}"         for ta in tas]))
+    LOGGER.info(sep_fmt)
+
+    # 3) Group by week_id and print
+    for week_id, shifts_in_week in groupby(shift_groups, key=lambda s: s.week_id):
+        LOGGER.info(f"***** Week {week_id} *****")
+        LOGGER.info(sep_fmt)
+
+        for shift_group in shifts_in_week:
+            # build the row of ShiftAssignment objects or empty placeholders
+            row_asgs = [
+                assignment_map.get((ta.name, shift_group.series, shift_group.start_time),
+                                   ShiftAssignment(id="unassigned", shift=shift_group, assigned_ta=None))
+                for ta in tas
+            ]
+
+            # 4a) Print the TA names or blank
+            LOGGER.info(
+                row_fmt.format(
+                    str(shift_group),
+                    *[asg.assigned_ta.name if asg.assigned_ta else "" for asg in row_asgs]
+                )
+            )
+            # 4b) Print the status (Desired/Undesired/Unavailable/Neutral)
+            LOGGER.info(
+                row_fmt.format(
+                    f"requires {shift_group.required_tas} TAs",
+                    *[
+                        asg.assigned_ta.get_status_for_shift(shift_group)
+                        if asg.assigned_ta else ""
+                        for asg in row_asgs
+                    ]
+                )
+            )
+            LOGGER.info(sep_fmt)
+
+    # 5) Optionally list any completely unassigned slots
+    unassigned = [
+        asg for asg in shift_assignments
+        if asg.assigned_ta is None
+    ]
+    if unassigned:
+        LOGGER.info("\nUnassigned Shifts:")
+        for asg in unassigned:
+            LOGGER.info(f"  {asg.shift} → {asg.assigned_ta}")
 
 def print_ta_availability(time_table: Timetable, logger: logging.Logger) -> None:
     """Prints the TA availability in a formatted way."""

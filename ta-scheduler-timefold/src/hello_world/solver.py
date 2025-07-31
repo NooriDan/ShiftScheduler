@@ -204,7 +204,9 @@ class TimetableSolverBlocking(TimetableSolverBase):
         # Members only relevant for this subclass
         self.solver: Solver
 
-    # Absteract methods
+    # ----------------------------
+    # Abstract methods
+    # ----------------------------
     def create_solver(self):
         super().create_solver()
         self.solver      = self.solver_factory.build_solver()
