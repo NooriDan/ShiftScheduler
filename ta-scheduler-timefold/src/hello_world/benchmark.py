@@ -116,12 +116,17 @@ class BenchmarkRunnerBase(ABC):
         self.results_base_dir   = Path(f"results/{self.config_data['TimetableSolver']['constraint_version']}/{self.timestamp}")
         self.results_base_dir.mkdir(parents=True, exist_ok=True)
 
+        # set the randmom seed
+        random.seed(self.benchmark_config.random_seed)
+
+
     def _load_config(self) -> Dict[str, Any]:
         with open(self.path_to_benchmark_config, "r") as f:
             return json.load(f)
     
     def run(self):
         seed = self.benchmark_config.random_seed
+        random.seed(seed)
         self.logger.info(f"Running the TA Rostering Program with seed: {seed}")
 
         for iteration_index in range(self.benchmark_config.num_of_runs):
