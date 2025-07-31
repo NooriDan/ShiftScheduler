@@ -242,6 +242,9 @@ class BenchmarkRunnerWithDatabase(BenchmarkRunnerBase):
             logger=self.logger
         )
 
+        self.problem_database.sort_problems_by_difficulty(increasing=True)
+
+        # Post Porcessing
         for iteration_index, scheduling_problem in enumerate(self.problem_database.problem_sets):
             self.logger.info(f"adding the Iteration {iteration_index + 1} / {num_runs}")
             self.logger.info("=================================================================")
@@ -264,7 +267,6 @@ class BenchmarkRunnerWithDatabase(BenchmarkRunnerBase):
             self.logger.info("=================================================================")
             self.logger.info(f"End of iteration {iteration_index + 1} / {num_runs}\n")
 
-        self.problem_database.sort_problems_by_difficulty(increasing=True)
         self._save_results()
         self.logger.info("🏁 Benchmark completed successfully!")
 
