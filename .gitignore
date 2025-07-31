@@ -311,9 +311,12 @@ timefold-quickstarts/
 .DS_Store
 .DS_Store
 /ta-scheduling-webapp/src/employee_scheduling/__pycache__/*
-*__pycache__/*
+*/__pycache__/*
 *.pyc
-ta-scheduler-timefold/src/hello_world/__pycache__/*
+*/ta-scheduler-timefold/src/hello_world/__pycache__/*
 ta-scheduler-timefold/src/hello_world/__pycache__/constraints.cpython-312.pyc
 ta-scheduler-timefold/src/hello_world/__pycache__/domain.cpython-312.pyc
 ta-scheduler-timefold/src/hello_world/__pycache__/main.cpython-312.pyc
+
+*/results/*
+*/logs/*
