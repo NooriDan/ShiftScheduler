@@ -606,8 +606,8 @@ def demo_data_random(
         days: List[str] = ["Mon", "Tue", "Wed", "Thu", "Fri"],
         shift_series_prefix: str = "L",
         ta_names = ["M. Roghani", "D. Noori", "A. Gholami", "M. Jafari", "A. Athar", "S. Smith", "J. Doe"],
-        num_of_weeks: int = 1,
-        allow_different_weekly_availability: bool = False,
+        num_of_weeks: int = 4,
+        allow_different_weekly_availability: bool = True,
         randomization_params: ProblemRandomizationParameters = ProblemRandomizationParameters()
       ) -> Timetable:
     """Generate random demo data for the Timetable."""

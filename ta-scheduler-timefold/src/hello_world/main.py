@@ -11,7 +11,7 @@ from hello_world.utils       import print_ta_availability, initialize_logger, Da
 from hello_world.solver      import TimetableSolverBlocking, TimetableSolverWithSolverManager
 from hello_world.constraints import constraints_provider_dict
 # Constants for random shift generation
-SEED = random.randint(0, 1000000)
+SEED = 100
 
 def get_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description='Run the TA Rostering Program in Terminal')

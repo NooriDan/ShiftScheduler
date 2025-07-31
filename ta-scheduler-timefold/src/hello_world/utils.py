@@ -447,7 +447,7 @@ def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
     # 2) Build a lookup for assignments
     shift_assignments = time_table.shift_assignments
     assignment_map = {
-        (asg.assigned_ta.name, asg.shift.series, asg.shift.start_time): asg
+        (asg.assigned_ta.name, asg.shift.series, asg.shift.start_time, asg.shift.week_id): asg
         for asg in shift_assignments
         if asg.assigned_ta is not None
     }
@@ -476,7 +476,7 @@ def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
         for shift_group in shifts_in_week:
             # build the row of ShiftAssignment objects or empty placeholders
             row_asgs = [
-                assignment_map.get((ta.name, shift_group.series, shift_group.start_time),
+                assignment_map.get((ta.name, shift_group.series, shift_group.start_time, week_id),
                                    ShiftAssignment(id="unassigned", shift=shift_group, assigned_ta=None))
                 for ta in tas
             ]

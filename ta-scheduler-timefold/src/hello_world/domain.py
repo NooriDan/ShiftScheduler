@@ -83,6 +83,9 @@ class ShiftAssignment():
     def __str__(self):
         return f'assigning {self.shift.series} to {self.assigned_ta}'
     
+    def get_week_id(self) -> str:
+        return str(self.shift.week_id)
+
     def is_assigned_a_ta(self) -> bool:
         """Check if the shift assignment is valid."""
         return self.assigned_ta is not None and self.shift is not None
