@@ -1,67 +1,227 @@
-= School Timetabling (Python)
+Here’s a comprehensive, up‐to‐date `README.md` for your TA Scheduler tool. It covers installation, configuration, all CLI flags, examples, demo-data vs. real-data usage, testing, and pointers for extension and contribution.
 
-Assign lessons to timeslots and rooms to produce a better schedule for teachers and students.
+````markdown
+# TA Scheduler (Python)
 
-== Prerequisites
+A command-line tool to generate optimized TA schedules by assigning lessons (shifts) to time-slots and rooms, using OptaPlanner via Timefold.
 
-. Install https://www.python.org/downloads/[Python 3.10+]
+---
 
-. Install JDK 17+, for example with https://sdkman.io[Sdkman]:
-+
-----
-$ sdk install java
-----
+## Table of Contents
 
-== Run the application
+1. [Features](#features)  
+2. [Prerequisites](#prerequisites)  
+3. [Installation](#installation)  
+4. [Quick Start](#quick-start)  
+5. [Command-Line Reference](#command-line-reference)  
+6. [Demo Data vs. Custom Data](#demo-data-vs-custom-data)  
+7. [CSV & Folder Formats](#csv--folder-formats)  
+8. [Benchmark Mode](#benchmark-mode)  
+9. [Logging & Analysis](#logging--analysis)  
+10. [Extending Constraints](#extending-constraints)  
+11. [Development & Testing](#development--testing)  
+12. [Contributing](#contributing)  
+13. [License](#license)  
 
-. Git clone the timefold-quickstarts repo:
-+
-[source, shell]
-----
-$ git clone https://github.com/TimefoldAI/timefold-quickstarts.git
-...
-$ cd timefold-quickstarts/python/hello-world
-----
+---
 
-. Create a virtual environment
-+
-[source, shell]
-----
-$ python -m venv .venv
-----
+## Features
 
-. Activate the virtual environment
-+
-[source, shell]
-----
-$ . .venv/bin/activate
-----
+- **Flexible data sources**: built-in demo data or your own CSVs.  
+- **Multiple solving methods**: blocking solver, solver-manager, or progress-bar mode.  
+- **Constraint versions**: switch between predefined constraint sets (e.g. `default`, `tabriz`).  
+- **Benchmark mode**: run multiple seeds, gather score analyses, and dump JSON/PKL results.  
+- **Post-solve analysis**: view broken constraints, match counts, and scoring breakdown.  
 
-. Install the application
-+
-[source, shell]
-----
-$ pip install -e .
-----
+---
 
-. Run the application
-+
-[source, shell]
-----
-$ run-timefold
-----
-[source, shell]
-----
-$ run-timefold --help
-----
+## Prerequisites
 
-. Run tests
-+
-[source, shell]
-----
-$ pytest
-----
+- **Python 3.10+**: [Download & install](https://www.python.org/downloads/)  
+- **Java 17+** (required by Timefold/OptaPlanner): install via [Sdkman](https://sdkman.io)  
+  ```shell
+  $ sdk install java
+````
 
-== More information
+* **git** (for cloning)
 
-Visit https://timefold.ai[timefold.ai].
+---
+
+## Installation
+
+1. **Clone the repo**
+
+   ```shell
+   $ git clone https://github.com/TimefoldAI/timefold-quickstarts.git
+   $ cd timefold-quickstarts/python/hello-world
+   ```
+
+2. **Create & activate a virtual environment**
+
+   ```shell
+   $ python -m venv .venv
+   $ source .venv/bin/activate
+   ```
+
+3. **Install**
+
+   ```shell
+   $ pip install -e .
+   ```
+
+---
+
+## Quick Start
+
+* To see global help and all flags:
+
+  ```shell
+  $ timefold-run-demo --help
+  ```
+
+* **Run default demo** (weekly random demo data):
+
+  ```shell
+  $ timefold-run-demo
+  ```
+
+* **Use your own CSVs & availability**:
+
+  ```shell
+  $ timefold-run-demo \
+      --overwrite \
+      --ta_csv_path path/to/ta_list.csv \
+      --shift_csv_path path/to/shift_list.csv \
+      --availability_folder path/to/availability/
+  ```
+
+* **Run benchmark** (e.g. 10 runs, JSON+PKL output):
+
+  ```shell
+  $ timefold-run-benchmark --demo_data_select benchmark-semester --constraint_version tabriz
+  ```
+
+---
+
+## Command-Line Reference
+
+All flags apply to both `timefold-run-demo` and `timefold-run-benchmark` (where relevant):
+
+| Flag                    | Type   | Default                                     | Description                                                       |
+| ----------------------- | ------ | ------------------------------------------- | ----------------------------------------------------------------- |
+| `--ta_csv_path`         | `str`  | `ta_list.csv`                               | Path to your TA list CSV.                                         |
+| `--shift_csv_path`      | `str`  | `shift_list.csv`                            | Path to your Shift list CSV.                                      |
+| `--availability_folder` | `str`  | `availability/`                             | Folder of per-TA availability CSVs.                               |
+| `--overwrite`           | `bool` | `false`                                     | If set, loads CSV/folder data; otherwise uses built-in demo data. |
+| `--constraint_version`  | `str`  | `default`                                   | Constraint set to apply (`default`, `tabriz`, …).                 |
+| `--demo_data_select`    | `str`  | `demo_data_weekly_scheduling-random` (demo) | Select which built-in demo data variant to load.                  |
+| `--solving_method`      | `str`  | `solver_manager`                            | Solver instantiation: `solver_manager`, `blocking`, or `tqdm`.    |
+| `--use_config_xml`      | `bool` | `false`                                     | Load solver settings from `solver_config.xml`.                    |
+| `--path_to_config_xml`  | `str`  | `None`                                      | Custom path to your `solver_config.xml`.                          |
+
+Benchmark-only flags:
+
+| Flag                   | Type  | Default            | Description                                        |
+| ---------------------- | ----- | ------------------ | -------------------------------------------------- |
+| `--demo_data_select`   | `str` | `benchmark-weekly` | Choose `benchmark-weekly` or `benchmark-semester`. |
+| `--constraint_version` | `str` | `default`          | Constraint set for benchmark.                      |
+
+---
+
+## Demo Data vs. Custom Data
+
+* **Demo Data**
+
+  * Stored in Python, randomized each run (seeded).
+  * Variants include `demo_data_weekly_scheduling-random`, `benchmark-semester`, etc.
+
+* **Custom Data**
+
+  * Provide three inputs:
+
+    1. **`ta_list.csv`**: header row, columns:
+
+       ```
+       ta_id,name,skill_level,...
+       ```
+    2. **`shift_list.csv`**: header row, columns:
+
+       ```
+       shift_id,week_id,day_id,room_id,start_time,end_time,required_skill,...
+       ```
+    3. **`availability/`**: folder containing `<ta_id>.csv` per TA, with columns:
+
+       ```
+       shift_id,available (0/1),desired (0/1),undesired (0/1)
+       ```
+
+---
+
+## Benchmark Mode
+
+Run many seeds in sequence to evaluate solver performance and difficulty:
+
+```shell
+$ timefold-run-benchmark \
+    --demo_data_select benchmark-weekly \
+    --constraint_version default \
+    --use_config_xml \
+    --path_to_config_xml path/to/solver_config.xml
+```
+
+* **Output**
+
+  * Results folder: `results/<constraint_version>/<YYYY-MM-DD_HH-MM-SS>/`
+
+    * `benchmark_results.json` – detailed score & metadata.
+    * `solutions.pkl` or `baseline.pkl` – pickled solutions or database.
+
+---
+
+## Logging & Analysis
+
+* Logs are written at `INFO` level by default.
+* You can inspect which constraints were violated by looking at the post-solve `ScoreAnalysis` in code (in `BenchmarkRunnerBase.process_score_analysis`).
+* Future: implement `solver.post_process_solution(..., log_analysis=True)` to dump per-constraint match details.
+
+---
+
+## Extending Constraints
+
+1. Edit or add to `hello_world/constraints.py` → `constraints_provider_dict`.
+2. Define a new key, e.g. `"myversion"`, mapping to a function that returns a list of OptaPlanner constraints.
+3. Invoke with `--constraint_version myversion`.
+
+---
+
+## Development & Testing
+
+* **Run tests** with `pytest`:
+
+  ```shell
+  $ pytest
+  ```
+* **Linting / Formatting**: we follow Black/flake8 conventions.
+* **Demo generator**: to quickly inspect data, call:
+
+  ```shell
+  $ test-demo-generator --help
+  ```
+
+---
+
+## Contributing
+
+1. Fork this repo & create a feature branch.
+2. Write clear commit messages and update tests.
+3. Open a PR against `main`, referencing any issue you fix.
+4. We use GitHub Actions to run CI; ensure all checks pass.
+
+---
+
+## License
+
+This project is licensed under the [Apache 2.0 License](LICENSE).
+
+```
+```
