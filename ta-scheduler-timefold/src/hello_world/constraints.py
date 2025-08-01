@@ -230,10 +230,9 @@ class TimetableConstraintGenTabrizEdition(TimetableConstraintGenBasic):
         constraints = super().create_constraints()
 
         addition: List[Constraint] = [
-        # Add the following
-         # Soft (1) constraints
-            # TODO
-            # self.reward_assignment_to_consecutive_shifts(),
+            # Add the following
+            # Soft (1) constraints
+            self.reward_assignment_to_consecutive_shifts(),
         ]
         
         constraints = constraints + addition
@@ -241,7 +240,18 @@ class TimetableConstraintGenTabrizEdition(TimetableConstraintGenBasic):
         return constraints
     
     # Optional: You can add more methods to customize the constraint creation process
-    
+    def reward_assignment_to_consecutive_shifts(self) -> Constraint:
+        """Rewards (soft) TAs assigned to the same shift series (i.e., L01, L02, ...)"""
+        return (
+            self.constraint_factory
+            .for_each(ShiftAssignment)
+            .group_by(lambda assignment: assignment.get_ta(), lambda assignment: assignment.get_shift_series(), ConstraintCollectors.count())
+            .filter(lambda ta, series, count: count>1)
+            .join(ConstraintParameters)
+            .reward(HardMediumSoftScore.ONE_SOFT, lambda ta, series, count, params: params.same_sereis_assignment_reward * (count-1) )
+            .as_constraint("reward_assignment_to_consecutive_shifts")
+        )
+
 
 # TODO: Add constraints for Continuous planning (windowed planning) -> tabriz edition
 

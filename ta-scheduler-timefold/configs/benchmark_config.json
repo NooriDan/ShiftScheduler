@@ -14,18 +14,18 @@
         },
 
     "RandomTimetableGenerator" : {
-        "num_of_weeks"          : 2,
+        "num_of_weeks"          : 5,
         "shift_series_prefix"   : "L",
         "days"                  : ["Mon", "Tue", "Wed", "Thu", "Fri"],
         "ta_names"              : ["M. Roghani", "D. Noori", "A. Gholami", "M. Jafari", "A. Athar", "S. Smith", "J. Doe"],       
-        "allow_different_weekly_availability" : false
+        "allow_different_weekly_availability" : true
         },
 
     "randomization_params" : {
         "MIN_NUM_SHIFTS_PER_WEEK" : 6,
-        "MAX_NUM_SHIFTS_PER_WEEK" : 8,
+        "MAX_NUM_SHIFTS_PER_WEEK" : 12,
 
-        "MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT" : 1,
+        "MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT" : 2,
         "MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT" : 3,
 
         "MIN_NUM_OF_SHIFT_PER_TA_PER_WEEK" : 0,
@@ -44,13 +44,9 @@
         },
 
     "ConstraintParameters" : {
-        "ta_meets_shift_requirement_over_the_semester" : true,
-        "ta_meets_shift_requirement_per_week"          : true,
-        "ta_undesired_shift"                           : true,
-        "ta_desired_shift"                             : true,
-        "ta_unavailable_shift"                         : true,
-        "ta_skill_level_match"                         : true,
-        "ta_maximum_shifts_per_week"                   : true,
-        "ta_minimum_shifts_per_week"                   : false
-        }
+        "undesired_assignment_penalty"      : 20,
+        "desired_assignment_reward"         : 5,
+        "same_sereis_assignment_reward"     : 1,
+        "unavailable_assignment_penalty"    : 1     
+    }
 }

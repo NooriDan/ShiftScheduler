@@ -11,11 +11,14 @@ from pydantic import Field
 
 @dataclass
 class ConstraintParameters:
-    undesired_assignment_penalty:   int = 20
-    desired_assignment_reward:      int = 1
+    undesired_assignment_penalty:   int = 20    # Soft
+    desired_assignment_reward:      int = 5     # Soft
+    same_sereis_assignment_reward:  int = 1     # Soft
+
+    unavailable_assignment_penalty:  int = 1     # Soft
 
     def __str__(self):
-        return f"undesired_assignment_penalty={self.undesired_assignment_penalty}, desired_assignment_reward={self.desired_assignment_reward}"
+        return f"ConstraintParameters"
 
 @dataclass
 class Shift():
@@ -85,6 +88,12 @@ class ShiftAssignment():
     
     def get_week_id(self) -> str:
         return str(self.shift.week_id)
+    
+    def get_shift_series(self) -> str:
+        return str(self.shift.series)
+    
+    def get_ta(self) -> TA | None:
+        return self.assigned_ta
 
     def is_assigned_a_ta(self) -> bool:
         """Check if the shift assignment is valid."""
@@ -148,7 +157,7 @@ class Timetable():
     score: Annotated[HardMediumSoftScore, PlanningScore] = field(default=None)
     # score: Annotated[BendableScore, PlanningScore(bendable_hard_levels_size=2, bendable_soft_levels_size=3)] # custom score levels
     def __str__(self):
-        return f"timetable_{self.id}"
+        return f"timetable_{self.id} - {len(self.shifts)} shifts - {len(self.tas)} TAs - [{len(self.shift_assignments)} planning variables]"
 
 
 if __name__ == '__main__':

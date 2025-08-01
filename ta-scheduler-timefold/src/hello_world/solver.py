@@ -40,7 +40,7 @@ class TimetableSolverBase(ABC):
         self.use_config_xml     = use_config_xml
 
         # class constants
-        self.default_term_time_budget           : Duration =  Duration(minutes=1, seconds=30)
+        self.default_term_time_budget           : Duration =  Duration(minutes=2, seconds=30)
         self.default_term_unimproved_early_term : Duration =  Duration(seconds=10)
 
         # attributes to hold the solver configuration and factory

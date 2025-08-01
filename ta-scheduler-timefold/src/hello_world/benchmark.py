@@ -100,6 +100,8 @@ class BenchmarkRunnerBase(ABC):
             **self.config_data["TimetableSolver"]
         )
 
+        self.constraint_parameters = ConstraintParameters(**self.config_data["ConstraintParameters"])
+
         self.generator = RandomTimetableGenerator(
             name=self.args.demo_data_select,
             logger=self.logger,
@@ -429,6 +431,10 @@ class SchedulingProblemDatabase:
             logger.info(f"Generating and solving problem {i + 1} / {num_problems}")
 
             timetable, generation_metadata = generator.gen_demo_data()
+
+            logger.info("************************** Initial Timetable **************************")
+            print_ta_availability(time_table=deepcopy(timetable), logger=logger)
+            logger.info("************************** /Initial Timetable **************************")
 
             # Solve the problem to get solution and score
             solution       = solver.solve_problem(problem=timetable)
