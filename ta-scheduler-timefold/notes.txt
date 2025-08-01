@@ -1,0 +1,211 @@
+Ideas for constraints
+--------------------------
+
+@constraint_provider
+def define_constraints(factory: ConstraintFactory):
+    return [
+        # HARD CONSTRAINTS (MUSTs)
+        ta_exact_shifts_per_semester(factory),
+        ta_weekly_shift_bounds(factory),
+        shift_exact_required_tas(factory),
+        ta_unavailable_shift(factory),
+
+        # SOFT / MEDIUM CONSTRAINTS (SHOULDs)
+        ta_missing_semester_shifts(factory),
+        ta_over_semester_shifts(factory),
+        ta_undesired_shift(factory),
+        ta_desired_shift(factory),
+        ta_consecutive_same_day_bonus(factory),
+    ]
+
+
+#
+# HARD: each TA must work exactly their required_shifts_per_semester
+#
+def ta_exact_shifts_per_semester(factory: ConstraintFactory):
+    return (
+        factory.for_each(TA)
+        .join(
+            ShiftAssignment,
+            Joiners.equal(lambda ta: ta, lambda asg: asg.assigned_ta),
+        )
+        .group_by(
+            lambda ta, asg: ta,
+            ConstraintCollectors.count_bi(),  # total assignments per TA
+        )
+        # penalize any deviation from exactly required_shifts_per_semester
+        .filter(lambda ta, count: count != ta.required_shifts_per_semester)
+        .penalize(
+            HardMediumSoftScore.ONE_HARD,
+            lambda ta, count: abs(ta.required_shifts_per_semester - count),
+        )
+        .as_constraint("TA exactly required shifts per semester")
+    )
+
+
+#
+# HARD: each TA’s shifts per week must be between min_shifts_per_week and max_shifts_per_week
+#
+def ta_weekly_shift_bounds(factory: ConstraintFactory):
+    return (
+        factory.for_each(ShiftAssignment)
+        .filter(lambda asg: asg.assigned_ta is not None)
+        .group_by(
+            # group key: (TA, ISO week) from shift.shift_date
+            lambda asg: (asg.assigned_ta, asg.shift.week_id),
+            ConstraintCollectors.count(),  # count per TA-week
+        )
+        .filter(
+            lambda (ta, week), count: (
+                count < ta.min_shifts_per_week or count > ta.max_shifts_per_week
+            )
+        )
+        .penalize(
+            HardMediumSoftScore.ONE_HARD,
+            # penalize each missing or extra shift
+            lambda (ta, _), count:
+                max(ta.min_shifts_per_week - count, 0)
+                + max(count - ta.max_shifts_per_week, 0)
+        )
+        .as_constraint("TA weekly shift bounds violated")
+    )
+
+
+#
+# HARD: each Shift must have exactly required_tas assignments
+#
+def shift_exact_required_tas(factory: ConstraintFactory):
+    return (
+        factory.for_each(ShiftAssignment)
+        .filter(lambda asg: asg.assigned_ta is not None)
+        .group_by(
+            lambda asg: asg.shift,
+            ConstraintCollectors.count(),
+        )
+        .filter(lambda shift, count: count != shift.required_tas)
+        .penalize(
+            HardMediumSoftScore.ONE_HARD,
+            lambda shift, count: abs(shift.required_tas - count),
+        )
+        .as_constraint("Shift required TA count violated")
+    )
+
+
+#
+# HARD: never assign a TA to a shift they marked unavailable
+#
+def ta_unavailable_shift(factory: ConstraintFactory):
+    return (
+        factory.for_each(ShiftAssignment)
+        .filter(
+            lambda asg:
+                asg.assigned_ta is not None
+                and asg.shift in asg.assigned_ta.unavailable
+        )
+        .penalize(HardMediumSoftScore.ONE_HARD)
+        .as_constraint("TA assigned to unavailable shift")
+    )
+
+
+#
+# MEDIUM: penalize under‐assignment over semester
+#
+def ta_missing_semester_shifts(factory: ConstraintFactory):
+    # penalize each missing shift softly
+    return (
+        factory.for_each(TA)
+        .join(
+            ShiftAssignment,
+            Joiners.equal(lambda ta: ta, lambda asg: asg.assigned_ta),
+        )
+        .group_by(
+            lambda ta, asg: ta,
+            ConstraintCollectors.count_bi(),
+        )
+        .filter(lambda ta, count: count < ta.required_shifts_per_semester)
+        .penalize(
+            HardMediumSoftScore.ONE_MEDIUM,
+            lambda ta, count: ta.required_shifts_per_semester - count
+        )
+        .as_constraint("TA missing semester shifts")
+    )
+
+
+#
+# MEDIUM: penalize over‐assignment over semester
+#
+def ta_over_semester_shifts(factory: ConstraintFactory):
+    # penalize each extra shift softly
+    return (
+        factory.for_each(TA)
+        .join(
+            ShiftAssignment,
+            Joiners.equal(lambda ta: ta, lambda asg: asg.assigned_ta),
+        )
+        .group_by(
+            lambda ta, asg: ta,
+            ConstraintCollectors.count_bi(),
+        )
+        .filter(lambda ta, count: count > ta.required_shifts_per_semester)
+        .penalize(
+            HardMediumSoftScore.ONE_MEDIUM,
+            lambda ta, count: count - ta.required_shifts_per_semester
+        )
+        .as_constraint("TA over semester shifts")
+    )
+
+
+#
+# SOFT: penalize assignment to an undesired shift
+#
+def ta_undesired_shift(factory: ConstraintFactory):
+    return (
+        factory.for_each(ShiftAssignment)
+        .filter(
+            lambda asg:
+                asg.assigned_ta is not None
+                and asg.shift in asg.assigned_ta.undesired
+        )
+        .penalize(HardMediumSoftScore.ONE_SOFT)
+        .as_constraint("TA assigned to undesired shift")
+    )
+
+
+#
+# SOFT: reward assignment to a desired shift
+#
+def ta_desired_shift(factory: ConstraintFactory):
+    return (
+        factory.for_each(ShiftAssignment)
+        .filter(
+            lambda asg:
+                asg.assigned_ta is not None
+                and asg.shift in asg.assigned_ta.desired
+        )
+        .reward(HardMediumSoftScore.ONE_SOFT)
+        .as_constraint("TA assigned to desired shift")
+    )
+
+
+#
+# SOFT: reward “consecutive” assignments on the same day
+#
+def ta_consecutive_same_day_bonus(factory: ConstraintFactory):
+    # for each pair of shifts for the same TA on the same date,
+    # if end_time of the earlier is exactly the start_time of the later, reward
+    return (
+        factory.for_each(ShiftAssignment)
+        .join(
+            ShiftAssignment,
+            Joiners.equal(lambda a: a.assigned_ta, lambda b: b.assigned_ta),
+            Joiners.equal(lambda a: a.shift.shift_date, lambda b: b.shift.shift_date),
+            # ensure A.start < B.start to avoid double‐counting
+            Joiners.lessThan(lambda a: a.shift.start_time, lambda b: b.shift.start_time),
+        )
+        .filter(
+            lambda a, b:
+                a.shift.end_time == b.shift.start_time
+        )
+        .reward(HardMediumSoftScore.ONE_SOFT)
+        .as_constraint("TA consecutive shifts bonus")
+    )

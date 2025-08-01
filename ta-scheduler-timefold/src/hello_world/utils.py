@@ -6,9 +6,12 @@ import openpyxl
 import datetime as dt
 import pandas as pd
 
-from typing import Dict
+from itertools import groupby
+from copy import deepcopy
+from typing import Dict, List, Any
 from pathlib import Path
 from datetime import timedelta, time, date
+from argparse import Namespace
 
 
 # Custom Imports 
@@ -54,7 +57,7 @@ class DataConstructor:
             ta = TA(
                 id=row['macid'],
                 name=row['name'],
-                required_shifts= row['req_shift_per_week'],
+                required_shifts_per_week= row['req_shift_per_week'],
                 is_grad_student= row['type'] == 'Grad',
                 desired=[],
                 undesired=[],
@@ -151,11 +154,11 @@ class DataConstructor:
                     print("========================================")
             else:
                 count_available = sum(1 for availability in self.avialability_matrix[ta.id] if availability != "Unavailable")
-                if count_available < ta.required_shifts:
+                if count_available < ta.required_shifts_per_week:
                     if log_error:
                         print(f"TA {ta.id} has insufficient availability.")
                         print(f"Available shifts: {count_available}")
-                        print(f"Required shifts: {ta.required_shifts}")
+                        print(f"Required shifts: {ta.required_shifts_per_week}")
 
                     return False
         return not missing_ta
@@ -298,7 +301,6 @@ class DataConstructor:
 #         print(f"Report has been saved to {filename}")
 
 
-"""Provides printing utilities for the assignment matrix."""
 def id_generator():
     """Generates unique IDs for the shift assignments."""
     current = 0
@@ -306,35 +308,84 @@ def id_generator():
         yield str(current)
         current += 1
 
-def initialize_logger():
-    # Configure the logging
-    LOG_FILE = f"logs/timefold_assignment_matrix_{datetime.datetime.now().strftime('%y_%m_%d_%s')}.log"
+def initialize_logger(args: Namespace, logging_level = logging.INFO) -> logging.Logger:
+    # Construct log directory path based on the constraint version argument
+    variant: str = args.demo_data_select if not args.overwrite else f"overwrite"
+    log_dir = os.path.join("logs", args.constraint_version, variant)
+    os.makedirs(log_dir, exist_ok=True)
 
-    # Create the logs directory if it doesn't exist
-    if not os.path.exists("logs"):
-        os.makedirs("logs")
+    # Use readable timestamp for the filename
+    log_filename = f"timefold_assignment_matrix_{datetime.datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log"
+    log_path = os.path.join(log_dir, log_filename)
 
     logging.basicConfig(
         level=logging.INFO,
         # format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         format="%(message)s",
         handlers=[
-            logging.FileHandler(LOG_FILE, mode='w'),  # Save logs to a file, overwrite each run
+            logging.FileHandler(log_path, mode='w'),  # Save logs to a file, overwrite each run
             logging.StreamHandler()  # Also display logs in the console
         ]
     )
-    return logging.getLogger('app')
+    # Create a logger instance
+    LOGGER = logging.getLogger('app')
 
-def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
+    LOGGER.info(f"...")
+    LOGGER.info(f"Logger initialized")
+    LOGGER.info(f"\t@ {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    LOGGER.info(f"\tConstraint version: {args.constraint_version}")
+    LOGGER.info(f"\tData:               {variant}")
+    LOGGER.info(f"...")
+
+    return LOGGER
+
+def get_handler_info(handler: logging.Handler) -> dict:
+    """Returns a dictionary with information about the logging handler."""
+    if not isinstance(handler, logging.Handler):
+        raise ValueError("Handler must be an instance of logging.Handler")
+    return {
+        "type": type(handler).__name__,
+        "level": logging.getLevelName(handler.level),
+        "formatter": handler.formatter._fmt if handler.formatter else None,
+        "output_file": getattr(handler, "baseFilename", None),  # Only FileHandlers have this
+        "name": getattr(handler, "name", None)
+    }
+
+def get_handler_info_from_logger(logger: logging.Logger) -> List[Dict[str, Any]]:
+    """Returns a list of dictionaries with information about the logging handlers of the given logger."""
+    if not isinstance(logger, logging.Logger):
+        raise ValueError("Logger must be an instance of logging.Logger")
+    
+    return [get_handler_info(handler) for handler in logger.handlers]
+
+def create_logger_info(logger: logging.Logger | None) -> Dict[str, Any]:
+    """Creates a dictionary with information about the logger."""
+    if not isinstance(logger, logging.Logger):
+        raise ValueError("Logger must be an instance of logging.Logger")
+    
+    return {
+        "name": logger.name,
+        "level": logging.getLevelName(logger.level),
+        "effective_level": logging.getLevelName(logger.getEffectiveLevel()),
+        "propagate": logger.propagate,
+        "handlers": get_handler_info_from_logger(logger)
+    }
+
+def legacy_print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
 
     LOGGER = logger
     LOGGER.info(f"Score: {time_table.score}")
-    LOGGER.info("=== Starting to print the assignment matrix ===")
+    # LOGGER.info("=== Starting to print the timetable ===")
 
-    column_width = 18
+    
     tas = time_table.tas
     shift_groups = time_table.shifts
     shift_assignments = time_table.shift_assignments
+    
+    PADDDING = 10
+    MIN_WIDTH = 22
+    # Calculate the maximum width for the columns based on TA names
+    column_width = max(max([len(ta.name) for ta in tas]) + PADDDING, MIN_WIDTH)  # Ensure a minimum width of 20 for better readability
     
     assignment_map = {
         (assignment.assigned_ta.name, assignment.shift.series, assignment.shift.start_time): assignment
@@ -347,7 +398,10 @@ def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
 
     LOGGER.info(sep_format)
     LOGGER.info(row_format.format('', *[f"{ta.name} (ID: {ta.id})" for ta in tas]))
-    LOGGER.info(row_format.format('', *[f"(requires: {ta.required_shifts})" for ta in tas]))
+    LOGGER.info(row_format.format('', *[f"requires" for ta in tas]))
+    LOGGER.info(row_format.format('', *[f"  budget:      {ta.required_shifts_per_semester} " for ta in tas]))
+    LOGGER.info(row_format.format('', *[f"  min_weekly: {ta.min_shifts_per_week} " for ta in tas]))
+    LOGGER.info(row_format.format('', *[f"  max_weekly: {ta.max_shifts_per_week} " for ta in tas]))
 
     LOGGER.info(sep_format)
 
@@ -367,7 +421,7 @@ def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
         ))
 
         LOGGER.info(row_format.format( 
-            f"requires {shift_group.required_tas}",
+            f"requires {shift_group.required_tas} TAs",
             *[assignment.assigned_ta.get_status_for_shift(shift_group) if assignment.assigned_ta is not None else " " 
               for assignment in row_shifts]
         ))
@@ -381,5 +435,121 @@ def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
         for shift in unassigned_shifts:
             LOGGER.info(f'{shift.shift} - {shift.assigned_ta}')
 
-    LOGGER.info("=== Finished printing the assignment matrix ===")
+    LOGGER.info("=== Finished printing the timetable ===")
 
+def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
+    LOGGER = logger
+    LOGGER.info(f"Score: {time_table.score}")
+
+    tas = time_table.tas
+    # 1) Sort shifts by week_id
+    shift_groups = sorted(time_table.shifts, key=lambda s: s.week_id)
+    # 2) Build a lookup for assignments
+    shift_assignments = time_table.shift_assignments
+    assignment_map = {
+        (asg.assigned_ta.name, asg.shift.series, asg.shift.start_time, asg.shift.week_id): asg
+        for asg in shift_assignments
+        if asg.assigned_ta is not None
+    }
+
+    # Table formatting
+    PADDING = 10
+    MIN_WIDTH = 22
+    column_width = max(max(len(ta.name) for ta in tas) + PADDING, MIN_WIDTH)
+    row_fmt = ("|{:<" + str(column_width) + "}") * (len(tas) + 1) + "|"
+    sep_fmt = "+" + ((("-" * column_width) + "+") * (len(tas) + 1))
+
+    # Header rows
+    LOGGER.info(sep_fmt)
+    LOGGER.info(row_fmt.format('', *[f"{ta.name} (ID: {ta.id})" for ta in tas]))
+    LOGGER.info(row_fmt.format('', *["requires" for _ in tas]))
+    LOGGER.info(row_fmt.format('', *[f"  budget: {ta.required_shifts_per_semester}" for ta in tas]))
+    LOGGER.info(row_fmt.format('', *[f"  minWk:  {ta.min_shifts_per_week}"         for ta in tas]))
+    LOGGER.info(row_fmt.format('', *[f"  maxWk:  {ta.max_shifts_per_week}"         for ta in tas]))
+    LOGGER.info(sep_fmt)
+
+    # 3) Group by week_id and print
+    for week_id, shifts_in_week in groupby(shift_groups, key=lambda s: s.week_id):
+        LOGGER.info(f"***** Week {week_id} *****")
+        LOGGER.info(sep_fmt)
+
+        for shift_group in shifts_in_week:
+            # build the row of ShiftAssignment objects or empty placeholders
+            row_asgs = [
+                assignment_map.get((ta.name, shift_group.series, shift_group.start_time, week_id),
+                                   ShiftAssignment(id="unassigned", shift=shift_group, assigned_ta=None))
+                for ta in tas
+            ]
+
+            # 4a) Print the TA names or blank
+            LOGGER.info(
+                row_fmt.format(
+                    str(shift_group),
+                    *[asg.assigned_ta.name if asg.assigned_ta else "" for asg in row_asgs]
+                )
+            )
+            # 4b) Print the status (Desired/Undesired/Unavailable/Neutral)
+            LOGGER.info(
+                row_fmt.format(
+                    f"requires {shift_group.required_tas} TAs",
+                    *[
+                        asg.assigned_ta.get_status_for_shift(shift_group)
+                        if asg.assigned_ta else ""
+                        for asg in row_asgs
+                    ]
+                )
+            )
+            LOGGER.info(sep_fmt)
+
+    # 5) Optionally list any completely unassigned slots
+    unassigned = [
+        asg for asg in shift_assignments
+        if asg.assigned_ta is None
+    ]
+    if unassigned:
+        LOGGER.info("\nUnassigned Shifts:")
+        for asg in unassigned:
+            LOGGER.info(f"  {asg.shift} → {asg.assigned_ta}")
+
+def print_ta_availability(time_table: Timetable, logger: logging.Logger) -> None:
+    """Prints the TA availability in a formatted way."""
+    time_table_in = deepcopy(time_table)  # Ensure we do not modify the original timetable
+    LOGGER = logger
+    LOGGER.info("=== Starting to print the TA availability ===")
+    
+    tas:                    List[TA]                = time_table_in.tas
+    shift_groups:           List[Shift]             = time_table_in.shifts
+    shift_assignments_new:  List[ShiftAssignment]   = []                # a dummy list to hold the cross product of TAs and shifts
+                                                                        # this is because we want to re-use the logic of the print_timetable function
+    # Create a cross product of TAs and shifts
+    ids = id_generator()
+    for ta in tas:
+        for shift in shift_groups:
+            if (shift in ta.desired) or (shift in ta.undesired) or (shift in ta.unavailable): # do not add "neutral" shifts
+                shift_assignments_new.append(ShiftAssignment(id=next(ids), shift=shift, assigned_ta=ta))
+
+    time_table_in.shift_assignments = shift_assignments_new
+    print_timetable(time_table_in, logger)
+
+    LOGGER.info("=== Finished printing the TA availability ===")
+
+
+# wrap the helper functions in a class
+class HelperFunctions:
+    """A class to wrap the helper functions for better organization."""
+    
+    @staticmethod
+    def print_timetable(time_table: Timetable, logger: logging.Logger) -> None:
+        """Prints the timetable in a formatted way."""
+        print_timetable(time_table, logger)
+    @staticmethod
+    def initialize_logger(constraint_version: str = "default") -> logging.Logger:
+        """Initializes the logger for the application."""
+        return initialize_logger(constraint_version=constraint_version)
+    
+# example on how to use the HelperFunctions class
+if __name__ == "__main__":
+    logger  = HelperFunctions.initialize_logger()
+    # Assuming `time_table` is an instance of `Timetable`
+    logger_info=create_logger_info(logger)
+    print(logger_info)

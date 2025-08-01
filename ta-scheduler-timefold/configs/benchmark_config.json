@@ -1,0 +1,52 @@
+{
+    "BenchmarkConfig" : {
+        "num_of_runs" : 1,
+        "random_seed" : 42,
+        "use_config_xml" : false,
+        "path_to_config_xml" : ""
+        },
+
+    "TimetableSolver" : {
+        "constraint_version"    : "default",
+        "random_seed"           : 20,
+        "path_to_config_xml"    : "",
+        "use_config_xml"        : false
+        },
+
+    "RandomTimetableGenerator" : {
+        "num_of_weeks"          : 5,
+        "shift_series_prefix"   : "L",
+        "days"                  : ["Mon", "Tue", "Wed", "Thu", "Fri"],
+        "ta_names"              : ["M. Roghani", "D. Noori", "A. Gholami", "M. Jafari", "A. Athar", "S. Smith", "J. Doe"],       
+        "allow_different_weekly_availability" : true
+        },
+
+    "randomization_params" : {
+        "MIN_NUM_SHIFTS_PER_WEEK" : 6,
+        "MAX_NUM_SHIFTS_PER_WEEK" : 12,
+
+        "MIN_NUM_OF_TAS_REQUIRED_PER_SHIFT" : 2,
+        "MAX_NUM_OF_TAS_REQUIRED_PER_SHIFT" : 3,
+
+        "MIN_NUM_OF_SHIFT_PER_TA_PER_WEEK" : 0,
+
+        "MIN_TA_SKILL_LEVEL" : 1,
+        "MAX_TA_SKILL_LEVEL" : 3,
+
+        "MIN_NUM_OF_UNAVAILABLE_SHIFTS_DIV"   : 0,
+        "MAX_NUM_OF_UNAVAILABLE_SHIFTS_DIV"   : 30,
+
+        "MIN_NUM_OF_DESIRED_SHIFTS_DIV"       : 0,     
+        "MAX_NUM_OF_DESIRED_SHIFTS_DIV"       : 30,    
+
+        "MIN_NUM_OF_UNDESIRED_SHIFTS_DIV"     : 0,     
+        "MAX_NUM_OF_UNDESIRED_SHIFTS_DIV"     : 30  
+        },
+
+    "ConstraintParameters" : {
+        "undesired_assignment_penalty"      : 20,
+        "desired_assignment_reward"         : 5,
+        "same_sereis_assignment_reward"     : 1,
+        "unavailable_assignment_penalty"    : 1     
+    }
+}

@@ -8,11 +8,12 @@ name = "hello_world"
 version = "1.0.0"
 requires-python = ">=3.10"
 dependencies = [
-    'timefold == 1.17.0b0',
+    'timefold >= 1.17.0b0',
     'pytest == 8.2.2'
 ]
 
 
 [project.scripts]
-roster-timefold = "hello_world:run_app"   
-test-demo-generator = "hello_world:generate_demo_data"
+timefold-run-demo       = "hello_world:run_demo"   
+timefold-run-benchmark  = "hello_world:run_benchmark"   
+test-demo-generator     = "hello_world:generate_demo_data"
