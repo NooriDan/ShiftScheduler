@@ -1,6 +1,6 @@
 # TA Scheduler (Python)
 
-A command-line tool to generate optimized TA schedules by assigning lessons (shifts) to time-slots and rooms, using OptaPlanner via Timefold.
+A command-line tool to generate optimized TA schedules by assigning lessons/labs/tut (shifts) to TAs, using Timefold.
 
 ---
 
@@ -9,7 +9,7 @@ A command-line tool to generate optimized TA schedules by assigning lessons (shi
 - **Flexible data sources**: built-in demo data or your own CSVs  
 - **Multiple solving methods**: blocking solver, solver-manager, or progress-bar mode  
 - **Constraint versions**: switch between predefined constraint sets (e.g. `default`, `tabriz`)  
-- **Benchmark mode**: run multiple seeds, gather score analyses, and dump JSON/PKL results  
+- **Benchmark mode**: run multiple seeds, modify behaviour by changing the `benchmark_config.json` file, gather score analyses, and dump JSON/PKL results  
 - **Post-solve analysis**: view broken constraints, match counts, and scoring breakdown  
 
 ---
