@@ -190,7 +190,7 @@ class TimetableSolverBase(ABC):
         # Build SolverConfig and SolverFactory
         self.logger.info("\t⚙️  Creating SolverConfig and SolverFactory...")
         if self.use_config_xml:
-            self.solver_config =  self._create_solver_conffig_from_xml(path_to_solver_config=self.path_to_solver_config)
+            self.solver_config =  self._create_solver_conffig_from_xml(path_to_solver_config=self.path_to_config_xml)
         else:
             self.solver_config =  self._create_solver_config_default()
 

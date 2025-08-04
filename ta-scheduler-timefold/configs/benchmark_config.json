@@ -1,15 +1,15 @@
 {
     "BenchmarkConfig" : {
         "num_of_runs" : 1,
-        "random_seed" : 42,
+        "random_seed" : 20,
         "use_config_xml" : false,
         "path_to_config_xml" : ""
         },
 
     "TimetableSolver" : {
         "constraint_version"    : "default",
-        "random_seed"           : 20,
-        "path_to_config_xml"    : "",
+        "random_seed"           : 2,
+        "path_to_config_xml"    : "/Users/danialnoorizadeh/Code/ShiftScheduler/ta-scheduler-timefold/configs/solver_config.xml",
         "use_config_xml"        : false
         },
 

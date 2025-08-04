@@ -1,0 +1,24 @@
+Timefold Solver offers several environment modes that control how it operates, primarily impacting performance and debugging during development and production. These modes are defined through the environmentMode property in the solver configuration. The main modes are: FULL_ASSERT, FAST_ASSERT, PRODUCE_ONLY, and REPRODUCIBLE. 
+
+====================================
+Here's a breakdown of each mode: 
+FULL_ASSERT:
+This mode is designed for thorough testing and debugging. It enables all runtime assertions, including those related to constraint streams and move selection, to catch potential issues early in the development cycle.
+
+FAST_ASSERT:
+This mode is a balance between performance and debugging. It enables a subset of assertions, typically those related to constraint streams, while still providing a reasonable performance level for development and testing.
+
+PRODUCE_ONLY:
+This mode is intended for production environments where performance is critical. It disables most runtime assertions to minimize overhead but still allows for basic score calculation and move evaluation.
+
+REPRODUCIBLE:
+This mode is also for production, but it focuses on ensuring consistent results across different runs with the same input. It achieves this by disabling certain optimizations that might introduce non-determinism.
+
+
+====================================
+Additionally, Timefold Solver offers other configuration options that affect the environment, such as:
+domainAccessType:
+This setting controls how Timefold accesses your domain model. It can be set to REFLECTION (default, slower but compatible) or GIZMO (faster, requires public fields and getters). 
+moveThreadCount:
+This setting controls the number of threads used for move evaluation during solving. It can be set to NONE (single-threaded), AUTO (let Timefold decide), or a static number. 
+Choosing the right environment mode and other configuration options depends on the specific needs of your project, balancing the need for thoroughness in testing with the need for performance in production. 
