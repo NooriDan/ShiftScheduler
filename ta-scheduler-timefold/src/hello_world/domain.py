@@ -5,7 +5,7 @@ from timefold.solver.domain import (planning_entity, planning_solution, Planning
 from timefold.solver import SolverStatus
 from timefold.solver.score import HardSoftScore, HardMediumSoftScore
 from dataclasses import dataclass, field
-from datetime import time, date
+from datetime import time, date, timedelta, datetime
 from typing import Annotated, List
 from pydantic import Field
 
@@ -40,6 +40,18 @@ class Shift():
         """Check if this shift is from the same series as another shift."""
         return self.series == other.series
     
+    def get_duration(self) -> timedelta:
+        start_time_dt = datetime.combine(self.shift_date, self.start_time)
+        end_time_dt = datetime.combine(self.shift_date, self.end_time)
+        return end_time_dt - start_time_dt
+    
+    def overlaps_with_other_shift(self, other: 'Shift') -> bool:
+        if self.day_of_week == other.day_of_week:
+            if other.end_time <= self.end_time and other.end_time >= self.start_time:
+                return True
+            elif other.start_time <= self.end_time and other.start_time >= self.start_time:
+                return True
+        return False
 @dataclass    
 class TA():
     id: Annotated[str, PlanningId]
@@ -94,6 +106,15 @@ class ShiftAssignment():
     
     def get_ta(self) -> TA | None:
         return self.assigned_ta
+    
+    def get_ta_id(self) -> str | None:
+        return self.assigned_ta.id if self.assigned_ta is not None else None
+    
+    def get_shift(self) -> Shift:
+        return self.shift
+    
+    def get_shift_id(self) -> str:
+        return self.shift.id
 
     def is_assigned_a_ta(self) -> bool:
         """Check if the shift assignment is valid."""
@@ -132,6 +153,16 @@ class ShiftAssignment():
     def is_from_the_same_series_as(self, other: 'ShiftAssignment') -> bool:
         """Check if this assignment is from the same series as another assignment."""
         return self.shift is not None and other.shift is not None and self.shift.is_from_the_same_series_as(other.shift)
+    
+    def overlaps_in_time_with(self, other: 'ShiftAssignment') -> bool:
+        """"""
+        if self.id == other.id:
+            return False # a shift_assignment cannont overlap with itself!
+        
+        if self.has_the_same_ta(other=other):
+            return self.shift.overlaps_with_other_shift(other=other.shift)
+        
+        return False
     
 
 

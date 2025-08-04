@@ -14,7 +14,7 @@
         },
 
     "RandomTimetableGenerator" : {
-        "num_of_weeks"          : 5,
+        "num_of_weeks"          : 1,
         "shift_series_prefix"   : "L",
         "days"                  : ["Mon", "Tue", "Wed", "Thu", "Fri"],
         "ta_names"              : ["M. Roghani", "D. Noori", "A. Gholami", "M. Jafari", "A. Athar", "S. Smith", "J. Doe"],       

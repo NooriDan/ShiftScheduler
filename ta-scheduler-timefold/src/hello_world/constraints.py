@@ -251,6 +251,31 @@ class TimetableConstraintGenTabrizEdition(TimetableConstraintGenBasic):
             .reward(HardMediumSoftScore.ONE_SOFT, lambda ta, series, count, params: params.same_sereis_assignment_reward * (count-1) )
             .as_constraint("reward_assignment_to_consecutive_shifts")
         )
+    
+    def penalize_overlapping_shifts(self) -> Constraint:
+        """Penalizes (Hard) if any TA is assigned to shifts that overlap in time"""
+
+        def func_filter_overlapping(lhs: ShiftAssignment, rhs: ShiftAssignment) -> bool:
+            return lhs.overlaps_with(other=rhs)
+        
+        return (
+            self.constraint_factory
+            .for_each(ShiftAssignment)
+            .join(
+                ShiftAssignment,
+                Joiners.equal(lambda assignment_1: assignment_1.shift.day_of_week, lambda assignment_2: assignment_2.shift.day_of_week),
+                Joiners.filtering(
+                    lambda assignment_1, assignment_2: 
+                        assignment_1.is_assigned_a_ta()
+                        and assignment_2.is_assigned_a_ta()
+                ),
+                Joiners.filtering(func_filter_overlapping)
+            )
+            .penalize(HardMediumSoftScore.ONE_HARD, lambda rhs, lhs: 1)  # You can adjust the weight
+            .as_constraint("Overlapping shifts in time")
+        )
+    
+    # helper funciton
 
 
 # TODO: Add constraints for Continuous planning (windowed planning) -> tabriz edition
