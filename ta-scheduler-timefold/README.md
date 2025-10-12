@@ -1,7 +1,7 @@
 # TA Scheduler (Python)
 
 This directory contains the scheduler logic used in our ClassBridge platform. We have made this opensource to encourage further collaboration. 
-A command-line tool to generate optimized TA schedules by assigning lessons/labs/tut (shifts) to TAs, using Timefold. Try the new TABRIZ edition! check out the [source code](ta-scheduler-timefold/src/hello_world), if interested.
+A command-line tool to generate optimized TA schedules by assigning lessons/labs/tut (shifts) to TAs, using Timefold. Try the new TABRIZ edition! check out the [source code](src/hello_world), if interested.
 
 ---
 
