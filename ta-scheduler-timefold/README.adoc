@@ -1,6 +1,6 @@
 # TA Scheduler (Python)
 
-A command-line tool to generate optimized TA schedules by assigning lessons/labs/tut (shifts) to TAs, using Timefold.
+A command-line tool to generate optimized TA schedules by assigning lessons/labs/tut (shifts) to TAs, using Timefold. Try the new TABRIZ edition!
 
 ---
 
