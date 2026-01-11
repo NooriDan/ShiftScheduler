@@ -308,8 +308,14 @@ def id_generator():
         yield str(current)
         current += 1
 
-def initialize_logger(args: Namespace, logging_level = logging.INFO) -> logging.Logger:
+def initialize_logger(args: Namespace = None, logging_level = logging.INFO) -> logging.Logger:
     # Construct log directory path based on the constraint version argument
+    if args is None:
+        args = Namespace()
+        args.constraint_version = "default"
+        args.demo_data_select = "default"
+        args.overwrite = False
+
     variant: str = args.demo_data_select if not args.overwrite else f"overwrite"
     log_dir = os.path.join("logs", args.constraint_version, variant)
     os.makedirs(log_dir, exist_ok=True)

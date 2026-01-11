@@ -9,6 +9,18 @@ from datetime import time, date, timedelta, datetime
 from typing import Annotated, List
 from pydantic import Field
 
+import logging
+from collections import defaultdict
+
+from typing import Dict, Tuple
+
+def id_generator():
+    """Generates unique IDs for the shift assignments."""
+    current = 0
+    while True:
+        yield str(current)
+        current += 1
+
 @dataclass
 class ConstraintParameters:
     undesired_assignment_penalty:   int = 20    # Soft
@@ -190,6 +202,87 @@ class Timetable():
     def __str__(self):
         return f"timetable_{self.id} - {len(self.shifts)} shifts - {len(self.tas)} TAs - [{len(self.shift_assignments)} planning variables]"
 
+
+    def sanity_check(self, logger: logging.Logger) -> Tuple[bool, Dict[str, Dict[str, Dict[int, int]]]]:
+
+        sanity          = True
+        count_tas       = len(self.tas)
+        count_shifts    = len(self.shifts)
+        logger.info(f"\tProblem has {count_tas} TAs and {count_shifts} shifts.")
+
+        # (1) Check if there are enough TAs for the shifts
+        total_required_tas              = sum(shift.required_tas for shift in self.shifts)
+        total_available_tas_per_week    = sum(ta.max_shifts_per_week for ta in self.tas)
+        
+        num_of_weeks = len(set(shift.week_id for shift in self.shifts))
+        total_available_tas = total_available_tas_per_week * num_of_weeks
+
+        if total_required_tas > total_available_tas:
+            logger.warning(f"\t⚠️  SANITY CHECK WARNING [TMTBL.workforce.count]: Total required TAs ({total_required_tas}) over the planning problem exceeds anticipated TA duties ({total_available_tas}).")
+            logger.warning(f"\t\tCount_TAs: {count_tas}, Num_of_weeks: {num_of_weeks}, Total_available_TAs_per_week: {total_available_tas_per_week}")
+            logger.warning(f"\t\tConsider increasing the number of TAs or their maximum shifts per week, or reducing the required TAs per shift.")
+            sanity = False
+
+        # (2) Check if too many TAs are unavailable for any shift
+        count_unavailable_by_series_week_id : Dict[str, Dict[int, int]] = defaultdict(lambda: defaultdict(int))
+        count_undesired_by_series_week_id : Dict[str, Dict[int, int]]   = defaultdict(lambda: defaultdict(int))
+        count_desired_by_series_week_id : Dict[str, Dict[int, int]]     = defaultdict(lambda: defaultdict(int))
+
+        # Populate the counts
+        for ta in self.tas:
+            for shift in ta.unavailable:
+                count_unavailable_by_series_week_id[shift.series][shift.week_id] += 1
+            for shift in ta.undesired:
+                count_undesired_by_series_week_id[shift.series][shift.week_id] += 1
+            for shift in ta.desired:
+                count_desired_by_series_week_id[shift.series][shift.week_id] += 1
+        
+        # Analyze the counts for each shift
+        for shifts in self.shifts:
+            series  = shifts.series
+            week_id = shifts.week_id
+            count_unavailable = count_unavailable_by_series_week_id.get(series, {}).get(week_id, 0)
+            count_undesired   = count_undesired_by_series_week_id.get(series, {}).get(week_id, 0)
+            count_desired     = count_desired_by_series_week_id.get(series, {}).get(week_id, 0)
+            # UNAVAILABLE CHECKS
+            if count_unavailable == count_tas:
+                logger.warning(f"\t⚠️  SANITY CHECK WARNING [TMTBL.shifts.unavailable]: All TAs are unavailable for shift series '{series}' in week '{week_id}'.")
+                sanity = False
+            elif shifts.required_tas > count_tas - count_unavailable:
+                logger.warning(f"\t⚠️  SANITY CHECK WARNING [TMTBL.shifts.unavailable]: Only {count_tas - count_unavailable} TAs are available for shift series '{series}' in week '{week_id}', but {shifts.required_tas} are required.")
+                sanity = False
+            # UNDESIRED CHECKS
+            if count_undesired == count_tas:
+                logger.warning(f"\t⚠️  SANITY CHECK WARNING [TMTBL.shifts.undesired]: All TAs are undesired for shift series '{series}' in week '{week_id}'.")
+                sanity = False
+            elif shifts.required_tas > count_tas - count_undesired:
+                logger.warning(f"\t⚠️  SANITY CHECK WARNING [TMTBL.shifts.undesired]: Only {count_tas - count_undesired} TAs find shift series '{series}' in week '{week_id}' desired/neutral, but {shifts.required_tas} are required.")
+                sanity = False
+            # DESIRED CHECKS
+            if count_desired == 0:
+                logger.warning(f"\t⚠️  SANITY CHECK WARNING [TMTBL.shifts.desired]: No TAs have shift series '{series}' in week '{week_id}' as desired.")
+                # sanity = False
+            
+        return sanity, {
+            "unavailable": count_unavailable_by_series_week_id,
+            "undesired": count_undesired_by_series_week_id,
+            "desired": count_desired_by_series_week_id
+            }
+    
+    def re_generate_empty_shift_assignments(self, shifts: List[Shift]) -> List[ShiftAssignment]:
+        shift_assignments = []
+        id_gen = id_generator()
+        for shift in shifts:
+            for i in range(shift.required_tas):
+                shift_assignment = ShiftAssignment(
+                    id=next(id_gen),
+                    shift=shift,
+                    assigned_ta=None
+                )
+                shift_assignments.append(shift_assignment)
+
+        self.shift_assignments = shift_assignments
+        return shift_assignments
 
 if __name__ == '__main__':
     # shift_group_1 = ShiftGroup("1", "L01", "Mon", time(14, 30), time(17, 30), 2)

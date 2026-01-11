@@ -167,7 +167,8 @@ class TimetableConstraintGenBase(ABC):
                     assignment.is_assigned_a_ta() and
                     assignment.is_unavailable()
                 )
-                .penalize(HardMediumSoftScore.ONE_HARD, lambda assignment: 1)
+                .group_by(lambda assignment: assignment.assigned_ta, ConstraintCollectors.count())
+                .penalize(HardMediumSoftScore.ONE_HARD, lambda ta, count: count**2) # Squared penalty to strongly discourage increasing violations for the same TA
                 .as_constraint("TA assigned to unavailable shift"))
 
     # Soft  Constraints

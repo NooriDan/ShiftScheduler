@@ -64,7 +64,9 @@ class TimetableSolverBase(ABC):
         logger = self.logger
 
         logger.info("\n🚀 === Starting to Solve the Problem ===")
-        
+        logger.info(f"\tRunning a sanity check on the problem...")
+        self.sanity_check(problem=problem)
+
         # Solve the problem based on the solving method (extended in child classes)
         solution = self._solve_problem_body(problem=problem)
         logger.info("✅ === Solver Finished Successfully ===")
@@ -182,7 +184,33 @@ class TimetableSolverBase(ABC):
             raise FileNotFoundError(f"The specified path to the solver config does not exist: {self.path_to_config_xml}")
         if self.use_config_xml and not self.path_to_config_xml:
             raise ValueError("When use_config_xml is True, path_to_config must be provided.")
-        
+    
+    def sanity_check(self, problem: Timetable) -> bool:
+        """ Performs a sanity check on the provided problem instance. """
+        self.logger.info("Performing sanity check on the problem instance...")
+        sanity = True
+        PASS = "✅"
+        FAIL = "❌"
+        # (1) Call the domain's sanity check method
+        # ------------------------------------------------------
+        self.logger.info("\t(1) Domain-specific sanity checks...")
+        tmp, _ = problem.sanity_check(logger=self.logger)
+        sanity = sanity and tmp
+        self.logger.info(f"\t(1) {PASS if sanity else FAIL} Domain-specific sanity checks completed.")
+
+        # (2) Check that the number of shift assignments matches the required number
+        # ------------------------------------------------------
+        self.logger.info("\t(2) Checking number of shift assignments...")
+        count_needed_shift_assignments = 0
+        for shift in problem.shifts:
+            count_needed_shift_assignments += shift.required_tas
+        sanity = sanity and (len(problem.shift_assignments) == count_needed_shift_assignments)
+        if len(problem.shift_assignments) != count_needed_shift_assignments:
+            self.logger.error(f"\t⚠️  SANITY CHECK [FATAL]: Number of shift assignments ({len(problem.shift_assignments)}) does not match the required number ({count_needed_shift_assignments}).")
+        self.logger.info(f"\t(2) {PASS if sanity else FAIL} Number of shift assignments check completed.")
+
+        return sanity
+
     def create_solver(self):
         """ Create the solver configuration based on the constraint version """
         self._validate_inputs()
